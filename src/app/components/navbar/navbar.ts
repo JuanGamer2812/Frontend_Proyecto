@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthGoogle } from '../../service/auth-google';
 import { AuthJwtService } from '../../service/auth-jwt.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -118,7 +119,9 @@ export class Navbar implements OnInit, OnDestroy {
     if (!url) return null;
     const u = String(url);
     if (u.startsWith('/uploads/')) {
-      const base = `http://127.0.0.1:5000${u}`;
+      // Usar el backend URL desde environment (quitar /api del final)
+      const backendUrl = environment.apiUrl.replace(/\/api$/, '');
+      const base = `${backendUrl}${u}`;
       const sep = base.includes('?') ? '&' : '?';
       return `${base}${sep}t=${Date.now()}`; // evitar caché tras actualización
     }
