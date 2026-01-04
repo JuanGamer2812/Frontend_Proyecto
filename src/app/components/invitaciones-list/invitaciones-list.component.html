@@ -1,0 +1,338 @@
+<div class="invitaciones-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1><i class="bi bi-envelope-paper"></i> Gestión de Invitaciones</h1>
+        <p>Administra los invitados y envía invitaciones por email</p>
+    </div>
+
+    <!-- Selector de Evento -->
+    <div class="evento-selector">
+        <label for="evento-select">
+      <i class="bi bi-calendar-event"></i>
+      Selecciona un Evento:
+    </label>
+        <select id="evento-select" class="form-select" [(ngModel)]="eventoSeleccionado" (change)="seleccionarEvento($any($event.target).value)">
+      <option [value]="null">-- Selecciona un evento --</option>
+      @for (evento of eventos(); track evento.id_evento) {
+        <option [value]="evento.id_evento">
+          {{ evento.nombre_evento }} - {{ formatearFecha(evento.fecha_evento) }}
+        </option>
+      }
+    </select>
+    </div>
+
+    @if (eventoSeleccionado()) {
+    <!-- Estadísticas -->
+    @if (estadisticas()) {
+    <div class="estadisticas-grid">
+        <div class="stat-card total">
+            <i class="bi bi-people-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.total_invitados }}</h3>
+                <p>Total Invitados</p>
+            </div>
+        </div>
+
+        <div class="stat-card confirmados">
+            <i class="bi bi-check-circle-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.confirmados }}</h3>
+                <p>Confirmados</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="getPorcentajeConfirmacion()"></div>
+                </div>
+                <small>{{ getPorcentajeConfirmacion() }}% del total</small>
+            </div>
+        </div>
+
+        <div class="stat-card pendientes">
+            <i class="bi bi-clock-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.pendientes }}</h3>
+                <p>Pendientes</p>
+            </div>
+        </div>
+
+        <div class="stat-card rechazados">
+            <i class="bi bi-x-circle-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.rechazados }}</h3>
+                <p>Rechazados</p>
+            </div>
+        </div>
+
+        <div class="stat-card asistentes">
+            <i class="bi bi-person-check-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.asistentes_confirmados }}</h3>
+                <p>Asistentes Totales</p>
+                <small>(incluye acompañantes)</small>
+            </div>
+        </div>
+
+        <div class="stat-card enviados">
+            <i class="bi bi-send-fill"></i>
+            <div class="stat-content">
+                <h3>{{ estadisticas()!.invitaciones_enviadas }}</h3>
+                <p>Emails Enviados</p>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Acciones y Filtros -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <button class="btn btn-primary" (click)="abrirModalCrear()">
+          <i class="bi bi-plus-circle"></i>
+          Nueva Invitación
+        </button>
+
+            <a routerLink="/envio-masivo" class="btn btn-success">
+                <i class="bi bi-cloud-upload"></i> Importar CSV
+            </a>
+
+            <button class="btn btn-info" (click)="exportarCSV()">
+          <i class="bi bi-download"></i>
+          Exportar CSV
+        </button> @if (invitacionesSeleccionadas().length > 0) {
+            <button class="btn btn-warning" (click)="enviarEmailsMasivos()">
+            <i class="bi bi-envelope-fill"></i>
+            Enviar Emails ({{ invitacionesSeleccionadas().length }})
+          </button> }
+        </div>
+
+        <div class="toolbar-right">
+            <select class="form-select form-select-sm" [(ngModel)]="filtroEstado">
+          <option value="todos">Todos los estados</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="confirmado">Confirmados</option>
+          <option value="rechazado">Rechazados</option>
+          <option value="cancelado">Cancelados</option>
+        </select>
+
+            <select class="form-select form-select-sm" [(ngModel)]="filtroCategoria">
+          <option value="todas">Todas las categorías</option>
+          <option value="vip">VIP</option>
+          <option value="familia">Familia</option>
+          <option value="amigos">Amigos</option>
+          <option value="trabajo">Trabajo</option>
+          <option value="general">General</option>
+        </select>
+
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control form-control-sm" placeholder="Buscar por nombre, email o código..." [(ngModel)]="busqueda">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Invitaciones -->
+    <div class="table-container">
+        @if (isLoading()) {
+        <div class="loading-overlay">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+        } @if (error()) {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> {{ error() }}
+        </div>
+        } @if (invitacionesFiltradas().length > 0) {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" [checked]="invitacionesSeleccionadas().length === invitacionesFiltradas().length" (change)="invitacionesSeleccionadas().length === invitacionesFiltradas().length ? deseleccionarTodas() : seleccionarTodas()">
+                    </th>
+                    <th>Invitado</th>
+                    <th>Email</th>
+                    <th>Categoría</th>
+                    <th>Estado</th>
+                    <th>Acompañantes</th>
+                    <th>Email Enviado</th>
+                    <th>Código RSVP</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (inv of invitacionesFiltradas(); track inv.id_invitacion) {
+                <tr>
+                    <td>
+                        <input type="checkbox" [checked]="invitacionesSeleccionadas().includes(inv.id_invitacion)" (change)="toggleSeleccion(inv.id_invitacion)">
+                    </td>
+                    <td>
+                        <strong>{{ inv.nombre_invitado }}</strong>
+                    </td>
+                    <td>{{ inv.email }}</td>
+                    <td>
+                        <span class="categoria-badge">
+                    <i [class]="getCategoriaIcon(inv.categoria || 'general')"></i>
+                    {{ inv.categoria || 'general' }}
+                  </span>
+                    </td>
+                    <td>
+                        <span class="badge" [class]="getEstadoBadgeClass(inv.estado)">
+                    <i [class]="getEstadoIcon(inv.estado)"></i>
+                    {{ inv.estado }}
+                  </span>
+                    </td>
+                    <td class="text-center">
+                        @if (inv.estado === 'confirmado') {
+                        <span class="acompanantes-info">
+                      {{ inv.acompanantes_confirmados }} / {{ inv.numero_acompanantes }}
+                    </span> } @else {
+                        <span class="text-muted">{{ inv.numero_acompanantes }}</span> }
+                    </td>
+                    <td class="text-center">
+                        @if (inv.enviado) {
+                        <i class="bi bi-check-circle-fill text-success" title="Enviado"></i> } @else {
+                        <i class="bi bi-x-circle text-muted" title="No enviado"></i> }
+                    </td>
+                    <td>
+                        <div class="codigo-cell">
+                            <code>{{ inv.codigo_unico }}</code>
+                            <button class="btn-icon" (click)="copiarCodigo(inv.codigo_unico)" title="Copiar código">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                            <button class="btn-icon" (click)="copiarLink(inv.codigo_unico)" title="Copiar link RSVP">
+                      <i class="bi bi-link-45deg"></i>
+                    </button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" (click)="abrirModalEditar(inv)" title="Editar">
+                      <i class="bi bi-pencil"></i>
+                    </button> @if (!inv.enviado) {
+                            <button class="btn btn-sm btn-outline-success" (click)="enviarEmail(inv.id_invitacion)" title="Enviar email">
+                        <i class="bi bi-send"></i>
+                      </button> }
+
+                            <button class="btn btn-sm btn-outline-danger" (click)="eliminarInvitacion(inv.id_invitacion)" title="Eliminar">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        } @else if (!isLoading() && !error()) {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No hay invitaciones</h3>
+            <p>Crea la primera invitación para este evento</p>
+            <button class="btn btn-primary" (click)="abrirModalCrear()">
+            <i class="bi bi-plus-circle"></i>
+            Nueva Invitación
+          </button>
+        </div>
+        }
+    </div>
+    } @else {
+    <div class="empty-state">
+        <i class="bi bi-calendar-x"></i>
+        <h3>Selecciona un Evento</h3>
+        <p>Elige un evento para gestionar sus invitaciones</p>
+    </div>
+    }
+
+    <!-- Modal Crear/Editar -->
+    @if (showModal()) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+        <div class="modal-backdrop" (click)="cerrarModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>
+                    @if (modalMode() === 'crear') {
+                    <i class="bi bi-plus-circle"></i> Nueva Invitación } @else {
+                    <i class="bi bi-pencil"></i> Editar Invitación }
+                </h3>
+                <button class="btn-close" (click)="cerrarModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="nombre">
+                            <i class="bi bi-person"></i>
+                            Nombre del Invitado *
+                        </label>
+                        <input type="text" id="nombre" class="form-control" [(ngModel)]="form.nombre" name="nombre" placeholder="Ej: Juan Pérez" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="bi bi-envelope"></i>
+                            Email *
+                        </label>
+                        <input type="email" id="email" class="form-control" [(ngModel)]="form.email" name="email" placeholder="ejemplo@correo.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono">
+                            <i class="bi bi-telephone"></i>
+                            Teléfono (10 dígitos)
+                        </label>
+                        <input type="text" id="telefono" class="form-control" [(ngModel)]="form.telefono" name="telefono" maxlength="10" pattern="\d{10}" placeholder="Ej: 5512345678">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoria">
+                                <i class="bi bi-tag"></i>
+                                Categoría
+                            </label>
+                            <select id="categoria" class="form-select" [(ngModel)]="form.categoria" name="categoria">
+                                <option value="general">General</option>
+                                <option value="vip">VIP</option>
+                                <option value="familia">Familia</option>
+                                <option value="amigos">Amigos</option>
+                                <option value="trabajo">Trabajo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="acompanantes">
+                                <i class="bi bi-people"></i>
+                                Acompañantes Permitidos
+                            </label>
+                            <input type="number" id="acompanantes" class="form-control" [(ngModel)]="form.acompanantes" name="acompanantes" min="0" max="10">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restricciones">
+                            <i class="bi bi-exclamation-diamond"></i>
+                            Restricciones (Opcional)
+                        </label>
+                        <input type="text" id="restricciones" class="form-control" [(ngModel)]="form.restricciones" name="restricciones" placeholder="Ej: Sin gluten, silla de ruedas...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensaje">
+                            <i class="bi bi-chat-quote"></i>
+                            Mensaje Personalizado (Opcional)
+                        </label>
+                        <textarea id="mensaje" class="form-control" [(ngModel)]="form.mensaje" name="mensaje" rows="3" placeholder="Mensaje especial para este invitado..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="cerrarModal()">
+            Cancelar
+          </button>
+                <button class="btn btn-primary" (click)="guardarInvitacion()" [disabled]="isLoading()">
+            <i class="bi bi-save"></i>
+            {{ modalMode() === 'crear' ? 'Crear' : 'Guardar' }}
+          </button>
+            </div>
+        </div>
+    </div>
+    }
+</div>

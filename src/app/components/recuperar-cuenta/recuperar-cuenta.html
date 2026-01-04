@@ -1,0 +1,121 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="recuperar-cuenta.css">
+</head>
+
+<body>
+    <!-- SECCION: RECUPERAR CUENTA -->
+    <div class="recovery-wrap">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                    <!-- TARJETA: CONTENEDOR GLASS DEL FORMULARIO -->
+                    <div class="card glass shadow-xl recovery-card">
+                        <div class="card-body p-4 p-md-5">
+
+                            <!-- ENCABEZADO -->
+                            <div class="text-center mb-4">
+                                <!-- ICONO PRINCIPAL -->
+                                <div class="icon-circle mb-3">
+                                    <i class="bi bi-shield-lock"></i>
+                                </div>
+                                <h2>Recuperar Contraseña</h2>
+                                <!-- TEXTO DESCRIPTIVO SEGÚN ESTADO (ANGULAR @if) -->
+                                <p>
+                                    @if (!emailSent) { Ingresa tu correo electrónico y te enviaremos una contraseña temporal } @else { Te hemos enviado una contraseña temporal a tu correo }
+                                </p>
+                            </div>
+
+                            <!-- BLOQUE CONDICIONAL: FORMULARIO CUANDO NO SE HA ENVIADO EMAIL -->
+                            @if (!emailSent) {
+                            <!-- FORMULARIO DE RECUPERACIÓN -->
+                            <form id="recoveryForm" class="needs-validation" novalidate>
+                                <!-- Campo: Correo electrónico -->
+                                <div class="form-floating mb-3">
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="name@example.com" required autocomplete="email" [(ngModel)]="email">
+                                    <label for="email">example@gmail.com</label>
+                                    <div class="invalid-feedback">Por favor ingresa un correo válido</div>
+                                </div>
+
+                                <!-- BOTÓN: ENVIAR CONTRASEÑA TEMPORAL -->
+                                <button type="button" class="btn btn-primary btn-lg w-100 mb-3" [disabled]="isLoading" (click)="onRequestTemporaryPassword($event)">
+                                                                    @if (isLoading) {
+                                                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                                        Enviando...
+                                                                    } @else {
+                                                                        <i class="bi bi-envelope me-2"></i>
+                                                                        Enviar contraseña temporal
+                                                                    }
+                                                                </button>
+
+                                <!-- ENLACE: VOLVER AL INICIO DE SESIÓN -->
+                                <div class="text-center">
+                                    <a routerLink="/login" class="link text-decoration-none">
+                                        <i class="bi bi-arrow-left me-1"></i> Volver al inicio de sesión
+                                    </a>
+                                </div>
+                            </form>
+                            } @else {
+                            <!-- BLOQUE: MENSAJE DE ÉXITO CUANDO EL EMAIL FUE ENVIADO -->
+                            <div class="success-message text-center">
+                                <!-- ICONO DE ÉXITO -->
+                                <div class="success-icon mb-3">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <h3 class="mb-3">¡Email Enviado!</h3>
+                                <p class="text mb-3">
+                                    Hemos enviado una contraseña temporal a tu correo electrónico.
+                                </p>
+                                <!-- INSTRUCCIONES -->
+                                <div class="alert alert-info mb-4" style="background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3);">
+                                    <p class="mb-2"><strong>📧 Pasos a seguir:</strong></p>
+                                    <ol class="text-start mb-0">
+                                        <li>Revisa tu bandeja de entrada (y spam)</li>
+                                        <li>Copia la contraseña temporal del email</li>
+                                        <li>Inicia sesión con tu email y la contraseña temporal</li>
+                                        <li>Crea una nueva contraseña permanente</li>
+                                    </ol>
+                                </div>
+                                <!-- AVISO DE SEGURIDAD -->
+                                <p class="text-warning mb-4">
+                                    <i class="bi bi-exclamation-triangle me-2"></i> La contraseña temporal expira en 1 hora
+                                </p>
+                                <!-- BOTÓN: IR AL LOGIN -->
+                                <a routerLink="/login" class="btn btn-primary mb-2 w-100">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> Ir al inicio de sesión
+                                </a>
+                                <!-- BOTÓN: RECUPERAR OTRA CUENTA -->
+                                <button type="button" class="btn btn-outline w-100" (click)="backToRequest()">
+                  <i class="bi bi-arrow-counterclockwise me-2"></i>
+                  Recuperar otra cuenta
+                </button>
+                            </div>
+                            }
+
+                            <!-- SECCION: INFORMACIÓN ADICIONAL / SOPORTE -->
+                            <div class="help-section mt-4 pt-4 border-top border-secondary border-opacity-25">
+                                <p class="text-center">
+                                    <i class="bi bi-info-circle me-1"></i> ¿Necesitas ayuda?
+                                </p>
+                                <!-- ENLACE: EMAIL DE SOPORTE -->
+                                <p class="text-center">
+                                    Contacta a soporte:
+                                    <a href="mailto:soporte@everluna.com" class="link-info text-decoration-none">
+                  soporte&#64;eclat.com
+                </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIN TARJETA -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

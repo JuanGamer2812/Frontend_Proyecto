@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="es" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skibidi Events — Bootstrap Melo</title>
+
+    <!-- Bootstrap + Icons (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* Fondo elegante */
+        
+        body {
+            background: radial-gradient(1200px 600px at -10% -20%, #12263f 0, transparent 60%), radial-gradient(1200px 600px at 110% 10%, #1a2438 0, transparent 60%), #0b1220;
+        }
+        /* Shell general */
+        
+        .shell {
+            background: rgba(15, 23, 42, .75);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 16px;
+        }
+        
+        .shadow-soft {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+        /* Card mejorada */
+        
+        .card {
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+            background: rgba(255, 255, 255, .02);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+            border-color: rgba(34, 211, 238, .25);
+        }
+        
+        .card-img-top {
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        /* Galería */
+        
+        .gallery-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 14px;
+        }
+        /* Badge suave y botón ghost */
+        
+        .badge-soft {
+            background: rgba(34, 211, 238, .12);
+            color: #e6fbff;
+            border: 1px solid rgba(34, 211, 238, .25);
+        }
+        
+        .btn-ghost {
+            --bs-btn-color: #cbd5e1;
+            --bs-btn-hover-color: #fff;
+            --bs-btn-bg: rgba(255, 255, 255, .06);
+            --bs-btn-hover-bg: rgba(255, 255, 255, .12);
+            --bs-btn-border-color: rgba(255, 255, 255, .10);
+            --bs-btn-hover-border-color: rgba(255, 255, 255, .18);
+            border-radius: 12px;
+        }
+        /* Testimonios */
+        
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, .15);
+        }
+        
+        .quote {
+            font-size: 1.05rem;
+        }
+        
+        .stars .bi {
+            color: #f5c94d;
+        }
+        
+        #carouselTestimonials .carousel-item {
+            min-height: 140px;
+        }
+        /* asegura alto visible */
+    </style>
+</head>
+
+<body>
+
+    <!-- SVG icons para theme toggle (mismo patrón de Bootstrap) -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+  <symbol id="check2" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></symbol>
+  <symbol id="circle-half" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/></symbol>
+  <symbol id="moon-stars-fill" viewBox="0 0 16 16"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></symbol>
+  <symbol id="sun-fill" viewBox="0 0 16 16"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0z"/></symbol>
+</svg>
+
+
+
+    <!-- Hero -->
+    <section class="text-center container-xxl mt-4">
+        <div class="row py-5">
+            <div class="col-lg-8 col-xl-7 mx-auto">
+                <span class="badge badge-soft mb-3">Colección destacada</span>
+                <h1 class="display-6 fw-bold">Album example</h1>
+                <p class="lead text-body-secondary">Algo breve que guíe a los visitantes sobre el contenido, el creador, etc. Claro, directo y con estilo.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="#testimonios" class="btn btn-primary"><i class="bi bi-stars me-1"></i> Ver testimonios</a>
+                    <a href="#galeria" class="btn btn-outline-secondary">Explorar galería</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios -->
+    <section id="testimonios" class="container-xxl pb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h3 fw-bold mb-0">Testimonios destacados</h2>
+            <div class="btn-group">
+                <button class="btn btn-ghost btn-sm" data-bs-target="#carouselTestimonials" data-bs-slide="prev"><i class="bi bi-arrow-left"></i></button>
+                <button class="btn btn-ghost btn-sm" data-bs-target="#carouselTestimonials" data-bs-slide="next"><i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div id="carouselTestimonials" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+
+                <div class="carousel-item active">
+                    <div class="shell p-4 p-md-5 shadow-soft">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-8">
+                                <p class="quote mb-2">“Nuestro matrimonio quedó perfecto. Timing, decoración y música… todo fluyó. Los invitados aún hablan del after.”</p>
+                                <div class="stars mb-2">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                                </div>
+                                <small class="text-body-secondary">Boda de Camila & Diego — Quito</small>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <img class="avatar me-2" src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=300&auto=format&fit=crop" alt="">
+                                <img class="avatar" src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=300&auto=format&fit=crop" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="shell p-4 p-md-5 shadow-soft">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-8">
+                                <p class="quote mb-2">“Evento corporativo sin estrés. Proveedor A/V, catering y agenda sincronizados. Superaron KPIs de asistencia.”</p>
+                                <div class="stars mb-2">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                </div>
+                                <small class="text-body-secondary">Summit Tech — Guayaquil</small>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <img class="avatar me-2" src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=300&auto=format&fit=crop" alt="">
+                                <img class="avatar" src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=300&auto=format&fit=crop" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="shell p-4 p-md-5 shadow-soft">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-8">
+                                <p class="quote mb-2">“Fiesta de 15 inolvidable. Tema, photo booth y DJ 🔥. Acompañamiento total del equipo.”</p>
+                                <div class="stars mb-2">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                                </div>
+                                <small class="text-body-secondary">Quinceañera — Cuenca</small>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <img class="avatar me-2" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop" alt="">
+                                <img class="avatar" src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=300&auto=format&fit=crop" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselTestimonials" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselTestimonials" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+        </div>
+    </section>
+
+    <!-- Galería -->
+    <section id="galeria" class="container-xxl py-5">
+        <h2 class="h3 fw-bold mb-4">Galería de eventos</h2>
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?1" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?2" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?3" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?4" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?5" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?6" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?7" alt=""></div>
+            <div class="col-6 col-md-4 col-lg-3"><img class="gallery-img shadow-soft" src="https://picsum.photos/600/450?8" alt=""></div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contacto" class="container-xxl pb-5">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <h2 class="h3 fw-bold mb-3">Contacto</h2>
+                <p class="text-body-secondary">Te respondemos el mismo día hábil. También podemos reunirnos por videollamada.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-envelope me-2"></i>EverlunaEvents.com</li>
+                    <li class="mb-2"><i class="bi bi-telephone me-2"></i> +593 9 9999 9999</li>
+                    <li><i class="bi bi-geo-alt me-2"></i>Machala</li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <form class="shell p-4 needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" required>
+                            <div class="invalid-feedback">Ingresa tu nombre.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" required>
+                            <div class="invalid-feedback">Correo válido.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de evento</label>
+                            <select class="form-select" required>
+              <option value="">Selecciona…</option>
+              <option>Boda</option><option>Corporativo</option><option>Fiesta</option><option>Otro</option>
+            </select>
+                            <div class="invalid-feedback">Selecciona una opción.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mensaje</label>
+                            <textarea class="form-control" rows="3" required></textarea>
+                            <div class="invalid-feedback">Cuéntanos brevemente.</div>
+                        </div>
+                        <div class="col-12 d-grid d-md-flex justify-content-md-end gap-2">
+                            <button class="btn btn-ghost" type="reset">Limpiar</button>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-send me-1"></i> Enviar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-body-secondary py-5">
+        <div class="container-xxl d-flex flex-column flex-md-row align-items-center justify-content-between gap-2 small">
+            <div>© 2025 Skibidi Events · <a class="link-info" href="#">Privacidad</a> · <a class="link-info" href="#">Términos</a></div>
+            <a href="#" class="link-info"><i class="bi bi-arrow-up"></i> Volver arriba</a>
+        </div>
+    </footer>
+
+    <!-- Bootstrap bundle (sin jQuery) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script de tema (vanilla, como en tu snippet) -->
+    <script>
+        (() => {
+            const storedTheme = localStorage.getItem('theme');
+            const getPreferredTheme = () => storedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const setTheme = t => {
+                if (t === 'auto') document.documentElement.setAttribute('data-bs-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                else document.documentElement.setAttribute('data-bs-theme', t);
+            };
+            setTheme(getPreferredTheme());
+            matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if ((localStorage.getItem('theme') || 'auto') === 'auto') setTheme('auto');
+            });
+            document.addEventListener('click', e => {
+                const btn = e.target.closest('[data-bs-theme-value]');
+                if (!btn) return;
+                const val = btn.getAttribute('data-bs-theme-value');
+                localStorage.setItem('theme', val);
+                setTheme(val);
+                document.querySelectorAll('[data-bs-theme-value]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        })();
+    </script>
+</body>
+
+</html>

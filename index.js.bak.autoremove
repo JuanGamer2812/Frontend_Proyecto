@@ -1,0 +1,84 @@
+﻿const app = require('./src/app');
+const http = require('http');
+const socketService = require('./src/services/socket.service');
+
+const PORT = process.env.PORT || 443;
+
+// Crear servidor HTTP
+const server = http.createServer(app);
+
+// Inicializar Socket.IO
+socketService.initializeSocketIO(server);
+
+server.listen(PORT, () => {
+    console.log(`ðYs? Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`ðY"O WebSockets habilitados en http://localhost:${PORT}`);
+});// --- Inicio parche multer + registro (aÃ±adido por asistente)
+const path = require('path');
+const fs = require('fs');
+try {
+  const multer = require('multer');
+  const uploadTmp = multer({ dest: path.join(__dirname, 'tmp_uploads') });
+
+  const safeString = (v, max = 50) => {
+    if (v === undefined || v === null) return null;
+    return String(v).substring(0, max).trim();
+  };
+
+  app.post('/api/auth/register', uploadTmp.single('foto'), async (req, res) => {
+    try {
+      const body = req.body || {};
+
+      const nombre = safeString(body.nombre, 50);
+      const apellido = safeString(body.apellido, 50);
+      const email = safeString(body.email, 100);
+      const password = body.password ? String(body.password) : '';
+      const telefono = safeString(body.telefono, 20);
+      const genero = safeString(body.genero, 20);
+      const fecha_nacimiento = safeString(body.fecha_nacimiento, 30);
+
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Bad Request', message: 'email y password son obligatorios' });
+      }
+
+      let foto_url = null;
+      if (req.file) {
+        const uploadsDir = path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+        const ext = path.extname(req.file.originalname) || '';
+        const filename = `${Date.now()}-${req.file.filename}${ext}`;
+        const dest = path.join(uploadsDir, filename);
+        fs.renameSync(req.file.path, dest);
+        foto_url = `/uploads/${filename}`;
+      }
+
+      const newUser = {
+        id: Date.now(),
+        nombre,
+        apellido,
+        email,
+        telefono,
+        role: 'user',
+        foto_url,
+      };
+
+      return res.status(201).json({
+        message: 'Registro exitoso',
+        user: newUser,
+        accessToken: 'mock-access-token',
+        refreshToken: 'mock-refresh-token'
+      });
+
+    } catch (err) {
+      console.error('Error en /api/auth/register:', err);
+      if (err && err.message && err.message.includes('character varying')) {
+        return res.status(400).json({ error:'Error del servidor', message: 'AlgÃºn campo excede la longitud permitida' });
+      }
+      return res.status(500).json({ error:'Error del servidor', message: err && err.message ? err.message : 'Internal error' });
+    }
+  });
+} catch (e) {
+  console.warn('multer no estÃ¡ instalado o no se pudo cargar: ', e.message);
+}
+// --- Fin parche multer + registro (aÃ±adido por asistente)

@@ -1,0 +1,79 @@
+<header class="p-3 mb-0 border-bottom">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+
+            <!-- 🔹 Logo (reemplazado el SVG por una imagen) -->
+            <a [routerLink]="['home']" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                <img src="isotipo.png" alt="Logo" width="50" height="50" class="me-0"> ÉCLAT
+            </a>
+
+            <!-- 🔹 Navegación -->
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                <li><a routerLink="/colaboradores" routerLinkActive="active" class="nav-link px-2 link-body-emphasis">Proveedores</a></li>
+                <li><a routerLink="/catalogo" routerLinkActive="active" class="nav-link px-2 link-body-emphasis">Catálogo</a></li>
+                <li><a routerLink="/about" routerLinkActive="active" class="nav-link px-2 link-body-emphasis">Sobre Nosotros</a></li>
+                <!-- Dropdown Trabaja con nosotros -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="trabajaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Trabaja con nosotros
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="trabajaDropdown">
+                        <li><a class="dropdown-item" routerLink="/postulacion-proveedor">Postular como Proveedor</a></li>
+                        <li><a class="dropdown-item" routerLink="/postulacion-trabajador">Postular como Trabajador</a></li>
+                    </ul>
+                </li>
+
+                <!-- Dropdown Administración (solo visible para admins) -->
+                <li *ngIf="isAdmin" class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Administración
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <li><a class="dropdown-item" routerLink="/adm-proveedor"><i class="bi bi-building me-2"></i>Administrar Postulaciones</a></li>
+                        <li><a class="dropdown-item" routerLink="/adm-usuarios"><i class="bi bi-people me-2"></i>Administrar Usuarios</a></li>
+                        <li><a class="dropdown-item" routerLink="/roles"><i class="bi bi-shield-lock me-2"></i>Administrar Roles</a></li>
+                        <li><a class="dropdown-item" routerLink="/admin/reportes"><i class="bi bi-graph-up-arrow me-2"></i>Reportes</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+
+
+            <!-- 🔹 Dropdown de usuario -->
+            <div class="dropdown text-end">
+                <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <!-- Mostrar imagen del perfil si está logueado -->
+                    <img [class.opacity]="!isLoggedIn" [src]="isLoggedIn ? userImage : 'usrIco.png'" (error)="onImgError()" alt="mdo" width="32" height="32" class="rounded-circle">
+                </a>
+
+                <ul class="dropdown-menu text-small">
+                    <!-- Menú para usuarios logueados -->
+                    <ng-container *ngIf="isLoggedIn; else guestMenu">
+                        <li class="px-3 py-2">
+                            <div class="d-flex align-items-center">
+                                <img [src]="userImage || 'usrIco.png'" (error)="onImgError()" width="48" height="48" class="rounded-circle me-2" alt="Avatar">
+                                <div>
+                                    <div class="fw-bold">{{ userFirstName || userName }}</div>
+                                    <div class="text-muted small">{{ userEmail }}</div>
+                                    <div *ngIf="isAdmin" class="badge bg-danger mt-1">Admin</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li><a class="dropdown-item" routerLink="/perfil">Configuración del Perfil</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><button class="dropdown-item text-danger" (click)="logout()">Cerrar sesión</button></li>
+                    </ng-container>
+
+                    <!-- Menú para invitados -->
+                    <ng-template #guestMenu>
+                        <li><a class="dropdown-item" routerLink="/login">Iniciar sesión</a></li>
+                        <li><a class="dropdown-item" routerLink="/crear-cuenta">Registrarte</a></li>
+                    </ng-template>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</header>

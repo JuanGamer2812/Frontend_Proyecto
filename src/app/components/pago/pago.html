@@ -1,0 +1,213 @@
+@if (visible) {
+<div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background-color: rgba(0,0,0,0.6); z-index: 1050;">
+    <div class="card shadow-lg" style="max-width: 950px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="bi bi-credit-card-2-front me-2"></i>Pasarela de Pago</h5>
+            <button type="button" class="btn-close btn-close-white" (click)="cancelarPago()"></button>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+                <span><i class="bi bi-calendar-event me-2"></i>{{ nombreEvento }}</span>
+                <span class="fs-5 fw-bold text-primary">Total: ${{ total | number:'1.2-2' }}</span>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 text-center" [class.border-primary]="metodoPagoSeleccionado() === 'tarjeta'" [class.border-3]="metodoPagoSeleccionado() === 'tarjeta'" (click)="seleccionarMetodo('tarjeta')" role="button">
+                        <div class="card-body py-3">
+                            <i class="bi bi-credit-card-2-front fs-1" [class.text-primary]="metodoPagoSeleccionado() === 'tarjeta'" [class.text-secondary]="metodoPagoSeleccionado() !== 'tarjeta'"></i>
+                            <p class="mb-0 mt-2 small fw-bold">Tarjeta</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 text-center" [class.border-warning]="metodoPagoSeleccionado() === 'paypal'" [class.border-3]="metodoPagoSeleccionado() === 'paypal'" (click)="seleccionarMetodo('paypal')" role="button">
+                        <div class="card-body py-3">
+                            <i class="bi bi-paypal fs-1" [class.text-warning]="metodoPagoSeleccionado() === 'paypal'" [class.text-secondary]="metodoPagoSeleccionado() !== 'paypal'"></i>
+                            <p class="mb-0 mt-2 small fw-bold">PayPal</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 text-center" [class.border-success]="metodoPagoSeleccionado() === 'transferencia'" [class.border-3]="metodoPagoSeleccionado() === 'transferencia'" (click)="seleccionarMetodo('transferencia')" role="button">
+                        <div class="card-body py-3">
+                            <i class="bi bi-bank fs-1" [class.text-success]="metodoPagoSeleccionado() === 'transferencia'" [class.text-secondary]="metodoPagoSeleccionado() !== 'transferencia'"></i>
+                            <p class="mb-0 mt-2 small fw-bold">Transferencia</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card h-100 text-center" [class.border-dark]="metodoPagoSeleccionado() === 'deposito'" [class.border-3]="metodoPagoSeleccionado() === 'deposito'" (click)="seleccionarMetodo('deposito')" role="button">
+                        <div class="card-body py-3">
+                            <i class="bi bi-cash-stack fs-1" [class.text-dark]="metodoPagoSeleccionado() === 'deposito'" [class.text-secondary]="metodoPagoSeleccionado() !== 'deposito'"></i>
+                            <p class="mb-0 mt-2 small fw-bold">Deposito</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (metodoPagoSeleccionado() === 'tarjeta') {
+            <div class="row">
+                <div class="col-lg-7">
+                    <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-credit-card me-2"></i>Datos de la Tarjeta</h6>
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del titular</label>
+                            <input type="text" class="form-control" [(ngModel)]="datosPago.nombreTarjeta" name="nombreTarjeta" placeholder="Como aparece en la tarjeta">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Numero de tarjeta</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" [(ngModel)]="datosPago.numeroTarjeta" name="numeroTarjeta" (input)="onNumeroTarjetaChange()" (keypress)="onlyNumbers($event)" placeholder="1234 5678 9012 3456" maxlength="19"> @if
+                                (validacionTarjeta.icono) {
+                                <span class="input-group-text"><i class="bi" [ngClass]="validacionTarjeta.icono"></i></span> }
+                            </div>
+                            @if (datosPago.numeroTarjeta) {
+                            <small [class.text-success]="validacionTarjeta.valid" [class.text-danger]="!validacionTarjeta.valid">{{ validacionTarjeta.message }}</small> }
+                        </div>
+                        <div class="row">
+                            <div class="col-4 mb-3">
+                                <label class="form-label">Mes</label>
+                                <select class="form-select" [(ngModel)]="datosPago.mesExpiracion" name="mesExpiracion" (change)="onFechaExpiracionChange()">
+                    <option value="">MM</option>
+                    @for (mes of getMonthsArray(); track mes.value) {
+                      <option [value]="mes.value">{{ mes.label }}</option>
+                    }
+                  </select>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label class="form-label">Anio</label>
+                                <select class="form-select" [(ngModel)]="datosPago.anioExpiracion" name="anioExpiracion" (change)="onFechaExpiracionChange()">
+                    <option value="">AAAA</option>
+                    @for (anio of getYearsArray(); track anio) {
+                      <option [value]="anio">{{ anio }}</option>
+                    }
+                  </select>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="password" class="form-control" [(ngModel)]="datosPago.cvv" name="cvv" (input)="onCVVChange()" (keypress)="onlyNumbers($event)" [placeholder]="getCVVPlaceholder()" [maxlength]="getCVVMaxLength()">
+                            </div>
+                        </div>
+                        @if (datosPago.mesExpiracion && datosPago.anioExpiracion) {
+                        <small [class.text-success]="validacionFecha.valid" [class.text-danger]="!validacionFecha.valid">{{ validacionFecha.message }}</small> }
+                    </form>
+                </div>
+                <div class="col-lg-5 mt-3 mt-lg-0">
+                    <h6 class="border-bottom pb-2 mb-3">Vista previa</h6>
+                    <div class="rounded-3 p-3 text-white position-relative" style="min-height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="position-absolute top-0 end-0 p-3 fs-5 fw-bold">
+                            @if (validacionTarjeta.tipo === 'Visa') { <span>VISA</span> } @if (validacionTarjeta.tipo === 'MasterCard') { <span class="text-warning">MC</span> } @if (validacionTarjeta.tipo === 'American Express') { <span>AMEX</span> }
+                        </div>
+                        <div class="mt-5 pt-2">
+                            <div class="bg-warning bg-opacity-75 rounded mb-3" style="width: 55px; height: 40px;"></div>
+                            <div class="fs-5 mb-3 font-monospace">{{ datosPago.numeroTarjeta || '**** **** **** ****' }}</div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <small class="text-white-50 d-block">TITULAR</small>
+                                    <span class="text-uppercase small">{{ datosPago.nombreTarjeta || 'NOMBRE APELLIDO' }}</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <small class="text-white-50 d-block">VENCE</small>
+                                    <span>{{ datosPago.mesExpiracion || 'MM' }}/{{ datosPago.anioExpiracion ? (datosPago.anioExpiracion.toString().slice(-2)) : 'AA' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            } @if (metodoPagoSeleccionado() === 'paypal') {
+            <div class="text-center py-5">
+                <i class="bi bi-paypal text-warning" style="font-size: 5rem;"></i>
+                <h5 class="mt-3">Pagar con PayPal</h5>
+                <p class="text-muted">Al hacer clic en "Pagar", seras redirigido a PayPal para completar tu pago de forma segura.</p>
+                <div class="alert alert-warning d-inline-block"><i class="bi bi-info-circle me-2"></i>Se abrira una ventana de PayPal</div>
+            </div>
+            } @if (metodoPagoSeleccionado() === 'transferencia') {
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card bg-success bg-opacity-10 border-success">
+                        <div class="card-body">
+                            <h6 class="card-title text-success"><i class="bi bi-bank me-2"></i>Datos para transferencia</h6>
+                            <hr>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Banco:</span><span class="fw-bold">{{ datosBancarios.banco }}</span></div>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Tipo:</span><span class="fw-bold">{{ datosBancarios.tipoCuenta }}</span></div>
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Cuenta:</span>
+                                <span><span class="fw-bold font-monospace">{{ datosBancarios.numeroCuenta }}</span><button class="btn btn-sm btn-outline-success ms-2" (click)="copiarAlPortapapeles(datosBancarios.numeroCuenta)"><i class="bi bi-clipboard"></i></button></span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Titular:</span><span class="fw-bold">{{ datosBancarios.titular }}</span></div>
+                            <div class="mb-0 d-flex justify-content-between"><span class="text-muted">Monto exacto:</span><span class="fw-bold text-success">${{ total | number:'1.2-2' }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                    <h6><i class="bi bi-receipt me-2"></i>Datos del comprobante</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Numero de comprobante / referencia</label>
+                        <input type="text" class="form-control" [(ngModel)]="datosPago.numeroComprobante" name="numeroComprobante" placeholder="Ej: 123456789">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subir comprobante</label>
+                        <input type="file" class="form-control" (change)="onComprobanteSelected($event)" accept=".jpg,.jpeg,.png,.pdf">
+                        <small class="text-muted">JPG, PNG o PDF. Maximo 5MB</small>
+                    </div>
+                    @if (nombreArchivoComprobante) {
+                    <div class="alert alert-success d-flex justify-content-between align-items-center py-2">
+                        <span><i class="bi bi-file-earmark-check me-2"></i>{{ nombreArchivoComprobante }}</span>
+                        <button class="btn btn-sm btn-outline-danger" (click)="eliminarComprobante()"><i class="bi bi-x"></i></button>
+                    </div>
+                    }
+                </div>
+            </div>
+            } @if (metodoPagoSeleccionado() === 'deposito') {
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card bg-secondary bg-opacity-10 border-secondary">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="bi bi-cash-stack me-2"></i>Datos para deposito</h6>
+                            <hr>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Banco:</span><span class="fw-bold">{{ datosBancarios.banco }}</span></div>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">Tipo:</span><span class="fw-bold">{{ datosBancarios.tipoCuenta }}</span></div>
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Cuenta:</span>
+                                <span><span class="fw-bold font-monospace">{{ datosBancarios.numeroCuenta }}</span><button class="btn btn-sm btn-outline-secondary ms-2" (click)="copiarAlPortapapeles(datosBancarios.numeroCuenta)"><i class="bi bi-clipboard"></i></button></span>
+                            </div>
+                            <div class="mb-2 d-flex justify-content-between"><span class="text-muted">A nombre de:</span><span class="fw-bold">{{ datosBancarios.titular }}</span></div>
+                            <div class="mb-0 d-flex justify-content-between"><span class="text-muted">Monto exacto:</span><span class="fw-bold text-dark">${{ total | number:'1.2-2' }}</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mt-3 mt-md-0">
+                    <h6><i class="bi bi-receipt me-2"></i>Datos de la boleta</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Numero de boleta</label>
+                        <input type="text" class="form-control" [(ngModel)]="datosPago.numeroComprobante" name="numeroBoleta" placeholder="Numero de boleta de deposito">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subir imagen de la boleta</label>
+                        <input type="file" class="form-control" (change)="onComprobanteSelected($event)" accept=".jpg,.jpeg,.png,.pdf">
+                        <small class="text-muted">JPG, PNG o PDF. Maximo 5MB</small>
+                    </div>
+                    @if (nombreArchivoComprobante) {
+                    <div class="alert alert-success d-flex justify-content-between align-items-center py-2">
+                        <span><i class="bi bi-file-earmark-check me-2"></i>{{ nombreArchivoComprobante }}</span>
+                        <button class="btn btn-sm btn-outline-danger" (click)="eliminarComprobante()"><i class="bi bi-x"></i></button>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancelarPago()" [disabled]="procesandoPago()"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted d-none d-md-inline"><i class="bi bi-shield-lock me-1"></i>Pago seguro</span>
+                <button type="button" class="btn btn-primary btn-lg" [disabled]="procesandoPago() || !isFormValid()" (click)="procesarPago()">
+          @if (procesandoPago()) { <span class="spinner-border spinner-border-sm me-2"></span>Procesando... }
+          @else { <i class="bi bi-check-circle me-1"></i>Pagar ${{ total | number:'1.2-2' }} }
+        </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

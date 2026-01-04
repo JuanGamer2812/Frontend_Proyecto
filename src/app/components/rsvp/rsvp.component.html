@@ -1,0 +1,248 @@
+<div class="rsvp-page">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3">Cargando invitación...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="error-container">
+      <div class="error-card">
+        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+        <h2>Invitación No Encontrada</h2>
+        <p>{{ error() }}</p>
+        <p class="text-muted">Por favor verifica el código de invitación o contacta al organizador.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Success State -->
+  @else if (success() && invitacion()) {
+    <div class="success-container">
+      <div class="success-card">
+        @if (confirmo()) {
+          <i class="bi bi-check-circle-fill text-success"></i>
+          <h2>¡Confirmación Exitosa! 🎉</h2>
+          <p>Tu asistencia ha sido confirmada para:</p>
+        } @else if (rechazo()) {
+          <i class="bi bi-x-circle-fill text-info"></i>
+          <h2>Respuesta Registrada</h2>
+          <p>Hemos registrado que no podrás asistir a:</p>
+        }
+        <h3>{{ invitacion()!.nombre_evento }}</h3>
+        <p class="text-muted">Se ha enviado un email de confirmación a {{ invitacion()!.email }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Invitation Content -->
+  @else if (invitacion() && !yaRespondio()) {
+    <div class="invitation-container">
+      <!-- Header -->
+      <div class="invitation-header">
+        <div class="header-icon">🎊</div>
+        <h1>¡Estás Invitado!</h1>
+        <h2>{{ invitacion()!.nombre_evento }}</h2>
+      </div>
+
+      <!-- Guest Info -->
+      <div class="guest-info">
+        <p class="greeting">Hola <strong>{{ invitacion()!.nombre_invitado }}</strong>,</p>
+        <p>Nos complace invitarte a nuestro evento especial. Será un placer contar con tu presencia.</p>
+      </div>
+
+      <!-- Custom Message -->
+      @if (invitacion()!.mensaje_personalizado) {
+        <div class="custom-message">
+          <i class="bi bi-chat-quote-fill"></i>
+          <p>{{ invitacion()!.mensaje_personalizado }}</p>
+        </div>
+      }
+
+      <!-- Event Details -->
+      <div class="event-details">
+        <h3><i class="bi bi-calendar-event"></i> Detalles del Evento</h3>
+        
+        <div class="detail-item">
+          <i class="bi bi-geo-alt-fill"></i>
+          <div>
+            <strong>Ubicación</strong>
+            <p>{{ invitacion()!.ubicacion }}</p>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <i class="bi bi-clock-fill"></i>
+          <div>
+            <strong>Fecha y Hora</strong>
+            <p>{{ formatearFecha(invitacion()!.fecha_evento) }}</p>
+          </div>
+        </div>
+
+        @if (invitacion()!.descripcion) {
+          <div class="detail-item">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+              <strong>Acerca del Evento</strong>
+              <p>{{ invitacion()!.descripcion }}</p>
+            </div>
+          </div>
+        }
+
+        @if (invitacion()!.numero_acompanantes > 0) {
+          <div class="detail-item highlight">
+            <i class="bi bi-people-fill"></i>
+            <div>
+              <strong>Acompañantes</strong>
+              <p>Puedes traer hasta {{ invitacion()!.numero_acompanantes }} acompañante{{ invitacion()!.numero_acompanantes > 1 ? 's' : '' }}</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- RSVP Form -->
+      <div class="rsvp-form">
+        <h3><i class="bi bi-clipboard-check"></i> Confirma tu Asistencia</h3>
+
+        <!-- Acompañantes -->
+        @if (invitacion()!.numero_acompanantes > 0) {
+          <div class="form-group">
+            <label for="acompanantes">
+              <i class="bi bi-people"></i>
+              ¿Cuántos acompañantes traerás?
+            </label>
+            <select 
+              id="acompanantes" 
+              class="form-select"
+              [(ngModel)]="acompanantesConfirmados">
+              @for (i of [0, 1, 2, 3, 4, 5].slice(0, invitacion()!.numero_acompanantes + 1); track i) {
+                <option [value]="i">{{ i }} {{ i === 1 ? 'acompañante' : 'acompañantes' }}</option>
+              }
+            </select>
+            <small class="text-muted">
+              Total de asistentes: <strong>{{ getTotalAsistentes() }}</strong> persona{{ getTotalAsistentes() > 1 ? 's' : '' }}
+            </small>
+          </div>
+        }
+
+        <!-- Restricciones Alimentarias -->
+        <div class="form-group">
+          <label for="restricciones">
+            <i class="bi bi-heart-pulse"></i>
+            Restricciones Alimentarias (Opcional)
+          </label>
+          <textarea
+            id="restricciones"
+            class="form-control"
+            rows="3"
+            placeholder="Ej: Vegetariano, alérgico a mariscos, etc."
+            [(ngModel)]="restriccionesAlimentarias"></textarea>
+          <small class="text-muted">Ayúdanos a preparar el menú perfecto para ti</small>
+        </div>
+
+        <!-- Buttons -->
+        <div class="action-buttons">
+          <button 
+            class="btn btn-primary btn-lg"
+            (click)="confirmarAsistencia()"
+            [disabled]="isLoading()">
+            <i class="bi bi-check-circle"></i>
+            Sí, Asistiré
+          </button>
+          
+          <button 
+            class="btn btn-outline-secondary btn-lg"
+            (click)="mostrarConfirmacionRechazo()"
+            [disabled]="isLoading()">
+            <i class="bi bi-x-circle"></i>
+            No Podré Asistir
+          </button>
+        </div>
+      </div>
+
+      <!-- Organizer Info -->
+      <div class="organizer-info">
+        <p>
+          <strong>Organizador:</strong> {{ invitacion()!.organizador_nombre }}<br>
+          <a [href]="'mailto:' + invitacion()!.organizador_email">
+            <i class="bi bi-envelope"></i>
+            {{ invitacion()!.organizador_email }}
+          </a>
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Already Responded -->
+  @else if (invitacion() && yaRespondio()) {
+    <div class="responded-container">
+      <div class="responded-card">
+        @if (confirmo()) {
+          <i class="bi bi-check-circle-fill text-success"></i>
+          <h2>Ya Confirmaste tu Asistencia ✓</h2>
+          <div class="confirmation-details">
+            <h3>{{ invitacion()!.nombre_evento }}</h3>
+            <p><i class="bi bi-calendar"></i> {{ formatearFecha(invitacion()!.fecha_evento) }}</p>
+            <p><i class="bi bi-geo-alt"></i> {{ invitacion()!.ubicacion }}</p>
+            <div class="attendees-info">
+              <p><strong>Asistentes confirmados:</strong></p>
+              <p class="attendees-count">{{ 1 + invitacion()!.acompanantes_confirmados }} persona{{ (1 + invitacion()!.acompanantes_confirmados) > 1 ? 's' : '' }}</p>
+            </div>
+            @if (invitacion()!.restricciones_alimentarias) {
+              <p class="restrictions">
+                <i class="bi bi-heart-pulse"></i>
+                <strong>Restricciones:</strong> {{ invitacion()!.restricciones_alimentarias }}
+              </p>
+            }
+          </div>
+          <p class="help-text">
+            Si necesitas hacer cambios, por favor contacta al organizador.
+          </p>
+        } @else if (rechazo()) {
+          <i class="bi bi-x-circle-fill text-secondary"></i>
+          <h2>Respuesta Registrada</h2>
+          <p>Ya indicaste que no podrás asistir a este evento.</p>
+          <p class="help-text">
+            Si cambiaste de opinión, contacta al organizador.
+          </p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Decline Confirmation Modal -->
+  @if (showDeclineConfirmation()) {
+    <div class="modal-overlay" (click)="cancelarRechazo()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>¿Seguro que no podrás asistir?</h3>
+          <button class="btn-close" (click)="cancelarRechazo()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Lamentamos que no puedas acompañarnos. Tu respuesta será registrada.</p>
+          <p class="text-muted">Podrás contactar al organizador si cambias de opinión.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="cancelarRechazo()">
+            Cancelar
+          </button>
+          <button class="btn btn-danger" (click)="rechazarInvitacion()">
+            Confirmar que No Asistiré
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Footer -->
+  <div class="rsvp-footer">
+    <p>Powered by <strong>ÉCLAT Eventos</strong></p>
+  </div>
+</div>

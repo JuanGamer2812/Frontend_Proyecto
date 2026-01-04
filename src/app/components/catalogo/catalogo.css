@@ -1,0 +1,174 @@
+/*TIPOGRAFÍA Y CONFIGURACIÓN GENERAL*/
+
+
+/* Estilo global del cuerpo de la página */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+
+/* TÍTULO PRINCIPAL */
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+
+/*SUBTÍTULOS PERSONALIZADOS*/
+
+.subtitle {
+    color: var(--color-subtext);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+
+/* CONTENIDO */
+
+
+/* Encabezados secundarios */
+
+h2 {
+    color: var(--color-primary);
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+
+/* Párrafos */
+
+p {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #ffffff;
+}
+
+
+/* TEXTOS DENTRO DE LAS TARJETAS */
+
+
+/* Título dentro de una tarjeta */
+
+.card-titulo {
+    font-family: 'Lora', serif;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+
+/* Texto descriptivo dentro de las tarjetas */
+
+.card-text {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+
+/* PA LAS TARJETAS DE CLIENTES (RESEÑAS) */
+
+.t-card {
+    position: relative;
+    background: #f5f6f7;
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .08) inset, 0 0 0 4px #fff inset, 0 1px 18px rgba(0, 0, 0, .06);
+}
+
+
+/* Comillas decorativas en esquina derecha */
+
+.t-card::after {
+    content: '\201C';
+    position: absolute;
+    right: 22px;
+    bottom: 18px;
+    font-size: 82px;
+    line-height: 1;
+    color: #7c696e;
+    font-family: "Playfair Display", serif;
+    opacity: .9;
+}
+
+
+/* Texto del testimonio */
+
+.t-text {
+    margin: 0 0 8px 0;
+    color: #54616c;
+    font-size: 1.05rem;
+    line-height: 1.9;
+}
+
+
+/* Avatar + nombre/cargo */
+
+.t-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+/* Avatar placeholder (cuando no hay foto) */
+
+.t-avatar-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    font-family: 'Playfair Display', serif;
+}
+
+.t-name {
+    font-family: "Playfair Display", serif;
+    color: #1A237E;
+}
+
+
+/* Indicadores más pequeños y separados */
+
+#testimoniosCarousel .carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #1A237E;
+    opacity: .35;
+}
+
+#testimoniosCarousel .carousel-indicators .active {
+    opacity: 1;
+}
+
+
+/* Espaciado en móvil */
+
+@media (max-width: 576px) {
+    .t-card {
+        padding: 22px;
+    }
+    .t-card::after {
+        font-size: 64px;
+        right: 14px;
+        bottom: 10px;
+    }
+}

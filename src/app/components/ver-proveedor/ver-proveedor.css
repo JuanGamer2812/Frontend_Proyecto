@@ -1,0 +1,11 @@
+.container {
+    max-width: 980px;
+}
+
+.card-body {
+    font-size: 0.95rem;
+}
+
+.fw-bold {
+    font-weight: 600;
+}

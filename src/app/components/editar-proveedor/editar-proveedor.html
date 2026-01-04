@@ -1,0 +1,329 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Proveedor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+</head>
+<br>
+
+<body>
+    <div class="container-xxl py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                
+                <!-- Loading -->
+                @if (loading && !error) {
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-3">Cargando datos del proveedor...</p>
+                    </div>
+                }
+
+                <!-- Error -->
+                @if (error) {
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i>Error</h5>
+                        <p>{{ error }}</p>
+                        <button type="button" class="btn btn-primary" (click)="onCancel()">
+                            Volver a la lista
+                        </button>
+                    </div>
+                }
+
+                <!-- Formulario -->
+                @if (!loading && !error) {
+                    <div class="shell shadow p-4 rounded bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h4 mb-0">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Editar Proveedor #{{ proveedorId }}
+                            </h2>
+                            <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+                                <i class="bi bi-arrow-left me-1"></i> Volver
+                            </button>
+                        </div>
+
+                        <form [formGroup]="formProveedor" (ngSubmit)="onSubmit()" novalidate>
+                            <h5 class="mb-3"><i class="bi bi-person-bounding-box me-2"></i>Datos del Proveedor</h5>
+
+                            <!-- DATOS GENERALES -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre de la Empresa <span class="text-danger">*</span></label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        formControlName="nom_empresa_proveedor" 
+                                        placeholder="Ej. Eventos Musicales S.A."
+                                        [class.is-invalid]="f['nom_empresa_proveedor'].touched && f['nom_empresa_proveedor'].invalid" />
+                                    @if (f['nom_empresa_proveedor'].touched && f['nom_empresa_proveedor'].invalid) {
+                                        <div class="text-danger small mt-1">
+                                            @if (f['nom_empresa_proveedor'].hasError('required')) { <div>Campo obligatorio.</div> }
+                                            @if (f['nom_empresa_proveedor'].hasError('minlength')) { <div>Mínimo 3 caracteres.</div> }
+                                            @if (f['nom_empresa_proveedor'].hasError('maxlength')) { <div>Máximo 100 caracteres.</div> }
+                                            @if (f['nom_empresa_proveedor'].hasError('pattern')) { <div>Solo letras, números, espacios y símbolos: & . -</div> }
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                                    <select 
+                                        class="form-select" 
+                                        formControlName="categoria_proveedor" 
+                                        (change)="onCategoryChange($event)"
+                                        [class.is-invalid]="f['categoria_proveedor'].touched && f['categoria_proveedor'].invalid"
+                                        [disabled]="true">
+                                        <option value="">Selecciona una categoría</option>
+                                        <option value="Musica">Música</option>
+                                        <option value="Catering">Catering</option>
+                                        <option value="Lugar">Lugar</option>
+                                        <option value="Decoracion">Decoración</option>
+                                    </select>
+                                    <small class="text-muted">La categoría no se puede cambiar</small>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- MÚSICA -->
+                            @if (isMusica()) {
+                                <div formGroupName="musica">
+                                    <h5><i class="bi bi-music-note me-2"></i>Datos específicos - Música</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Género musical</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                formControlName="genero" 
+                                                placeholder="Ej. Rock, Salsa, Electrónica" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Precio</label>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                formControlName="precio" 
+                                                placeholder="Ej. 150" />
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">¿Cobro por hora?</label>
+                                            <select class="form-select" formControlName="porHora">
+                                                <option value="">Seleccione</option>
+                                                <option value="si">Sí</option>
+                                                <option value="no">No</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Hora inicio</label>
+                                            <input type="time" class="form-control" formControlName="horaInicio" />
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Hora fin</label>
+                                            <input type="time" class="form-control" formControlName="horaFin" />
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Descripción</label>
+                                            <textarea 
+                                                class="form-control" 
+                                                formControlName="descripcion" 
+                                                rows="3"
+                                                placeholder="Describe el servicio musical"></textarea>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Plan</label>
+                                            <select class="form-select" formControlName="plan">
+                                                <option value="">Seleccione plan</option>
+                                                <option value="1">Plan Básico</option>
+                                                <option value="2">Plan Premium</option>
+                                                <option value="3">Plan VIP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- CATERING -->
+                            @if (isCatering()) {
+                                <div formGroupName="catering">
+                                    <h5><i class="bi bi-cup-hot me-2"></i>Datos específicos - Catering</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo de comida</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                formControlName="tipoComida" 
+                                                placeholder="Ej. Internacional, Buffet, Formal" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Precio por persona</label>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                formControlName="precioPersona" 
+                                                placeholder="Ej. 25" />
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Descripción</label>
+                                            <textarea 
+                                                class="form-control" 
+                                                formControlName="descripcion" 
+                                                rows="3"
+                                                placeholder="Describe el servicio de catering"></textarea>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Plan</label>
+                                            <select class="form-select" formControlName="plan">
+                                                <option value="">Seleccione plan</option>
+                                                <option value="1">Plan Básico</option>
+                                                <option value="2">Plan Premium</option>
+                                                <option value="3">Plan VIP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- LUGAR -->
+                            @if (isLugar()) {
+                                <div formGroupName="lugar">
+                                    <h5><i class="bi bi-building me-2"></i>Datos específicos - Lugar</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Capacidad</label>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                formControlName="capacidad" 
+                                                placeholder="Ej. 200 personas" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Precio</label>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                formControlName="precio" 
+                                                placeholder="Ej. 500" />
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Dirección</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                formControlName="direccion" 
+                                                placeholder="Ej. Av. Principal 123, Ciudad" />
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Descripción</label>
+                                            <textarea 
+                                                class="form-control" 
+                                                formControlName="descripcion" 
+                                                rows="3"
+                                                placeholder="Describe el lugar"></textarea>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">¿Tiene seguridad?</label>
+                                            <select class="form-select" formControlName="seguridad">
+                                                <option value="">Seleccione</option>
+                                                <option value="si">Sí</option>
+                                                <option value="no">No</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Plan</label>
+                                            <select class="form-select" formControlName="plan">
+                                                <option value="">Seleccione plan</option>
+                                                <option value="1">Plan Básico</option>
+                                                <option value="2">Plan Premium</option>
+                                                <option value="3">Plan VIP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- DECORACIÓN -->
+                            @if (isDecoracion()) {
+                                <div formGroupName="decoracion">
+                                    <h5><i class="bi bi-palette me-2"></i>Datos específicos - Decoración</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Nivel</label>
+                                            <select class="form-select" formControlName="nivel">
+                                                <option value="">Seleccione nivel</option>
+                                                <option value="basico">Básico</option>
+                                                <option value="intermedio">Intermedio</option>
+                                                <option value="premium">Premium</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tipo</label>
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                formControlName="tipo" 
+                                                placeholder="Ej. Bodas, Cumpleaños" />
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label">Precio</label>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                formControlName="precio" 
+                                                placeholder="Ej. 300" />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <hr class="my-4">
+
+                            <!-- Botones de acción -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button 
+                                    type="button" 
+                                    class="btn btn-outline-secondary" 
+                                    (click)="onCancel()"
+                                    [disabled]="loading">
+                                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                                </button>
+                                
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-primary"
+                                    [disabled]="loading || formProveedor.invalid">
+                                    @if (loading) {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    } @else {
+                                        <i class="bi bi-check-circle me-1"></i>
+                                    }
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>

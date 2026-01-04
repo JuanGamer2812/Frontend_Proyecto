@@ -1,0 +1,102 @@
+/* ------------------------- ESTILOS BASE ------------------------- */
+
+
+/* Estilo general del cuerpo (body) */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ------------------------- TITULOS ------------------------- */
+
+
+/* TÍTULO PRINCIPAL (h1) */
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+
+/* SUBTÍTULOS O SECCIONES (h2) */
+
+h2 {
+    color: var(--color-primary);
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+
+/* ------------------------- TEXTOS Y PÁRRAFOS ------------------------- */
+
+
+/* Párrafo genérico */
+
+p {
+    font-family: 'Lora', serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #ffffff;
+}
+
+
+/* Texto usado en secciones descriptivas del home */
+
+.texto-home {
+    color: var(--color-text);
+    line-height: 1.7;
+    font-size: 1.05rem;
+    text-align: justify;
+}
+
+
+/* Texto centrado para pasos o explicaciones */
+
+.texto-pasos {
+    color: var(--color-text);
+    line-height: 1.7;
+    font-size: 1.05rem;
+    text-align: center;
+    /* Centra el texto horizontalmente */
+}
+
+
+/* ------------------------- SECCIONES CON IMÁGENES (FEATURETTE) ------------------------- */
+
+
+/* Encabezado dentro de una featurette */
+
+.featurette-heading {
+    text-align: center;
+}
+
+
+/* Contenedor general de la sección (imagen + texto) */
+
+.row.featurette {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+
+/* Columnas internas (texto e imagen) */
+
+.col-md-7,
+.col-md-5 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}

@@ -1,0 +1,129 @@
+<div class="contenedor-postulantes">
+    <div class="header">
+        <h1>📋 Gestionar Postulantes de Proveedores</h1>
+        <p>Selecciona un postulante y completa sus datos para agregarlo al sistema</p>
+    </div>
+
+    <!-- Mensajes -->
+    <div *ngIf="mensajeExito" class="alert alert-success">
+        {{ mensajeExito }}
+    </div>
+    <div *ngIf="mensajeError" class="alert alert-danger">
+        {{ mensajeError }}
+    </div>
+
+    <div class="contenedor-principal">
+        <!-- LISTA DE POSTULANTES -->
+        <div class="seccion-postulantes">
+            <h2>Postulantes Registrados</h2>
+
+            <div *ngIf="cargando" class="cargando">
+                ⏳ Cargando postulantes...
+            </div>
+
+            <div *ngIf="!cargando && postulantes.length === 0" class="sin-datos">
+                ℹ️ No hay postulantes registrados aún
+            </div>
+
+            <div *ngIf="!cargando && postulantes.length > 0" class="lista-postulantes">
+                <div *ngFor="let post of postulantes" class="tarjeta-postulante" [class.seleccionada]="postulantesSeleccionado?.id_postu_proveedor === post.id_postu_proveedor" (click)="seleccionarPostulante(post)">
+                    <div class="encabezado-tarjeta">
+                        <h3>{{ post.nom_empresa }}</h3>
+                        <span class="badge-categoria" [style.backgroundColor]="getCategoriaColor(post.categoria)">
+              {{ post.categoria }}
+            </span>
+                    </div>
+
+                    <div class="detalles">
+                        <p><strong>📧 Email:</strong> {{ post.correo }}</p>
+                        <p><strong>📅 Fecha:</strong> {{ post.fecha | date: 'dd/MM/yyyy' }}</p>
+                        <p *ngIf="post.portafolio" class="portafolio">
+                            <strong>📄 Portafolio:</strong> {{ post.portafolio.substring(0, 100) }}...
+                        </p>
+                    </div>
+
+                    <div class="acciones-tarjeta">
+                        <button *ngIf="postulantesSeleccionado?.id_postu_proveedor === post.id_postu_proveedor" class="btn btn-primary" disabled>
+              ✓ Seleccionado
+            </button>
+                        <button *ngIf="postulantesSeleccionado?.id_postu_proveedor !== post.id_postu_proveedor" class="btn btn-outline">
+              Seleccionar
+            </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE CONVERSIÓN -->
+        <div class="seccion-formulario">
+            <h2>Completar Datos</h2>
+
+            <div *ngIf="!postulantesSeleccionado" class="sin-seleccion">
+                👈 Selecciona un postulante para continuar
+            </div>
+
+            <div *ngIf="postulantesSeleccionado" class="formulario-activo">
+                <div class="resumen-postulante">
+                    <h3>{{ postulantesSeleccionado.nom_empresa }}</h3>
+                    <p><strong>Categoría:</strong> {{ postulantesSeleccionado.categoria }}</p>
+                    <p><strong>Email:</strong> {{ postulantesSeleccionado.correo }}</p>
+                </div>
+
+                <form [formGroup]="formConvertir" (ngSubmit)="convertir()">
+                    <!-- Precio Base -->
+                    <div class="form-group">
+                        <label for="precio">Precio Base ($)</label>
+                        <input type="number" id="precio" formControlName="precio_base" placeholder="Ej: 500" step="0.01" min="1" class="form-control" />
+                        <div *ngIf="
+                formConvertir.get('precio_base')?.invalid &&
+                formConvertir.get('precio_base')?.touched
+              " class="error-message">
+                            ⚠️ Ingresa un precio válido
+                        </div>
+                    </div>
+
+                    <!-- Plan -->
+                    <div class="form-group">
+                        <label for="plan">Plan</label>
+                        <select id="plan" formControlName="id_plan" class="form-control">
+              <option value="">-- Selecciona un plan --</option>
+              <option *ngFor="let plan of planes" [value]="plan.id_plan">
+                {{ plan.nombre_plan }}
+              </option>
+            </select>
+                        <div *ngIf="
+                formConvertir.get('id_plan')?.invalid &&
+                formConvertir.get('id_plan')?.touched
+              " class="error-message">
+                            ⚠️ Selecciona un plan
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="form-group">
+                        <label for="desc">Descripción</label>
+                        <textarea id="desc" formControlName="descripcion" placeholder="Describe los servicios y características..." class="form-control" rows="4"></textarea>
+                        <div *ngIf="
+                formConvertir.get('descripcion')?.invalid &&
+                formConvertir.get('descripcion')?.touched
+              " class="error-message">
+                            ⚠️ La descripción debe tener al menos 10 caracteres
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="botones-formulario">
+                        <button type="submit" class="btn btn-success" [disabled]="!formConvertir.valid || procesando">
+              <span *ngIf="!procesando">✅ Agregar como Proveedor</span>
+              <span *ngIf="procesando">⏳ Procesando...</span>
+            </button>
+
+                        <button type="button" class="btn btn-secondary" (click)="limpiarSeleccion()" [disabled]="procesando">
+              ✕ Cancelar
+            </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

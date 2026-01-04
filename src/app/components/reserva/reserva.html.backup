@@ -1,0 +1,405 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Proveedores</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="reserva.css">
+</head>
+<br>
+
+<body>
+    <div class="container-xxl py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <div class="shell shadow-soft p-4 p-lg-5">
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h2><i class="bi bi-calendar-event me-2"></i>Registrar evento</h2>
+                    </div>
+
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                        <!-- =================== DATOS DEL EVENTO =================== -->
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre del evento<span class="text-danger">*</span></label>
+                                <input class="form-control" formControlName="nombreEvento" placeholder="Ej. Boda Camila & Diego" [ngClass]="{'is-invalid': isInvalid('nombreEvento')}">
+                                <div class="invalid-feedback">3–100 caracteres.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo<span class="text-danger">*</span></label>
+                                <input class="form-control" formControlName="tipoEvento" placeholder="Ej. Boda, Corporativo, Fiesta" [ngClass]="{'is-invalid': isInvalid('tipoEvento')}">
+                                <div class="invalid-feedback">Obligatorio. Máx 100.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Descripción<span class="text-danger">*</span></label>
+                                <textarea rows="3" class="form-control" formControlName="descripcion" [ngClass]="{'is-invalid': isInvalid('descripcion')}"></textarea>
+                                <div class="invalid-feedback">Obligatorio.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Inicio del Evento<span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" formControlName="fechaInicio" [ngClass]="{'is-invalid': isInvalid('fechaInicio') || form.errors?.['rangoFechas']}">
+                                <div class="invalid-feedback">Fecha/hora válida.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Fin del Evento<span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" formControlName="fechaFin" [ngClass]="{'is-invalid': isInvalid('fechaFin') || form.errors?.['rangoFechas']}">
+                                <div class="invalid-feedback">Debe ser posterior al inicio.</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- =================== MÚSICA =================== -->
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3><i class="bi bi-music-note-beamed me-2"></i>Música (proveedor)</h3>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" formControlName="enableMusica" id="enableMusica">
+                                <label class="form-check-label" for="enableMusica">Agregar</label>
+                            </div>
+                        </div>
+
+                        <div class="collapse show" *ngIf="c('enableMusica').value" [formGroup]="g('musica')">
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre del proveedor<span class="text-danger">*</span></label>
+                                    <input class="form-control" formControlName="nombre" [ngClass]="{'is-invalid': secInvalid('musica','nombre')}">
+                                    <div class="invalid-feedback">Requerido (≤100).</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Género<span class="text-danger">*</span></label>
+                                    <input class="form-control" formControlName="genero" [ngClass]="{'is-invalid': secInvalid('musica','genero')}">
+                                    <div class="invalid-feedback">Requerido (≤50).</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Descripción<span class="text-danger">*</span></label>
+                                    <textarea class="form-control" rows="2" formControlName="descripcion" [ngClass]="{'is-invalid': secInvalid('musica','descripcion')}"></textarea>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Precio (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input class="form-control" formControlName="precio" [ngClass]="{'is-invalid': secInvalid('musica','precio')}">
+                                    </div>
+                                    <div class="invalid-feedback">Obligatorio y &gt; 0.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label d-block">Modalidad</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="porHora" id="porHora">
+                                        <label class="form-check-label" for="porHora">¿Por hora?</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="estado" id="estado_musica">
+                                        <label class="form-check-label" for="estado_musica">¿Activo?</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Horario<span class="text-danger">*</span></label>
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                        <input type="time" class="form-control" formControlName="horaInicio" [ngClass]="{'is-invalid': secInvalid('musica','horaInicio') || g('musica').errors?.['rangoHoras']}">
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                        <input type="time" class="form-control" formControlName="horaFin" [ngClass]="{'is-invalid': secInvalid('musica','horaFin') || g('musica').errors?.['rangoHoras']}">
+                                    </div>
+                                    <div class="invalid-feedback d-block" *ngIf="g('musica').errors?.['rangoHoras']">
+                                        Fin debe ser mayor que inicio.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Imagen (requerida)</label>
+                                    <input type="file" class="form-control" accept="image/*" (change)="onFile('musica','imagen',$event)" [ngClass]="{'is-invalid': secInvalid('musica','imagen')}">
+                                    <div class="invalid-feedback d-block" *ngIf="err('musica','imagen','required')">Archivo requerido.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('musica','imagen','imageOnly')">Solo imágenes.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('musica','imagen','maxFile')">Máx 3 MB.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Plan</label>
+                                    <select class="form-select" formControlName="plan" [ngClass]="{'is-invalid': secInvalid('musica','plan')}">
+                  <option value="" disabled selected>Selecciona un plan</option>
+                  <option *ngFor="let p of planes" [value]="p">{{ p }}</option>
+                </select>
+                                    <div class="invalid-feedback">Obligatorio (≤20).</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- =================== CATERING =================== -->
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3><i class="bi bi-egg-fried me-2"></i>Catering (proveedor)</h3>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" formControlName="enableCatering" id="enableCatering">
+                                <label class="form-check-label" for="enableCatering">Agregar</label>
+                            </div>
+                        </div>
+
+                        <div class="collapse show" *ngIf="c('enableCatering').value" [formGroup]="g('catering')">
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre del proveedor</label>
+                                    <input class="form-control" formControlName="nombre" [ngClass]="{'is-invalid': secInvalid('catering','nombre')}">
+                                    <div class="invalid-feedback">Requerido (≤100).</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Tipo de comida</label>
+                                    <input class="form-control" formControlName="tipoComida" [ngClass]="{'is-invalid': secInvalid('catering','tipoComida')}">
+                                    <div class="invalid-feedback">Requerido (≤100).</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" rows="2" formControlName="descripcion" [ngClass]="{'is-invalid': secInvalid('catering','descripcion')}"></textarea>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Menú (resumen)</label>
+                                    <textarea class="form-control" rows="2" formControlName="menu" [ngClass]="{'is-invalid': secInvalid('catering','menu')}"></textarea>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Precio por persona (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input class="form-control" formControlName="precioPP" [ngClass]="{'is-invalid': secInvalid('catering','precioPP')}">
+                                    </div>
+                                    <div class="invalid-feedback">Obligatorio y &gt; 0.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Plan</label>
+                                    <select class="form-select" formControlName="plan" [ngClass]="{'is-invalid': secInvalid('catering','plan')}">
+                  <option value="" disabled selected>Selecciona un plan</option>
+                  <option *ngFor="let p of planes" [value]="p">{{ p }}</option>
+                </select>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- =================== DECORACIÓN =================== -->
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3><i class="bi bi-balloon-heart me-2"></i>Decoración (proveedor)</h3>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" formControlName="enableDecor" id="enableDecor">
+                                <label class="form-check-label" for="enableDecor">Agregar</label>
+                            </div>
+                        </div>
+
+                        <div class="collapse show" *ngIf="c('enableDecor').value" [formGroup]="g('decoracion')">
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre del proveedor</label>
+                                    <input class="form-control" formControlName="nombre" [ngClass]="{'is-invalid': secInvalid('decoracion','nombre')}">
+                                    <div class="invalid-feedback">Requerido (≤100).</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Nivel</label>
+                                    <input class="form-control" formControlName="nivel" [ngClass]="{'is-invalid': secInvalid('decoracion','nivel')}">
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Tipo</label>
+                                    <input class="form-control" formControlName="tipo" [ngClass]="{'is-invalid': secInvalid('decoracion','tipo')}">
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Precio (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input class="form-control" formControlName="precio" [ngClass]="{'is-invalid': secInvalid('decoracion','precio')}">
+                                    </div>
+                                    <div class="invalid-feedback">Obligatorio y &gt; 0.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Imagen (requerida)</label>
+                                    <input type="file" class="form-control" accept="image/*" (change)="onFile('decoracion','imagen',$event)" [ngClass]="{'is-invalid': secInvalid('decoracion','imagen')}">
+                                    <div class="invalid-feedback d-block" *ngIf="err('decoracion','imagen','required')">Archivo requerido.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('decoracion','imagen','imageOnly')">Solo imágenes.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('decoracion','imagen','maxFile')">Máx 3 MB.</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Ficha / notas</label>
+                                    <textarea class="form-control" rows="2" formControlName="pdf" [ngClass]="{'is-invalid': secInvalid('decoracion','pdf')}"></textarea>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Plan</label>
+                                    <select class="form-select" formControlName="plan" [ngClass]="{'is-invalid': secInvalid('decoracion','plan')}">
+                  <option value="" disabled selected>Selecciona un plan</option>
+                  <option *ngFor="let p of planes" [value]="p">{{ p }}</option>
+                </select>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- =================== LUGAR =================== -->
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3><i class="bi bi-geo-alt me-2"></i>Lugar (proveedor)</h3>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" formControlName="enableLugar" id="enableLugar">
+                                <label class="form-check-label" for="enableLugar">Agregar</label>
+                            </div>
+                        </div>
+
+                        <div class="collapse show" *ngIf="c('enableLugar').value" [formGroup]="g('lugar')">
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre del lugar</label>
+                                    <input class="form-control" formControlName="nombre" [ngClass]="{'is-invalid': secInvalid('lugar','nombre')}">
+                                    <div class="invalid-feedback">Requerido (≤100).</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Capacidad</label>
+                                    <input type="number" class="form-control" formControlName="capacidad" [ngClass]="{'is-invalid': secInvalid('lugar','capacidad')}">
+                                    <div class="invalid-feedback">Número ≥ 1.</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Precio (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input class="form-control" formControlName="precio" [ngClass]="{'is-invalid': secInvalid('lugar','precio')}">
+                                    </div>
+                                    <div class="invalid-feedback">Obligatorio y &gt; 0.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Dirección</label>
+                                    <input class="form-control" formControlName="direccion" [ngClass]="{'is-invalid': secInvalid('lugar','direccion')}">
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Descripción</label>
+                                    <input class="form-control" formControlName="descripcion" [ngClass]="{'is-invalid': secInvalid('lugar','descripcion')}">
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="seguridad" id="seg_lugar">
+                                        <label class="form-check-label" for="seg_lugar">¿Cuenta con seguridad y control de acceso?</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Imagen principal (requerida)</label>
+                                    <input type="file" class="form-control" accept="image/*" (change)="onFile('lugar','imagen',$event)" [ngClass]="{'is-invalid': secInvalid('lugar','imagen')}">
+                                    <div class="invalid-feedback d-block" *ngIf="err('lugar','imagen','required')">Archivo requerido.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('lugar','imagen','imageOnly')">Solo imágenes.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="err('lugar','imagen','maxFile')">Máx 3 MB.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Imagen 1 (requerida)</label>
+                                    <input type="file" class="form-control" accept="image/*" (change)="onFile('lugar','imagen1',$event)" [ngClass]="{'is-invalid': secInvalid('lugar','imagen1')}">
+                                    <div class="invalid-feedback d-block" *ngIf="err('lugar','imagen1','required')">Archivo requerido.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Imagen 2 (requerida)</label>
+                                    <input type="file" class="form-control" accept="image/*" (change)="onFile('lugar','imagen2',$event)" [ngClass]="{'is-invalid': secInvalid('lugar','imagen2')}">
+                                    <div class="invalid-feedback d-block" *ngIf="err('lugar','imagen2','required')">Archivo requerido.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Plan</label>
+                                    <select class="form-select" formControlName="plan" [ngClass]="{'is-invalid': secInvalid('lugar','plan')}">
+                  <option value="" disabled selected>Selecciona un plan</option>
+                  <option *ngFor="let p of planes" [value]="p">{{ p }}</option>
+                </select>
+                                    <div class="invalid-feedback">Obligatorio.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+
+                        <!-- Mensaje informativo -->
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                            </div>
+                        </div>
+
+                        <!-- =================== ACCIONES =================== -->
+                        <div class="d-grid d-sm-flex justify-content-end gap-2">
+                            <button type="reset" class="btn btn-ghost">Limpiar</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+                            <i class="bi bi-save2 me-1"></i> Guardar evento
+                            </button>
+                        </div>
+
+                        <div class="text-end mt-2" *ngIf="form.invalid">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón
+                            </small>
+                        </div>
+                    </form>
+
+
+                    <!-- =================== RESUMEN DE COSTOS =================== -->
+                    <div class="row g-3 mt-3">
+                        <div class="col-lg-6">
+                            <div class="shell p-3">
+                                <h3 class="h6 mb-3"><i class="bi bi-cash-coin me-2"></i>Resumen de costos</h3>
+                                <ul class="list-unstyled small mb-2">
+                                    <li><span class="small-muted">Evento base:</span> ${{ sumBase | number:'1.2-2' }}</li>
+                                    <li><span class="small-muted">Música:</span> ${{ sumMusica | number:'1.2-2' }}</li>
+                                    <li><span class="small-muted">Catering:</span> ${{ sumCatering | number:'1.2-2' }}</li>
+                                    <li><span class="small-muted">Decoración:</span> ${{ sumDecor | number:'1.2-2' }}</li>
+                                    <li><span class="small-muted">Lugar:</span> ${{ sumLugar | number:'1.2-2' }}</li>
+                                </ul>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total estimado</strong>
+                                    <strong>${{ sumTotal | number:'1.2-2' }}</strong>
+                                </div>
+                                <div class="form-text mt-2">El total es referencial (no incluye impuestos/negociaciones).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

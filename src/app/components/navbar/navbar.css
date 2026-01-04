@@ -1,0 +1,165 @@
+/* =========================
+   PALETA Y TIPOGRAFÍAS
+========================= */
+
+:root {
+    --color-primary: #1A237E;
+    /* Azul profundo elegante */
+    --color-secondary: #D81B60;
+    /* Rosa elegante para acentos */
+    --color-text: #2C2C2C;
+    /* Texto principal */
+    --color-subtext: #6C757D;
+    /* Texto secundario */
+    --color-accent: #FBC02D;
+    /* Dorado suave para hover */
+}
+
+
+/*AQUI APLICO LORA A TODA LA PÁGINA*/
+
+body {
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    background-color: #fff;
+}
+
+
+/* =========================
+   NAVBAR GENERAL
+========================= */
+
+header {
+    background-color: #fff;
+    font-family: 'Playfair Display', serif;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+header .navbar-brand,
+header a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+
+/* =========================
+   LOGO Y TITULO
+========================= */
+
+header a.d-flex {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================
+   LINKS DE NAVEGACIÓN
+========================= */
+
+.nav-link {
+    font-family: 'Lora', serif;
+    font-weight: 500;
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: color 0.3s ease, transform 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+
+/* Link activo: usar borde inferior en lugar de font-weight para evitar que el texto cambie de tamaño */
+
+.nav-link.active {
+    color: var(--color-primary);
+    /* Mantener mismo font-weight para evitar saltos visuales */
+    font-weight: 500;
+}
+
+
+/* Indicador visual sutil para link activo */
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 2px;
+}
+
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.dropdown-menu {
+    font-family: 'Lora', serif;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    background: #fff;
+}
+
+.dropdown-menu.show {
+    background: #fff;
+}
+
+.dropdown-item {
+    color: var(--color-text);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-menu .dropdown-item {
+    background-color: transparent !important;
+    color: var(--color-text) !important;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item:active,
+.dropdown-menu .dropdown-item.active {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    color: var(--color-text) !important;
+}
+
+.dropdown-menu .dropdown-item:focus-visible {
+    outline: none;
+}
+
+.nav-item .nav-link.dropdown-toggle {
+    color: var(--color-text);
+}
+
+.nav-item .nav-link.dropdown-toggle:hover {
+    color: var(--color-primary);
+}
+
+.nav-item .nav-link.dropdown-toggle:focus,
+.nav-item .nav-link.dropdown-toggle.show,
+.nav-item .nav-link.dropdown-toggle:active {
+    color: var(--color-text);
+}
+
+
+/* =========================
+   PERFIL (imagen)
+========================= */
+
+.dropdown-toggle img {
+    border: 2px solid var(--color-primary);
+    transition: transform 0.3s ease;
+}
+
+.dropdown-toggle img:hover {
+    transform: scale(1.05);
+}

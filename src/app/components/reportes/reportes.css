@@ -1,0 +1,78 @@
+:host {
+    display: block;
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+.reportes-hero {
+    padding: 28px 0;
+    background: linear-gradient(135deg, rgba(26, 35, 126, 0.06), rgba(216, 27, 96, 0.04));
+}
+
+.hero-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(26, 35, 126, 0.18);
+}
+
+.hero-subtext {
+    color: var(--color-subtext);
+    font-size: 0.95rem;
+}
+
+.surface-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.badge.bg-secondary {
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+label.form-label {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.form-select,
+.form-control {
+    border-radius: 10px;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.table thead {
+    background: var(--color-surface);
+}
+
+.table-responsive {
+    border: 1px solid #eaecef;
+    border-radius: 10px;
+}
+
+.badge.bg-success {
+    background: #16a34a !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--color-primary);
+    color: #fff;
+}

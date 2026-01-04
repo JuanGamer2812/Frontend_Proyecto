@@ -1,0 +1,204 @@
+/* ------------------------- CONTENIDO ------------------------- */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    color: #0c0c0c;
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+p {
+    color: #181717;
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+
+/* ------------------------- CONTENEDOR PRINCIPAL ------------------------- */
+
+.shell {
+    background: #ffffff;
+    /* Fondo del contenedor del formulario */
+    border: 1px solid #dee2e6;
+    /* Borde de la caja */
+    border-radius: 16px;
+    /* Bordes redondeados */
+    box-shadow: 0 10px 30px rgba(114, 98, 108, 0.521);
+    /* Sombra suave */
+}
+
+
+/*posocion centrada del login */
+
+.login-wrap {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 24px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* Tarjeta glass */
+
+.card.glass {
+    width: min(96%, 440px);
+    border: 1px solid rgba(214, 211, 209, 0.25);
+    background: rgba(15, 45, 94, 0.12);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: #ffffff;
+    border-radius: 20px;
+    transform: perspective(1000px) translateZ(0);
+    transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.login-card:hover {
+    transform: perspective(1000px) translateZ(12px) rotateX(1deg) rotateY(-1deg);
+    box-shadow: 0 1rem 2rem rgba(0, 104, 90, .3);
+}
+
+
+/* Shake cuando falla */
+
+.shake {
+    animation: shake .45s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+    10%,
+    90% {
+        transform: translateX(-1px);
+    }
+    20%,
+    80% {
+        transform: translateX(2px);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translateX(-4px);
+    }
+    40%,
+    60% {
+        transform: translateX(4px);
+    }
+}
+
+
+/* Botón con elevación sutil */
+
+.lift {
+    transition: transform .15s ease, box-shadow .15s ease;
+    background: linear-gradient(135deg, #4b4848, #4b4848) !important;
+    border: none !important;
+}
+
+.lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1.25rem rgba(101, 109, 108, 0.4);
+    background: linear-gradient(135deg, #4b4848, #4b4848) !important;
+}
+
+.hover-glow {
+    transition: box-shadow .2s ease;
+    border-color: rgba(109, 105, 104, 0.4) !important;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 0.75rem rgba(190, 190, 190, 0.6) inset, 0 0 0.75rem rgba(182, 153, 153, 0.493);
+    border-color: rgba(133, 127, 127, 0.6) !important;
+}
+
+
+/* Toggle mostrar/ocultar contraseña */
+
+.toggle-pass {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid rgba(231, 222, 220, 0.5);
+    padding: .375rem .6rem;
+    border-radius: .5rem;
+    background: linear-gradient(135deg, rgba(146, 146, 146, 0.781), rgba(26, 58, 109, .3));
+    color: #423939;
+    font-weight: 600;
+    transition: all .2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+
+.toggle-pass:hover {
+    background: linear-gradient(135deg, rgba(103, 112, 117, 0.5), rgba(109, 121, 139, 0.5));
+    color: #4b4848;
+    transform: translateY(-50%) scale(1.05);
+}
+
+
+/* Brand - Logo EverLuna */
+
+.brand-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #1A3A6D, #00685A);
+    font-weight: 800;
+    letter-spacing: .5px;
+    box-shadow: 0 .5rem 1rem rgba(0, 104, 90, .5);
+    color: #E3A899;
+    border: 2px solid rgba(227, 168, 153, .3);
+}
+
+
+/* Brand Logo - Imagen */
+
+.brand-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.logo-img {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 0.5rem 1rem rgba(0, 104, 90, .5));
+    transition: transform .3s ease, filter .3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0.75rem 1.5rem rgba(0, 104, 90, .7));
+}
+
+
+/* ================== COLOR OSCURO PARA "Recordarme" ================== */
+
+.form-check-label {
+    color: #1a1a1a;
+    /* Texto oscuro, sobrio */
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+}
+
+.form-check-input {
+    accent-color: #1A3A6D;
+    /* Hace que el checkmark sea del color principal */
+}

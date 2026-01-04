@@ -1,0 +1,175 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Paleta Elegante</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="postulacion-trabajador.css">
+</head>
+
+<body>
+    <!-- SECCION: HEADER CON TITULO Y SUBTITULO -->
+    <header class="hero text-center">
+        <h1>Únete a Nuestro Equipo de Innovadores</h1>
+        <p class="subtitle">
+            Si eres diseñador UX/UI, programador, analista o profesional del marketing digital <br> en ÉCLAT encontrarás un espacio donde tus ideas cobran vida.
+        </p>
+    </header>
+
+    <hr class="short-separator">
+
+
+    <!-- SECCION: FORMULARIO DE REGISTRO DE TRABAJADOR -->
+    <div class="container-xxl py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <!-- Contenedor principal del formulario -->
+                <div class="shell shadow-soft p-4 p-lg-5">
+
+                    <!-- Título del formulario -->
+                    <h2 class="h5 mt-3 mb-3">
+                        <i class="bi bi-person-bounding-box me-2"></i>Registrar Trabajador
+                    </h2>
+
+                    <!-- Formulario principal -->
+                    <form [formGroup]="form" novalidate>
+
+                        <!-- Grupo de campos principales -->
+                        <div class="row g-3">
+
+                            <!-- Campo: Cédula -->
+                            <div class="col-md-6">
+                                <label class="form-label">Cédula<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('cedula')}" formControlName="cedula" placeholder="Ej. 1101234567">
+                                <div class="invalid-feedback" *ngIf="isInvalid('cedula')">
+                                    <ng-container *ngIf="err('cedula','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('cedula','pattern')">Solo números.</ng-container>
+                                    <ng-container *ngIf="err('cedula','minLen')">Mínimo 3 caracteres.</ng-container>
+                                    <ng-container *ngIf="err('cedula','maxlength')">Máximo 15 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Primer Nombre -->
+                            <div class="col-md-6">
+                                <label class="form-label">Primer Nombre<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('nombre1')}" formControlName="nombre1" placeholder="Ej. Juan">
+                                <div class="invalid-feedback" *ngIf="isInvalid('nombre1')">
+                                    <ng-container *ngIf="err('nombre1','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('nombre1','minLen')">Mínimo 3 caracteres.</ng-container>
+                                    <ng-container *ngIf="err('nombre1','maxlength')">Máximo 100 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Segundo Nombre -->
+                            <div class="col-md-6">
+                                <label class="form-label">Segundo Nombre</label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('nombre2')}" formControlName="nombre2" placeholder="Ej. Carlos">
+                                <div class="invalid-feedback" *ngIf="isInvalid('nombre2')">
+                                    <ng-container *ngIf="err('nombre2','maxlength')">Máximo 50 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Primer Apellido -->
+                            <div class="col-md-6">
+                                <label class="form-label">Primer Apellido<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('apellido1')}" formControlName="apellido1" placeholder="Ej. Pérez">
+                                <div class="invalid-feedback" *ngIf="isInvalid('apellido1')">
+                                    <ng-container *ngIf="err('apellido1','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('apellido1','minLen')">Mínimo 3 caracteres.</ng-container>
+                                    <ng-container *ngIf="err('apellido1','maxlength')">Máximo 100 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Segundo Apellido -->
+                            <div class="col-md-6">
+                                <label class="form-label">Segundo Apellido</label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('apellido2')}" formControlName="apellido2" placeholder="Ej. González">
+                                <div class="invalid-feedback" *ngIf="isInvalid('apellido2')">
+                                    <ng-container *ngIf="err('apellido2','maxlength')">Máximo 100 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Fecha de Nacimiento -->
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de Nacimiento<span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" [ngClass]="{'is-invalid': isInvalid('fechaNacimiento')}" formControlName="fechaNacimiento">
+                                <div class="invalid-feedback" *ngIf="isInvalid('fechaNacimiento')">
+                                    <ng-container *ngIf="err('fechaNacimiento','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('fechaNacimiento','tooYoung')">Debes ser mayor de 18.</ng-container>
+                                    <ng-container *ngIf="err('fechaNacimiento','tooOld')">Edad máxima 70.</ng-container>
+                                    <ng-container *ngIf="err('fechaNacimiento','invalidDate')">Fecha inválida.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Correo Electrónico -->
+                            <div class="col-md-6">
+                                <label class="form-label">Correo Electrónico<span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" [ngClass]="{'is-invalid': isInvalid('correo')}" formControlName="correo" placeholder="correo@dominio.com">
+                                <div class="invalid-feedback" *ngIf="isInvalid('correo')">
+                                    <ng-container *ngIf="err('correo','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('correo','email')">Formato de correo inválido.</ng-container>
+                                    <ng-container *ngIf="err('correo','maxlength')">Máximo 100 caracteres.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Teléfono -->
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" [ngClass]="{'is-invalid': isInvalid('telefono')}" formControlName="telefono" placeholder="0991234567">
+                                <div class="invalid-feedback" *ngIf="isInvalid('telefono')">
+                                    <ng-container *ngIf="err('telefono','required')">Campo requerido.</ng-container>
+                                    <ng-container *ngIf="err('telefono','pattern')">Debe tener 10 dígitos numéricos.</ng-container>
+                                </div>
+                            </div>
+
+                            <!-- Campo: CV (PDF) -->
+                            <div class="col-md-6">
+                                <label class="form-label">Currículum Vitae<span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" accept=".pdf,application/pdf" formControlName="cv" (change)="onFileSelected($event)" [ngClass]="{'is-invalid': isInvalid('cv')}" />
+                                <div class="invalid-feedback" *ngIf="isInvalid('cv')">
+                                    <ng-container *ngIf="err('cv','required')">El CV es obligatorio.</ng-container>
+                                    <ng-container *ngIf="err('cv','pdfOnly')">Solo PDF.</ng-container>
+                                    <ng-container *ngIf="err('cv','maxFileSize')">Tamaño máximo 5 MB.</ng-container>
+                                </div>
+                                <small class="text-success" *ngIf="f['cv'].value">
+                {{ f['cv'].value?.name || f['cv'].value }}
+              </small>
+                                <small class="text-muted">Solo se permiten archivos PDF</small>
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Mensaje informativo -->
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-grid d-sm-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-ghost" (click)="form.reset()">Limpiar</button>
+                            <button type="button" class="btn btn-primary" [disabled]="form.invalid" (click)="onSubmit()">
+              <i class="bi bi-save2 me-1"></i> Guardar Trabajador
+            </button>
+                        </div>
+                        <div class="text-end mt-2" *ngIf="form.invalid">
+                            <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón
+                        </small>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

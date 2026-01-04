@@ -1,0 +1,247 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ReactiveFormsModule,
+  FormControl
+} from '@angular/forms';
+
+type Sec = 'musica' | 'catering' | 'decoracion' | 'lugar';
+
+@Component({
+  selector: 'app-reserva',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './reserva.html',
+  styleUrls: ['./reserva.css']
+})
+export class Reserva {
+  readonly planes = ['Esencial', 'Plus', 'Estelar'] as const;
+
+  // === Helpers para el resumen ===
+  private num(v: any): number {
+    if (v === null || v === undefined || v === '') return 0;
+    const n = typeof v === 'string' ? parseFloat(v) : v;
+    return isFinite(n) ? n : 0;
+  }
+  get sumBase(): number { return this.num(this.f['precioEvento'].value); }
+  get sumMusica(): number {
+    if (!this.c('enableMusica').value) return 0;
+    return this.num(this.g('musica').get('precio')!.value);
+  }
+  get sumCatering(): number {
+    if (!this.c('enableCatering').value) return 0;
+    return this.num(this.g('catering').get('precioPP')!.value);
+  }
+  get sumDecor(): number {
+    if (!this.c('enableDecor').value) return 0;
+    return this.num(this.g('decoracion').get('precio')!.value);
+  }
+  get sumLugar(): number {
+    if (!this.c('enableLugar').value) return 0;
+    return this.num(this.g('lugar').get('precio')!.value);
+  }
+  get sumTotal(): number {
+    return this.sumBase + this.sumMusica + this.sumCatering + this.sumDecor + this.sumLugar;
+  }
+
+  form: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      // ================== EVENTO ==================
+      nombreEvento: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      tipoEvento:    ['', [Validators.required, Validators.maxLength(100)]],
+      descripcion:   ['', [Validators.required]],
+      fechaInicio:   ['', [Validators.required]],
+      fechaFin:      ['', [Validators.required]],
+      precioEvento:  [null, [Validators.required, this.moneyMin(0.01)]],
+      hayPlaylist:   [false],
+      playlist:      [{ value: '', disabled: true }],
+
+      // ================== TOGGLES ==================
+      enableMusica:    [false],
+      enableCatering:  [false],
+      enableDecor:     [false],
+      enableLugar:     [false],
+
+      // ================== MÚSICA ==================
+      musica: this.fb.group({
+        nombre:       [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        descripcion:  [{ value: '', disabled: true }, [Validators.required]],
+        precio:       [{ value: null, disabled: true }, [Validators.required, this.moneyMin(0.01)]],
+        porHora:      [{ value: false, disabled: true }], // boolean presente
+        genero:       [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(50)]],
+        estado:       [{ value: false, disabled: true }], // boolean presente
+        horaInicio:   [{ value: '', disabled: true }, [Validators.required]],
+        horaFin:      [{ value: '', disabled: true }, [Validators.required]],
+        imagen:       [{ value: null, disabled: true }, [this.imageRequired(), this.imageOnly(), this.maxFileMB(3)]],
+        plan:         [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(20)]],
+      }, { validators: [this.horaFinMayor()] }),
+
+      // ================== CATERING ==================
+      catering: this.fb.group({
+        nombre:      [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        tipoComida:  [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        descripcion: [{ value: '', disabled: true }, [Validators.required]],
+        menu:        [{ value: '', disabled: true }, [Validators.required]],
+        precioPP:    [{ value: null, disabled: true }, [Validators.required, this.moneyMin(0.01)]],
+        plan:        [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(20)]],
+      }),
+
+      // ================== DECORACIÓN ==================
+      decoracion: this.fb.group({
+        nombre:      [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        nivel:       [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        tipo:        [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        precio:      [{ value: null, disabled: true }, [Validators.required, this.moneyMin(0.01)]],
+        pdf:         [{ value: '', disabled: true }, [Validators.required]],
+        imagen:      [{ value: null, disabled: true }, [this.imageRequired(), this.imageOnly(), this.maxFileMB(3)]],
+        plan:        [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(20)]],
+      }),
+
+      // ================== LUGAR ==================
+      lugar: this.fb.group({
+        nombre:      [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(100)]],
+        capacidad:   [{ value: null, disabled: true }, [Validators.required, Validators.min(1)]],
+        precio:      [{ value: null, disabled: true }, [Validators.required, this.moneyMin(0.01)]],
+        direccion:   [{ value: '', disabled: true }, [Validators.required]],
+        descripcion: [{ value: '', disabled: true }, [Validators.required]],
+        seguridad:   [{ value: false, disabled: true }], // boolean presente
+        imagen:      [{ value: null, disabled: true }, [this.imageRequired(), this.imageOnly(), this.maxFileMB(3)]],
+        imagen1:     [{ value: null, disabled: true }, [this.imageRequired(), this.imageOnly(), this.maxFileMB(3)]],
+        imagen2:     [{ value: null, disabled: true }, [this.imageRequired(), this.imageOnly(), this.maxFileMB(3)]],
+        plan:        [{ value: '', disabled: true }, [Validators.required, Validators.maxLength(20)]],
+      })
+    }, { validators: [this.finMayorQueInicio()] });
+
+    // Playlist dinámico
+    this.c('hayPlaylist').valueChanges.subscribe((on: boolean) => {
+      const p = this.c('playlist');
+      if (on) { p.enable(); p.addValidators([Validators.required, Validators.maxLength(100)]); }
+      else    { p.reset(); p.clearValidators(); p.disable(); }
+      p.updateValueAndValidity();
+    });
+
+    // Activación/Desactivación por sección
+    this.setupSection('musica',    'enableMusica');
+    this.setupSection('catering',  'enableCatering');
+    this.setupSection('decoracion','enableDecor');
+    this.setupSection('lugar',     'enableLugar');
+  }
+
+  // ===== Helpers de acceso =====
+  c(path: string): AbstractControl { return this.form.get(path)!; }
+  g(sec: Sec): FormGroup { return this.form.get(sec) as FormGroup; }
+  get f() { return this.form.controls; }
+
+  isInvalid(name: string) {
+    const ctl = this.c(name);
+    return ctl.invalid && (ctl.touched || ctl.dirty);
+  }
+  secInvalid(sec: Sec, name: string) {
+    const ctl = this.g(sec).get(name)!;
+    return ctl.invalid && (ctl.touched || ctl.dirty);
+  }
+  err(sec: Sec, name: string, key: string) {
+    return !!(this.g(sec).get(name)!.errors || {})[key];
+  }
+
+  // ====== Secciones condicionales ======
+  private setupSection(sec: Sec, toggleName: string) {
+    const toggle = this.c(toggleName) as FormControl<boolean>;
+    toggle.valueChanges.subscribe(on => this.applySecState(sec, !!on));
+    this.applySecState(sec, !!toggle.value); // estado inicial
+  }
+  private applySecState(sec: Sec, enabled: boolean) {
+    const grp = this.g(sec);
+    Object.keys(grp.controls).forEach(k => {
+      const ctl = grp.get(k)!;
+      if (enabled) ctl.enable({ emitEvent: false });
+      else         ctl.disable({ emitEvent: false });
+    });
+    grp.updateValueAndValidity({ emitEvent: false });
+  }
+
+  // ===== Validadores personalizados =====
+  private moneyMin(min: number) {
+    return (c: AbstractControl): ValidationErrors | null => {
+      const v = typeof c.value === 'string' ? parseFloat(c.value) : c.value;
+      if (v === null || v === undefined || v === '') return { required: true };
+      return isFinite(v) && v > 0 && v >= min ? null : { minAmount: { min } };
+    };
+  }
+  private imageOnly() {
+    return (c: AbstractControl): ValidationErrors | null => {
+      const file = c.value as File | null;
+      if (!file) return null;
+      return /^image\//.test(file.type) ? null : { imageOnly: true };
+    };
+  }
+  private imageRequired() {
+    return (c: AbstractControl): ValidationErrors | null => {
+      const file = c.value as File | null;
+      return file ? null : { required: true };
+    };
+  }
+  private maxFileMB(mb: number) {
+    return (c: AbstractControl): ValidationErrors | null => {
+      const file = c.value as File | null;
+      if (!file) return null;
+      return file.size <= mb * 1024 * 1024 ? null : { maxFile: { mb } };
+    };
+  }
+  private finMayorQueInicio() {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const ini = group.get('fechaInicio')?.value;
+      const fin = group.get('fechaFin')?.value;
+      if (!ini || !fin) return null;
+      return new Date(fin) > new Date(ini) ? null : { rangoFechas: true };
+    };
+  }
+  private horaFinMayor() {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const hi = group.get('horaInicio')?.value;
+      const hf = group.get('horaFin')?.value;
+      if (!hi || !hf) return null;
+      // comparo como HH:mm
+      return hf > hi ? null : { rangoHoras: true };
+    };
+  }
+
+  // ===== File inputs =====
+  onFile(sec: Sec, control: string, ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files.length ? input.files[0] : null;
+    const ctl = this.g(sec).get(control)!;
+    ctl.setValue(file);
+    ctl.markAsDirty();
+    ctl.markAsTouched();
+    ctl.updateValueAndValidity();
+  }
+
+  // ===== Envío =====
+  markAllTouched() {
+    const mark = (ctrl: AbstractControl) => {
+      ctrl.markAsTouched();
+      if ((ctrl as any).controls) {
+        const children = Object.values((ctrl as any).controls) as AbstractControl[];
+        children.forEach(c => mark(c));
+      }
+    };
+    mark(this.form);
+  }
+  onSubmit() {
+    if (this.form.invalid) {
+      this.markAllTouched();
+      return;
+    }
+    console.log('✅ Form OK', this.form.getRawValue());
+    alert('¡Evento guardado!');
+    this.form.reset();
+  }
+}

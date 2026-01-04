@@ -1,0 +1,166 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - Vista Home</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="colaboradores.css">
+</head>
+
+
+<body>
+    <!--SECCION 1: DESCRIPCION DE BIENVENIDA A PROVEEDORES-->
+    <div class="px-4 py-5 my-5 text-center">
+        <h1>Directorio de Proveedores</h1>
+
+        <div class="col-lg-6 mx-auto">
+            <p class="content container">
+                Este directorio representa más que una lista de proveedores: es una comunidad de expertos que, como nosotros, creen en la importancia de la calidad, la confianza y la dedicación personalizada.
+            </p>
+        </div>
+    </div>
+    <!--FIN SECCION 1 DESCRIPCION DE BIENVENIDA A PROVEEDORES-->
+
+
+
+    <!--SECCION 2: CARRUSEL DE IMAGENES DE MARCAS MAS VENDIDAS-->
+    <div id="carouselExampleCaptions" class="carousel slide colaboradores-carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="pReconocido1.jpg" class="d-block w-100 carousel-img" alt="Marca reconocida 1" loading="lazy">
+                <div class="carousel-caption d-none d-md-block">
+                    <h3>Andrea Villegas Pastry Shop</h3>
+                    <!-- <p>Some representative placeholder content for the first slide.</p>-->
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="pReconocido2.jpg" class="d-block w-100 carousel-img" alt="Marca reconocida 2" loading="lazy">
+                <div class="carousel-caption d-none d-md-block">
+                    <h3>Drink Team</h3>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="pReconocido3.jpg" class="d-block w-100 carousel-img" alt="Marca reconocida 3" loading="lazy">
+                <div class="carousel-caption d-none d-md-block">
+                    <h3>Catering de Altura</h3>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    <!--FIN SECCION 2: CARRUSEL DE IMAGENES DE MARCAS MAS VENDIDAS-->
+
+
+
+    <!-- SECCION 3: CARTAS LISTA DE PROVEEDORES -->
+    <div class="px-4 py-5 my-4 text-center">
+        <h2>Nuestros Proveedores</h2>
+        <p>¡Explora, inspirate y descubre a los mejores aliados para tu gran día!</p>
+
+        <!-- Filtro de Categorías Dinámico -->
+        <div class="d-flex justify-content-center mt-4">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" [class.active]="categoriaSeleccionada() === 'TODOS'" (click)="filtrarPorCategoria('TODOS')">
+                    <i class="bi bi-grid-3x3-gap"></i> Todos
+                </button> @for (cat of categorias(); track cat.nombre) {
+                <button type="button" class="btn btn-outline-primary" [class.active]="categoriaSeleccionada() === cat.nombre" (click)="filtrarPorCategoria(cat.nombre)">
+                        @if (cat.icono) {
+                            <i [class]="'bi ' + cat.icono"></i>
+                        }
+                        {{ cat.nombre }}
+                    </button> }
+            </div>
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3">Cargando proveedores...</p>
+    </div>
+    } @else if (error()) {
+    <div class="alert alert-danger mx-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ error() }}
+    </div>
+    } @else if (proveedores().length === 0) {
+    <div class="alert alert-info text-center mx-4">
+        No hay proveedores disponibles en este momento.
+    </div>
+    } @else {
+    <div class="row row-cols-1 row-cols-md-4 g-4 px-3">
+        <!--aqui se aumentan columnas en md-4-->
+        @for (proveedor of proveedores(); track proveedor.Nombre) {
+        <div class="col">
+            <div class="card h-100">
+                @if (proveedor.Foto) {
+                <!-- Usar función getImageUrl para detectar automáticamente el tipo de imagen -->
+                <img [src]="getImageUrl(proveedor.Foto)" class="card-img-top" [alt]="proveedor.Nombre" loading="lazy"> } @else {
+                <div class="card-img-placeholder">
+                    <i class="bi bi-shop display-4 text-muted"></i>
+                    <p class="small text-muted mb-0">Sin imagen</p>
+                </div>
+                }
+                <div class="card-body">
+                    <h5 class="card-title">{{ proveedor.Nombre }}</h5>
+                    <p>{{ proveedor.Descripcion }}</p>
+                </div>
+                <div class="card-footer">
+                    @if (proveedor.Categoria === 'MUSICA') {
+                    <small class="text-body-secondary">Musica.</small> } @else if (proveedor.Categoria === 'CATERING') {
+                    <small class="text-body-secondary">Catering.</small> } @else if (proveedor.Categoria === 'DECORACION') {
+                    <small class="text-body-secondary">Decoración.</small> } @else if (proveedor.Categoria === 'LUGAR') {
+                    <small class="text-body-secondary">Lugar.</small> } @else {
+                    <small class="text-body-secondary">{{ proveedor.Categoria }}</small> }
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+    <!-- FIN SECCION 3: LISTA DE PROVEEDORES -->
+
+
+
+
+    <!-- SECCION 3: FOOTER -->
+    <div class="container">
+        <!-- Footer Section -->
+        <footer class="py-3 my-4">
+            <!-- PA PONER LOS LINKS DE NAEGACION -->
+            <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+                <li class="nav-item">
+                    <a href="/home" class="nav-link px-2 text-body-secondary">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalogo" class="nav-link px-2 text-body-secondary">Catálogo</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about" class="nav-link px-2 text-body-secondary">Sobre Nosotros</a>
+                </li>
+            </ul>
+
+            <!-- Copyright Text -->
+            <p class="text-center text-body-secondary">© 2025 Company, Inc</p>
+        </footer>
+    </div>
+
+</body>

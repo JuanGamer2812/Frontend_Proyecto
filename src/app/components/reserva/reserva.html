@@ -1,0 +1,392 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Reserva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+</head>
+
+<div class="container-xxl py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="shell shadow-soft p-4 p-lg-5">
+
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2><i class="bi bi-calendar-event me-2"></i>Crear Reserva de Evento</h2>
+                </div>
+
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+                    <!-- =================== DATOS DEL EVENTO =================== -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Evento</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Nombre del evento<span class="text-danger">*</span></label>
+                                    <input class="form-control" formControlName="nombre_evento" placeholder="Ej. Boda Camila & Diego" [ngClass]="{'is-invalid': isInvalid('nombre_evento')}">
+                                    <div class="invalid-feedback">3–100 caracteres requeridos.</div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Cédula del responsable<span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                        <input type="text" class="form-control" formControlName="cedula_reservacion" placeholder="Ej. 1234567890" maxlength="15" [ngClass]="{'is-invalid': isInvalid('cedula_reservacion')}">
+                                    </div>
+                                    <div class="invalid-feedback">Cédula válida requerida (10-15 dígitos).</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Categoría del evento<span class="text-danger">*</span></label>
+                                    <select class="form-select" formControlName="id_categoria" [ngClass]="{'is-invalid': isInvalid('id_categoria')}">
+                                        <option value="" disabled selected>Selecciona una categoría</option>
+                                        <option *ngFor="let cat of categorias()" [value]="cat.id">{{ cat.nombre }}</option>
+                                    </select>
+                                    <div class="invalid-feedback">Selecciona una categoría de evento.</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Descripción<span class="text-danger">*</span></label>
+                                    <textarea rows="3" class="form-control" formControlName="descripcion_evento" placeholder="Describe tu evento..." [ngClass]="{'is-invalid': isInvalid('descripcion_evento')}"></textarea>
+                                    <div class="invalid-feedback">La descripción es obligatoria.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha y hora de inicio<span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" formControlName="fecha_inicio_evento" [ngClass]="{'is-invalid': isInvalid('fecha_inicio_evento') || form.errors?.['rangoFechas']}">
+                                    <div class="invalid-feedback">Fecha/hora válida requerida.</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha y hora de fin<span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" formControlName="fecha_fin_evento" [ngClass]="{'is-invalid': isInvalid('fecha_fin_evento') || form.errors?.['rangoFechas']}">
+                                    <div class="invalid-feedback">Debe ser posterior al inicio.</div>
+                                </div>
+
+                                <!-- Plan global eliminado: ahora se selecciona por proveedor -->
+
+                                <!-- SPOTIFY PLAYLIST -->
+                                <div class="col-md-6">
+                                    <label class="form-label d-block">Opciones</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="hay_playlist_evento" id="hayPlaylist">
+                                        <label class="form-check-label" for="hayPlaylist">
+      ¿Incluir lista de reproducción?
+    </label>
+                                    </div>
+                                    <input *ngIf="form.get('hay_playlist_evento')?.value" class="form-control mt-2" formControlName="playlist_evento" placeholder="Enlace de la playlist de Spotify" (input)="actualizarSpotifyEmbed()">
+                                    <div *ngIf="spotifyEmbedUrl && form.get('hay_playlist_evento')?.value" class="mt-2">
+                                        <iframe [src]="spotifyEmbedUrl" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================== PROVEEDORES =================== -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Proveedores del Evento</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="text-muted mb-2">Selecciona la categoría de proveedor que deseas agregar:</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button *ngFor="let tipo of tiposProveedor" type="button" class="btn btn-outline-primary btn-sm" (click)="agregarProveedor(tipo)" [disabled]="isAgregarDisabled(tipo)" [class.disabled]="isAgregarDisabled(tipo)" [attr.aria-disabled]="isAgregarDisabled(tipo)">
+                                        <i class="bi bi-plus-circle"></i> {{ tipo.nombre }}
+                                    </button>
+                                </div>
+                            </div>
+                            <hr>
+                            <div *ngIf="proveedoresArray.length === 0" class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> No has agregado proveedores aún. Haz clic en las categorías de arriba para comenzar.
+                            </div>
+                            <div formArrayName="proveedoresSeleccionados">
+                                <div *ngFor="let provGrp of proveedoresArray.controls; let i = index" [formGroupName]="i" class="card mb-3 border-start border-primary border-3">
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="bi bi-tag me-2"></i> {{ provGrp.get('categoria')?.value }}
+                                                    </h6>
+                                                    <div *ngIf="proveedorDescripcion[i]" class="text-muted small">{{ proveedorDescripcion[i] }}</div>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarProveedor(i)">
+                                                        <i class="bi bi-trash"></i> Quitar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Plan<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="id_plan" (change)="onProveedorPlanChange(i)" [ngClass]="{'is-invalid': provGrp.get('id_plan')?.invalid && provGrp.get('id_plan')?.touched}">
+                                                    <option value="" disabled selected>Selecciona un plan</option>
+                                                    <option *ngFor="let plan of planesVisibles" [value]="plan.id_plan">{{ plan.nombre_plan }}</option>
+                                                </select>
+                                                <div class="invalid-feedback">Selecciona un plan para este proveedor.</div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Proveedor<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="id_proveedor" [disabled]="!provGrp.get('id_plan')?.value" [ngClass]="{'is-invalid': provGrp.get('id_proveedor')?.invalid && provGrp.get('id_proveedor')?.touched}">
+                                                       <option value="" disabled selected>Selecciona un proveedor</option>
+                                                       <option *ngFor="let prov of getProveedoresPorCategoriaYPlan(provGrp.get('categoria')?.value, i)" [value]="prov.id_proveedor">
+                                                           {{ prov.nombre }} - ${{ prov.precio_base | number:'1.2-2' }}
+                                                       </option>
+                                                </select>
+                                                <div class="invalid-feedback">Debes seleccionar un proveedor.</div>
+                                            </div>
+                                            <div class="col-md-6" *ngIf="!provGrp.get('id_tipo')?.value">
+                                                <label class="form-label">Tipo<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="id_tipo" (change)="onTipoSeleccionado(i)" [ngClass]="{'is-invalid': provGrp.get('id_tipo')?.invalid && provGrp.get('id_tipo')?.touched}">
+                                                       <option value="" disabled selected>Selecciona un tipo</option>
+                                                       <option *ngFor="let tipo of tiposProveedor" [value]="tipo.id_tipo">{{ tipo.nombre }}</option>
+                                                </select>
+                                                <div class="invalid-feedback">El tipo es obligatorio.</div>
+                                            </div>
+
+                                            <!-- Características NO editables del proveedor -->
+                                            <div class="col-12" *ngIf="proveedorCaracteristicas[i]?.length">
+                                                <div class="alert alert-secondary py-2">
+                                                    <strong>Características del proveedor:</strong>
+                                                    <ul class="mb-0">
+                                                        <li *ngFor="let car of proveedorCaracteristicas[i]">
+                                                            <!-- Detectar PDF/URL por nombre -->
+                                                            <ng-container *ngIf="esCaracteristicaFileUrl(car); else normalCaracteristica">
+                                                                <span>{{ car.nombre }}:</span>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary ms-2" (click)="abrirPdfCaracteristica(car.valor, car.nombre)">
+                                                                    <i class="bi bi-eye me-1"></i>Ver documento
+                                                                </button>
+                                                            </ng-container>
+                                                            <ng-template #normalCaracteristica>
+                                                                <span>{{ car.nombre }}: {{ car.valor }}</span>
+                                                            </ng-template>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <!-- Características que el usuario debe llenar para SU reserva -->
+                                            <div class="col-12" *ngIf="proveedorCaracteristicasEditable[i]?.length">
+                                                <div class="mb-2">
+                                                    <strong>Opciones para tu reserva:</strong>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4 mb-2" *ngFor="let car of proveedorCaracteristicasEditable[i]">
+                                                        <label>{{ car.nombre }}</label>
+
+                                                        <!-- Si es PDF/URL y tiene valor del proveedor, solo mostrar visor -->
+                                                        <ng-container *ngIf="esCaracteristicaFileUrl(car) && car.valorProveedor; else inputEditable">
+                                                            <div>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="abrirPdfCaracteristica(car.valorProveedor.valor || car.valorProveedor.valor_texto || car.valorProveedor, car.nombre)">
+                                                                    <i class="bi bi-eye me-1"></i>Ver documento
+                                                                </button>
+                                                            </div>
+                                                        </ng-container>
+
+                                                        <!-- Inputs editables normales -->
+                                                        <ng-template #inputEditable>
+                                                            <input *ngIf="car.tipo === 'texto'" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+
+                                                            <input *ngIf="car.tipo === 'numero' || car.tipo === 'number'" type="number" step="any" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+
+                                                            <div *ngIf="car.tipo === 'booleano' || car.tipo === 'boolean'" class="form-check">
+                                                                <input class="form-check-input" type="checkbox" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" id="car_bool_{{i}}_{{car.id_caracteristica}}" [disabled]="car.obligatorio">
+                                                                <label class="form-check-label" [for]="'car_bool_' + i + '_' + car.id_caracteristica">Sí</label>
+                                                            </div>
+
+                                                            <select *ngIf="car.tipo === 'opcion'" class="form-select" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+                                                                <option *ngFor="let op of car.opciones" [value]="op">{{ op }}</option>
+                                                            </select>
+
+                                                            <textarea *ngIf="car.tipo === 'json'" class="form-control" rows="3" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio"></textarea>
+
+                                                            <!-- fallback -->
+                                                            <input *ngIf="!['texto','numero','number','booleano','boolean','opcion','json'].includes(car.tipo)" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica"
+                                                                [disabled]="car.obligatorio">
+                                                        </ng-template>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Imágenes del proveedor (se muestra para cualquier tipo) -->
+                                            <div class="col-12">
+                                                <div class="mb-2"><strong>Imágenes del proveedor:</strong></div>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <ng-container *ngIf="proveedorImagenes[i] && proveedorImagenes[i].length > 0">
+                                                        <img *ngFor="let imgObj of proveedorImagenes[i]" [src]="imgObj.url" [attr.data-img-id]="imgObj.id" class="img-thumbnail" style="max-width: 180px; height:120px; object-fit:cover;">
+                                                    </ng-container>
+                                                    <ng-container *ngIf="!proveedorImagenes[i] || proveedorImagenes[i].length === 0">
+                                                        <div class="d-flex align-items-center justify-content-center border rounded" style="width:180px; height:120px; background:#f8f9fa; color:#6c757d">Sin imágenes</div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4" *ngIf="!provGrp.get('id_tipo')?.value">
+                                                <label class="form-label">Fecha inicio</label>
+                                                <input type="datetime-local" class="form-control" formControlName="fecha_inicio_evento">
+                                            </div>
+                                            <div class="col-md-4" *ngIf="!provGrp.get('id_tipo')?.value">
+                                                <label class="form-label">Fecha fin</label>
+                                                <input type="datetime-local" class="form-control" formControlName="fecha_fin_evento">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================== INVITADOS =================== -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="bi bi-people me-2"></i>Lista de Invitados</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary">{{ totalPersonasInvitadas }} personas</span>
+                                    <!-- Botón Excel: Descargar plantilla -->
+                                    <button type="button" class="btn btn-outline-success btn-sm" (click)="descargarPlantillaExcel()">
+                                        <i class="bi bi-file-earmark-excel"></i> Plantilla
+                                    </button>
+                                    <!-- Botón Excel: Importar -->
+                                    <label class="btn btn-outline-primary btn-sm mb-0">
+                                        <i class="bi bi-upload"></i> Importar
+                                        <input type="file" accept=".xlsx,.xls" (change)="onImportarExcel($event)" hidden>
+                                    </label>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="agregarInvitado()">
+                                        <i class="bi bi-person-plus me-1"></i> Agregar
+                                    </button>
+                                    <!-- ...dentro de la sección de invitados... -->
+                                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="quitarTodosInvitados()">
+  <i class="bi bi-trash"></i> Quitar todos
+</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="toggleInvitadosDrawer()" title="Mostrar/ocultar invitados">
+                                        <i class="bi" [ngClass]="{ 'bi-chevron-down': mostrarInvitadosDrawer(), 'bi-chevron-up': !mostrarInvitadosDrawer() }"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div *ngIf="invitadosArray.length === 0" class="alert alert-warning mb-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>No hay invitados agregados.</strong> Agrega al menos un invitado para calcular el costo de catering.
+                            </div>
+                            <div class="invited-drawer" [class.collapsed]="!mostrarInvitadosDrawer()" *ngIf="invitadosArray.length > 0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nombre *</th>
+                                                <th>Email</th>
+                                                <th>Teléfono</th>
+                                                <th style="width: 110px;">Acompañantes</th>
+                                                <th>Notas</th>
+                                                <th style="width: 50px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody formArrayName="invitados">
+                                            <tr *ngFor="let invGrp of invitadosArray.controls; let i = index" [formGroupName]="i">
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" formControlName="nombre" placeholder="Nombre completo" [ngClass]="{'is-invalid': invGrp.get('nombre')?.invalid && invGrp.get('nombre')?.touched}">
+                                                </td>
+                                                <td>
+                                                    <input type="email" class="form-control form-control-sm" formControlName="email" placeholder="email@ejemplo.com">
+                                                </td>
+                                                <td>
+                                                    <input type="tel" class="form-control form-control-sm" formControlName="telefono" placeholder="0999999999">
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control form-control-sm text-center" formControlName="acompanantes" min="0" max="10" title="Número de acompañantes adicionales">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" formControlName="notas" placeholder="Dieta especial, alergias, etc.">
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="eliminarInvitado(i)" title="Eliminar invitado">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- =================== RESUMEN =================== -->
+                    <div class="card mb-4 bg-light">
+                        <div class="card-body">
+                            <h5 class="mb-3"><i class="bi bi-cash-coin me-2"></i>Resumen de Costos</h5>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2 d-flex justify-content-between">
+                                            <span class="text-muted">Base por proveedor (25 x {{ proveedoresArray.length }}):</span>
+                                            <strong>${{ 25 * proveedoresArray.length | number:'1.2-2' }}</strong>
+                                        </li>
+                                        <li class="mt-2 pt-2 border-top d-flex justify-content-between">
+                                            <span class="text-muted">Proveedores seleccionados:</span>
+                                            <strong>{{ proveedoresArray.length }}</strong>
+                                        </li>
+                                        <li class="mt-3 pt-2 border-top d-flex justify-content-between">
+                                            <span class="text-muted">Subtotal:</span>
+                                            <strong>${{ subtotal | number:'1.2-2' }}</strong>
+                                        </li>
+                                        <li class="mb-1 d-flex justify-content-between">
+                                            <span class="text-muted">IVA (15%):</span>
+                                            <strong class="text-warning">${{ iva | number:'1.2-2' }}</strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4 text-md-end d-flex flex-column justify-content-center">
+                                    <div class="h3 text-primary mb-0">
+                                        Total: ${{ totalEstimado | number:'1.2-2' }}
+                                    </div>
+                                    <small class="text-muted">Incluye IVA (15%)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================== ACCIONES =================== -->
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                    </div>
+
+                    <div class="d-grid d-md-flex justify-content-md-end gap-2">
+                        <button type="reset" class="btn btn-outline-secondary" [disabled]="submitting()">
+                            <i class="bi bi-x-circle me-1"></i> Limpiar
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg" (click)="abrirModalPago()" [disabled]="form.invalid || submitting()">
+                            <i class="bi bi-credit-card me-1"></i>
+                            <span *ngIf="!submitting()">Proceder al Pago</span>
+                            <span *ngIf="submitting()">
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                Procesando...
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="text-end mt-2" *ngIf="form.invalid && !submitting()">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para continuar
+                        </small>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pago -->
+<app-pago [visible]="mostrarPago()" [total]="totalEstimado" [subtotal]="subtotal" [iva]="iva" [nombreEvento]="form.get('nombre_evento')?.value" (pagoCompletado)="onPagoCompletado($event)" (pagoCancelado)="onPagoCancelado()">
+</app-pago>
+
+<!-- Modal PDF Viewer -->
+<app-pdf-viewer-modal [isVisible]="showPdfModal()" [pdfUrl]="pdfModalUrl()" [fileName]="pdfModalFileName()" (close)="cerrarPdfModal()"></app-pdf-viewer-modal>
