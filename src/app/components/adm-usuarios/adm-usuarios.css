@@ -1,0 +1,95 @@
+/* Estilos heredados de roles-api.css */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+.form-control,
+.form-select {
+    background-color: #fff;
+    border-color: #ccc;
+    color: var(--color-text);
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.shell {
+    background: #e4e7e4;
+    border: 1px solid #dee2e6;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(114, 98, 108, 0.521);
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+.spinner-border-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-width: 0.1em;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+.bg-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.bg-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.bg-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-bg);
+    border-radius: 8px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: color-mix(in srgb, var(--bs-primary) 5%, white 95%);
+}
+
+th {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    padding: 1rem;
+    font-size: 1rem;
+    text-align: left;
+}
+
+td {
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    padding: 1rem;
+    text-align: left;
+    font-size: 1rem;
+}

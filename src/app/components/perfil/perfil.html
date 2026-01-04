@@ -1,0 +1,470 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Paleta Elegante</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="perfil.css">
+</head>
+
+<body>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container-xxl py-5 mt-1">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+
+                <!-- HEADER: TÍTULO Y DESCRIPCIÓN -->
+                <header class="hero text-center">
+                    <h1>Configuración de la Cuenta</h1>
+                    <p class="subtitle">
+                        Administra tu información personal y seguridad desde este panel.
+                    </p>
+                </header>
+
+                <!-- TABS: Navegación entre las secciones de perfil y seguridad -->
+                <ul class="nav nav-tabs justify-content-center mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile" type="button">
+                            <i class="bi bi-person me-2"></i>Perfil
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#security" type="button">
+                            <i class="bi bi-shield-lock me-2"></i>Seguridad
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-eventos" type="button">
+                            <i class="bi bi-calendar-check me-2"></i>Mis Eventos
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- CONTENIDO DE LAS TABS -->
+                <div class="tab-content">
+                    <!-- SECCIÓN DE PERFIL -->
+                    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                        <!-- AGREGAR AQUÍ LA CLASE .SHELL -->
+                        <div class="shell shadow-soft p-4 p-lg-0">
+                            <div class="shell card shadow-sm border-0">
+                                <div class="card-body p-4">
+                                    <!-- TÍTULO DE LA SECCIÓN DE PERFIL -->
+                                    <h2 class="card-title mb-4">Información Personal</h2>
+
+                                    <!-- FORMULARIO DE DATOS DEL PERFIL -->
+                                    <form [formGroup]="formPerfil" (ngSubmit)="onSubmitPerfil()" novalidate>
+                                        <div class="row mb-3">
+
+                                            <!-- Campo: Nombre -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Nombre<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" formControlName="nombre" placeholder="Tu nombre" [class.is-invalid]="fPerfil['nombre'].touched && fPerfil['nombre'].invalid" />
+                                                <!-- Errores de validación del nombre -->
+                                                <div *ngIf="fPerfil['nombre'].touched && fPerfil['nombre'].invalid" class="invalid-feedback">
+                                                    <div *ngIf="fPerfil['nombre'].errors?.['required']">Campo obligatorio.</div>
+                                                    <div *ngIf="fPerfil['nombre'].errors?.['minlength']">Mínimo 3 caracteres.</div>
+                                                    <div *ngIf="fPerfil['nombre'].errors?.['pattern']">Solo letras y espacios.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <!-- Campo: Correo electrónico -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Correo electrónico<span class="text-danger">*</span></label>
+                                                <input type="email" class="form-control" formControlName="correo" placeholder="correo@ejemplo.com" [class.is-invalid]="fPerfil['correo'].touched && fPerfil['correo'].invalid" />
+                                                <!-- Errores de validación del correo -->
+                                                <div *ngIf="fPerfil['correo'].touched && fPerfil['correo'].invalid" class="invalid-feedback">
+                                                    <div *ngIf="fPerfil['correo'].errors?.['required']">Campo obligatorio.</div>
+                                                    <div *ngIf="fPerfil['correo'].errors?.['email']">Formato inválido.</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Campo: Teléfono -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Teléfono<span class="text-danger">*</span></label>
+                                                <input type="tel" class="form-control" formControlName="telefono" placeholder="10 dígitos" [class.is-invalid]="fPerfil['telefono'].touched && fPerfil['telefono'].invalid" />
+                                                <!-- Errores de validación del teléfono -->
+                                                <div *ngIf="fPerfil['telefono'].touched && fPerfil['telefono'].invalid" class="invalid-feedback">
+                                                    <div *ngIf="fPerfil['telefono'].errors?.['required']">Campo obligatorio.</div>
+                                                    <div *ngIf="fPerfil['telefono'].errors?.['pattern']">Debe tener 10 números.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <!-- Campo: Fecha de nacimiento -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control" formControlName="fecha_nacimiento" [class.is-invalid]="fPerfil['fecha_nacimiento'].touched && fPerfil['fecha_nacimiento'].invalid" />
+                                                <!-- Error de fecha no válida -->
+                                                <div *ngIf="fPerfil['fecha_nacimiento'].errors?.['fechaInvalida']" class="invalid-feedback">
+                                                    La fecha no puede ser futura.
+                                                </div>
+                                                <div *ngIf="fPerfil['fecha_nacimiento'].errors?.['required']" class="invalid-feedback">Campo obligatorio.</div>
+                                            </div>
+
+                                            <!-- Campo: Género -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Género<span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="genero" [class.is-invalid]="fPerfil['genero'].touched && fPerfil['genero'].invalid">
+                                                    <option value="">Seleccione</option>
+                                                    <option value="M">Masculino</option>
+                                                    <option value="F">Femenino</option>
+                                                    <option value="Otros">Otros</option>
+                                                </select>
+                                                <!-- Error de selección de género -->
+                                                <div *ngIf="fPerfil['genero'].errors?.['required']" class="invalid-feedback">Campo obligatorio.</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <!-- Campo: Foto de perfil (opcional) -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Foto de perfil (opcional)</label>
+                                                <input type="file" class="form-control" (change)="onFileSelected($event)" />
+                                            </div>
+
+                                            <!-- Vista previa de la foto de perfil -->
+                                            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                                                <div *ngIf="fotoPreview" class="text-center">
+                                                    <img [src]="fotoPreview" (error)="onImgError()" alt="Vista previa" class="rounded-circle shadow-sm" width="120" height="120" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <!-- Mensaje informativo -->
+                                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                                            <i class="bi bi-info-circle-fill me-2"></i>
+                                            <div>
+                                                <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                                            </div>
+                                        </div>
+
+                                        <!-- Botones de acción -->
+                                        <div class="d-flex justify-content-end gap-2 mt-4">
+                                            <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary" [disabled]="formPerfil.invalid">
+                                                <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                                            </button>
+                                        </div>
+
+                                        <div class="text-end mt-2" *ngIf="formPerfil.invalid">
+                                            <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón.
+                                          </small>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DE SEGURIDAD -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <!-- AGREGAR AQUÍ LA CLASE .SHELL -->
+                        <div class="shell shadow-soft p-4 p-lg-5">
+                            <div class="shell card shadow-sm border-0">
+                                <div class="card-body p-4">
+                                    <!-- TÍTULO DE SEGURIDAD -->
+                                    <h2 class="card-title mb-4">Seguridad y Contraseña</h2>
+
+                                    <!-- Verificación de email -->
+                                    <div class="verification-section mb-4 p-3 border rounded">
+                                        <h5><i class="bi bi-envelope-check me-2"></i>Verificación de Email</h5>
+
+                                        <!-- Estado del email -->
+                                        <div *ngIf="currentUser?.email_verified" class="alert alert-success d-flex align-items-center my-2">
+                                            <i class="bi bi-check-circle-fill me-2"></i>
+                                            <strong>Email verificado</strong>
+                                        </div>
+
+                                        <div *ngIf="!currentUser?.email_verified" class="alert alert-warning d-flex align-items-center my-2">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <strong>Email no verificado</strong>
+                                        </div>
+
+                                        <!-- Botón -->
+                                        <button type="button" class="btn btn-outline-primary" [disabled]="currentUser?.email_verified || verificacionEnvio || cooldownSeconds > 0" (click)="onSendVerificationEmail()">
+                                                                                    <span *ngIf="!verificacionEnvio && cooldownSeconds === 0">
+                                                                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                                                                        {{ currentUser?.email_verified ? 'Verificado' : 'Reenviar correo de verificación' }}
+                                                                                    </span>
+                                                                                    <span *ngIf="verificacionEnvio">
+                                                                                        <i class="bi bi-hourglass-split me-1"></i>Enviando...
+                                                                                    </span>
+                                                                                    <span *ngIf="cooldownSeconds > 0 && !verificacionEnvio">
+                                                                                        <i class="bi bi-clock me-1"></i>Espera {{ formatCooldown(cooldownSeconds) }}
+                                                                                    </span>
+                                                                                </button>
+
+                                        <small class="text-muted d-block mt-2" *ngIf="mensajeVerificacion">
+                                            <i class="bi bi-info-circle me-1"></i>{{ mensajeVerificacion }}
+                                        </small>
+                                    </div>
+
+                                    <!-- FORMULARIO DE SEGURIDAD -->
+                                    <form [formGroup]="formSeguridad" (ngSubmit)="onSubmitSeguridad()" novalidate>
+                                        <!-- Campo: Contraseña actual -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Contraseña actual<span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" formControlName="actual" [class.is-invalid]="fSeguridad['actual'].touched && fSeguridad['actual'].invalid" />
+                                            <!-- Error de contraseña actual -->
+                                            <div *ngIf="fSeguridad['actual'].touched && fSeguridad['actual'].invalid" class="invalid-feedback">
+                                                La contraseña actual es obligatoria.
+                                            </div>
+                                        </div>
+
+                                        <!-- Campo: Nueva contraseña -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Nueva contraseña<span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" formControlName="nueva" [class.is-invalid]="fSeguridad['nueva'].touched && fSeguridad['nueva'].invalid" />
+                                            <!-- Error de nueva contraseña -->
+                                            <div *ngIf="fSeguridad['nueva'].touched && fSeguridad['nueva'].invalid" class="invalid-feedback">
+                                                <div *ngIf="fSeguridad['nueva'].errors?.['required']">La nueva contraseña es obligatoria.</div>
+                                                <div *ngIf="fSeguridad['nueva'].errors?.['pattern']">Debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Campo: Confirmar nueva contraseña -->
+                                        <div class="mb-4">
+                                            <label class="form-label">Confirmar nueva contraseña<span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" formControlName="confirmar" [class.is-invalid]="fSeguridad['confirmar'].touched && (fSeguridad['confirmar'].invalid || formSeguridad.errors?.['noCoincide'])" />
+                                            <!-- Error de confirmación de contraseña -->
+                                            <div *ngIf="fSeguridad['confirmar'].touched && fSeguridad['confirmar'].errors?.['required']" class="invalid-feedback">
+                                                La confirmación es obligatoria.
+                                            </div>
+                                            <div *ngIf="formSeguridad.errors?.['noCoincide']" class="invalid-feedback">
+                                                Las contraseñas no coinciden.
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <!-- Mensaje informativo -->
+                                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                                            <i class="bi bi-info-circle-fill me-2"></i>
+                                            <div>
+                                                <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                                            </div>
+                                        </div>
+
+                                        <!-- Mensajes de estado -->
+                                        <div *ngIf="cambioPasswordError" class="alert alert-danger d-flex align-items-center" role="alert">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <div>{{ cambioPasswordError }}</div>
+                                        </div>
+                                        <div *ngIf="cambioPasswordExito" class="alert alert-success d-flex align-items-center" role="alert">
+                                            <i class="bi bi-check-circle-fill me-2"></i>
+                                            <div>{{ cambioPasswordExito }}</div>
+                                        </div>
+
+                                        <!-- Botón de actualización de contraseña -->
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary" [disabled]="formSeguridad.invalid || cambiandoPassword">
+                                                <i class="bi bi-shield-check me-1"></i>
+                                                <span *ngIf="!cambiandoPassword">Actualizar contraseña</span>
+                                                <span *ngIf="cambiandoPassword">Actualizando...</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="text-end mt-2" *ngIf="formSeguridad.invalid">
+                                            <small class="text-muted">
+                                                <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón.
+                                            </small>
+                                        </div>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DE MIS EVENTOS -->
+                    <div class="tab-pane fade" id="mis-eventos" role="tabpanel">
+                        <div class="shell shadow-soft p-4 p-lg-0">
+
+                            <!-- Loading -->
+                            <div *ngIf="cargandoEventos" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-3">Cargando eventos...</p>
+                            </div>
+
+                            <!-- Sin eventos -->
+                            <div *ngIf="!cargandoEventos && misEventosFuturos.length === 0 && misEventosPasados.length === 0" class="text-center py-5">
+                                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                                <p class="mt-3 text-muted">No tienes eventos aún</p>
+                            </div>
+
+                            <div *ngIf="!cargandoEventos">
+                                <!-- EVENTOS FUTUROS -->
+                                <div *ngIf="misEventosFuturos.length > 0" class="card shadow-sm border-0 mb-4">
+                                    <div class="card-body p-4">
+                                        <h3 class="card-title text-center mb-4">
+                                            <i class="bi bi-calendar-plus me-2"></i>Eventos Próximos
+                                        </h3>
+                                        <div class="row g-3">
+                                            <div *ngFor="let evento of misEventosFuturos" class="col-12">
+                                                <div class="card border border-primary">
+                                                    <div class="card-body">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8">
+                                                                <h5 class="card-title mb-2">
+                                                                    <span class="badge bg-primary me-2">Próximo</span> {{ evento.nombre_evento }}
+                                                                </h5>
+                                                                <p class="card-text text-muted small mb-2">
+                                                                    <i class="bi bi-calendar3 me-1"></i> {{ evento.fecha_inicio_evento | date:'dd/MM/yyyy' }}
+                                                                    <i class="bi bi-clock ms-2 me-1"></i> {{ evento.fecha_inicio_evento | date:'HH:mm' }}
+                                                                </p>
+                                                                <p class="card-text small" *ngIf="evento.descripcion_evento">
+                                                                    {{ evento.descripcion_evento.substring(0, 100) }}...
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-4 text-md-end">
+                                                                <span class="text-muted small">
+                                                                    <i class="bi bi-info-circle me-1"></i>Evento activo
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- EVENTOS PASADOS -->
+                                <div *ngIf="misEventosPasados.length > 0" class="card shadow-sm border-0">
+                                    <div class="card-body p-4">
+                                        <h3 class="card-title text-center mb-4">
+                                            <i class="bi bi-calendar-check me-2"></i>Eventos Pasados
+                                        </h3>
+                                        <div class="row g-3">
+                                            <div *ngFor="let evento of misEventosPasados" class="col-12">
+                                                <div class="card border">
+                                                    <div class="card-body">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-8">
+                                                                <h5 class="card-title mb-2">{{ evento.nombre_evento }}</h5>
+                                                                <p class="card-text text-muted small mb-2">
+                                                                    <i class="bi bi-calendar3 me-1"></i> {{ evento.fecha_inicio_evento | date:'dd/MM/yyyy' }}
+                                                                    <i class="bi bi-clock ms-2 me-1"></i> {{ evento.fecha_inicio_evento | date:'HH:mm' }}
+                                                                </p>
+                                                                <p class="card-text small" *ngIf="evento.descripcion_evento">
+                                                                    {{ evento.descripcion_evento.substring(0, 100) }}...
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-4 text-md-end">
+                                                                <button *ngIf="!yaResenado(evento)" class="btn btn-outline-primary btn-sm" (click)="abrirModalResenia(evento)">
+                                                                    <i class="bi bi-star me-1"></i>Dejar Reseña
+                                                                </button>
+                                                                <span *ngIf="yaResenado(evento)" class="badge bg-success">
+                                                                    <i class="bi bi-check-circle me-1"></i>Reseña enviada
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fin de los contenidos de las tabs -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL DE RESEÑA -->
+    <div class="modal fade" [class.show]="mostrandoModalResenia" [style.display]="mostrandoModalResenia ? 'block' : 'none'" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-star-fill me-2 text-warning"></i> Dejar Reseña
+                    </h5>
+                    <button type="button" class="btn-close" (click)="cerrarModalResenia()"></button>
+                </div>
+                <div class="modal-body">
+                    <div *ngIf="eventoSeleccionado" class="mb-3">
+                        <p class="fw-bold mb-1">{{ eventoSeleccionado.nombre_evento }}</p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-calendar3 me-1"></i> {{ eventoSeleccionado.fecha_inicio_evento | date:'dd/MM/yyyy' }}
+                        </p>
+                    </div>
+
+                    <!-- Mensajes de éxito/error -->
+                    <div *ngIf="mensajeReseniaExito" class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>{{ mensajeReseniaExito }}
+                    </div>
+                    <div *ngIf="mensajeReseniaError" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ mensajeReseniaError }}
+                    </div>
+
+                    <form [formGroup]="formResenia" (ngSubmit)="enviarResenia()">
+                        <!-- Calificación -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Calificación</label>
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" formControlName="calificacion" value="1" id="star1">
+                                    <label class="btn btn-outline-warning" for="star1">1 ★</label>
+
+                                    <input type="radio" class="btn-check" formControlName="calificacion" value="2" id="star2">
+                                    <label class="btn btn-outline-warning" for="star2">2 ★</label>
+
+                                    <input type="radio" class="btn-check" formControlName="calificacion" value="3" id="star3">
+                                    <label class="btn btn-outline-warning" for="star3">3 ★</label>
+
+                                    <input type="radio" class="btn-check" formControlName="calificacion" value="4" id="star4">
+                                    <label class="btn btn-outline-warning" for="star4">4 ★</label>
+
+                                    <input type="radio" class="btn-check" formControlName="calificacion" value="5" id="star5" checked>
+                                    <label class="btn btn-outline-warning" for="star5">5 ★</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comentario -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                            Comentario <span class="text-muted">(opcional)</span>
+                        </label>
+                            <textarea class="form-control" formControlName="comentario" rows="4" placeholder="Cuéntanos sobre tu experiencia..." maxlength="500"></textarea>
+                            <small class="text-muted">
+                            {{ formResenia.get('comentario')?.value?.length || 0 }} / 500 caracteres
+                        </small>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" (click)="cerrarModalResenia()" [disabled]="enviandoResenia">
+                            Cancelar
+                        </button>
+                            <button type="submit" class="btn btn-primary" [disabled]="formResenia.invalid || enviandoResenia">
+                            <span *ngIf="!enviandoResenia">
+                                <i class="bi bi-send me-1"></i>Enviar Reseña
+                            </span>
+                            <span *ngIf="enviandoResenia">
+                                <span class="spinner-border spinner-border-sm me-1"></span>Enviando...
+                            </span>
+                        </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade" [class.show]="mostrandoModalResenia" *ngIf="mostrandoModalResenia"></div>
+
+</body>

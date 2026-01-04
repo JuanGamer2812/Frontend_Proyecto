@@ -1,0 +1,17 @@
+.card {
+    border: 1px solid #e5e7eb;
+}
+
+.badge.bg-secondary {
+    letter-spacing: 0.05em;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.table-responsive {
+    border: 1px solid #eaecef;
+    border-radius: 0.35rem;
+}

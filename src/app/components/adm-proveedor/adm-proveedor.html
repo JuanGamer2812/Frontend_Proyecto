@@ -1,0 +1,278 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Proveedores</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="adm-proveedor.css">
+</head>
+<br>
+
+<body>
+
+    <div class="shell container-xxl py-1">
+        <!-- Shell contenedor -->
+        <div class="shadow-soft p-4 p-lg-5">
+            <div class="card-body">
+
+                <!-- Título principal -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                    <h1>Administrar Proveedores</h1>
+                </div>
+
+                <!-- Pestañas de navegación -->
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" [class.active]="vistaActiva() === 'proveedores'" (click)="cambiarVista('proveedores')" type="button">
+                            Proveedores Registrados
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" [class.active]="vistaActiva() === 'postulaciones'" (click)="cambiarVista('postulaciones')" type="button">
+                            Postulaciones (Trabaja con Nosotros)
+                            @if (postulaciones().length > 0) {
+                                <span class="badge bg-primary ms-1">{{ postulaciones().length }}</span>
+                            }
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- =================== VISTA PROVEEDORES =================== -->
+                @if (vistaActiva() === 'proveedores') {
+                <!-- Selector de categoría -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="btn-group" role="group" aria-label="Categorías">
+                        @for (c of categorias; track c) {
+                        <button class="btn" [class.btn-primary]="categoria()===c" [class.btn-outline-primary]="categoria()!==c" (click)="cambiarCategoria(c)">
+                                {{ c }}
+                            </button> }
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <button class="btn btn-success" type="button" routerLink="/insertar-proveedor">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Nuevo Proveedor
+                        </button>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="cargarProveedores()" [disabled]="loadingProveedores()">
+                            @if (loadingProveedores()) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Recargar
+                        </button>
+                </div>
+
+                <!-- Mensaje de carga -->
+                @if (loadingProveedores()) {
+                <div class="alert alert-info">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Cargando proveedores...
+                </div>
+                }
+
+                <!-- Mensaje de error -->
+                @if (errorProveedores()) {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ errorProveedores() }}
+                    <button class="btn btn-sm btn-outline-danger ms-2" (click)="cargarProveedores()">Reintentar</button>
+                </div>
+                }
+
+                <!-- Aviso si no hay proveedores -->
+                @if (!loadingProveedores() && listado().length === 0) {
+                <div class="alert alert-warning">
+                    <strong>No hay proveedores en la categoría {{ categoria() }}</strong>
+                    <br>
+                    <small class="text-muted">
+                            Total de proveedores cargados: <strong>{{ proveedores().length }}</strong>
+                        </small>
+                    <br><br>
+                    <button class="btn btn-sm btn-primary" (click)="cargarProveedores()">
+                            Recargar Proveedores
+                        </button>
+                </div>
+                }
+
+                <!-- TABLA DE PROVEEDORES -->
+                @if (!loadingProveedores() && listado().length > 0) {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Precio Base</th>
+                                <th>Estado</th>
+                                <th>Estado Aprobación</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (p of listado(); track getId(p)) {
+                            <tr>
+                                <td>{{ p.id_proveedor }}</td>
+                                <td><strong>{{ p.nombre }}</strong></td>
+                                <td>{{ formatCurrency(p.precio_base) }}</td>
+                                <td>
+                                    <button class="btn btn-sm" [class.btn-success]="p.estado === true" [class.btn-danger]="p.estado === false" (click)="cambiarEstado(p)" [disabled]="isProcesando(p.id_proveedor)" title="Cambiar estado">
+                                        @if (isProcesando(p.id_proveedor)) {
+                                            <span class="spinner-border spinner-border-sm"></span>
+                                        } @else {
+                                            {{ p.estado ? 'Activo' : 'Inactivo' }}
+                                        }
+                                    </button>
+                                </td>
+                                <td>
+                                    <span class="badge" [ngClass]="getEstadoAprobacionClase(p.estado_aprobacion)">
+                                        {{ getEstadoAprobacionTexto(p.estado_aprobacion) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small text-truncate" style="max-width: 200px;" [title]="p.descripcion || ''">
+                                        {{ trunc(p.descripcion, 40) }}
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-info">{{ p.tipo_nombre || p.id_tipo }}</span></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <!-- Botones de aprobación (solo si está pendiente) -->
+                                        @if (p.estado_aprobacion === 'pendiente') {
+                                        <button class="btn btn-success" (click)="aprobarProveedor(p)" [disabled]="isProcesando(p.id_proveedor)" title="Aprobar">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        <button class="btn btn-danger" (click)="rechazarProveedor(p)" [disabled]="isProcesando(p.id_proveedor)" title="Rechazar">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button> }
+
+                                        <!-- Botón de suspender (solo si está aprobado) -->
+                                        @if (p.estado_aprobacion === 'aprobado') {
+                                        <button class="btn btn-warning" (click)="suspenderProveedor(p)" [disabled]="isProcesando(p.id_proveedor)" title="Suspender">
+                                                <i class="bi bi-pause-circle"></i>
+                                            </button> }
+
+
+                                        <!-- Botón de desuspender (solo si está suspendido) -->
+                                        @if (p.estado_aprobacion === 'suspendido') {
+                                        <button class="btn btn-success" (click)="desuspenderProveedor(p)" [disabled]="isProcesando(p.id_proveedor)" title="Desuspender y aprobar">
+                                                <i class="bi bi-play-circle"></i>
+                                            </button> }
+                                        <!-- Botón ver -->
+                                        <button class="btn btn-info" (click)="verDetalles(getId(p))" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                        <!-- Botón editar -->
+                                        <button class="btn btn-primary" (click)="editarProveedor(getId(p))" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        <!-- Botón eliminar -->
+                                        <button class="btn btn-danger" (click)="eliminarProveedor(getId(p))" [disabled]="isProcesando(p.id_proveedor)" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Info de resultados -->
+                <div class="alert alert-info mt-3">
+                    <small>
+                            Proveedores en <strong>{{ categoria() }}</strong>: <strong>{{ listado().length }}</strong>
+                        </small>
+                </div>
+                } }
+
+                <!-- =================== VISTA POSTULACIONES =================== -->
+                @if (vistaActiva() === 'postulaciones') {
+                <!-- Botones de acción -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="cargarPostulaciones()" [disabled]="loadingPostulaciones()">
+                        @if (loadingPostulaciones()) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Recargar
+                    </button>
+                </div>
+
+                <!-- Mensaje de carga -->
+                @if (loadingPostulaciones()) {
+                <div class="alert alert-info">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Cargando postulaciones...
+                </div>
+                }
+
+                <!-- Mensaje de error -->
+                @if (errorPostulaciones()) {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ errorPostulaciones() }}
+                    <button class="btn btn-sm btn-outline-danger ms-2" (click)="cargarPostulaciones()">Reintentar</button>
+                </div>
+                }
+
+                <!-- Aviso si no hay postulaciones -->
+                @if (!loadingPostulaciones() && postulaciones().length === 0) {
+                <div class="alert alert-warning">
+                    No hay postulaciones pendientes.
+                    <br>
+                    <small class="text-muted">Las personas interesadas en trabajar como proveedores aparecerán aquí.</small>
+                </div>
+                }
+
+                <!-- TABLA DE POSTULACIONES -->
+                @if (!loadingPostulaciones() && postulaciones().length > 0) {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Empresa</th>
+                                <th>Categoría</th>
+                                <th>Correo</th>
+                                <th>Portafolio</th>
+                                <th>Fecha</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (post of postulaciones(); track post.id_postu_proveedor) {
+                            <tr>
+                                <td>{{ post.id_postu_proveedor }}</td>
+                                <td><strong>{{ post.nom_empresa_postu_proveedor }}</strong></td>
+                                <td><span class="badge bg-info">{{ post.categoria_postu_proveedor }}</span></td>
+                                <td>{{ post.correo_postu_proveedor }}</td>
+                                <td>
+                                    <div class="small text-truncate" style="max-width: 300px;" [title]="post.portafolio_postu_proveedor">
+                                        {{ trunc(post.portafolio_postu_proveedor, 50) }}
+                                    </div>
+                                </td>
+                                <td>{{ post.fecha_postu_proveedor }}</td>
+                                <td class="text-center text-muted">
+                                    <small>Solo lectura</small>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Info de resultados -->
+                <div class="alert alert-info mt-3">
+                    <small>Total de postulaciones: <strong>{{ postulaciones().length }}</strong></small>
+                </div>
+                } }
+
+            </div>
+        </div>
+    </div>
+</body>

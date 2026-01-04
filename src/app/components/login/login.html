@@ -1,0 +1,154 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+    <div class="login-wrap">
+        <div class="bg-anim"></div>
+
+        <div class=" card glass shadow-xl login-card" [class.shake]="shake()">
+            <div class=" shell card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="brand-logo mb-3">
+                        <img src="/isotipo.png" alt="eclat" class="logo-img">
+                    </div>
+                    <h2>Bienvenido a ÉCLAT</h2>
+                    <p>Inicia sesión para gestionar tus eventos</p>
+                </div>
+
+                <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                    <!-- DEBUG VISUAL -->
+                    <div *ngIf="debugMessage" class="alert alert-info small" style="white-space: pre-wrap;">
+                        <b>DEBUG:</b> {{ debugMessage }}
+                    </div>
+                    <!-- Email -->
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control form-control-lg" id="email" placeholder="name@example.com" formControlName="email" [class.is-invalid]="f['email'].touched && f['email'].invalid" autocomplete="email" />
+                        <label for="email">Correo electrónico</label>
+                        <div class="invalid-feedback">Correo inválido</div>
+                    </div>
+
+                    <!-- Password + toggle -->
+                    <div class="form-floating mb-2 position-relative">
+                        <input [type]="showPass() ? 'text':'password'" class="form-control form-control-lg" id="password" placeholder="••••••" formControlName="password" [class.is-invalid]="f['password'].touched && f['password'].invalid" autocomplete="current-password" />
+                        <label for="password">Contraseña</label>
+                        <button type="button" class="btn btn-sm btn-light-subtle toggle-pass" (click)="toggleShow()">
+						{{ showPass() ? 'Ocultar' : 'Mostrar' }}
+					</button>
+                        <div class="invalid-feedback">La contraseña es inválida</div>
+                    </div>
+
+                    <!-- Remember + link -->
+                    <div class="d-flex align-items-center justify-content-between mb-4 small">
+                        <label class="form-check">
+						<input class="form-check-input" type="checkbox" formControlName="remember">
+						<span class="form-check-label">Recordarme</span>
+					</label>
+                        <a class="link-offset-1-hover text-decoration-none" routerLink="/recuperar">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="btn btn-primary btn-lg w-100 lift" type="submit" [disabled]="submitting() || form.invalid">
+					<span *ngIf="!submitting()">Ingresar</span>
+					<span *ngIf="submitting()">Ingresando…</span>
+				</button>
+
+                    <!-- Divider -->
+                    <div class="text-center text-black my-4">o</div>
+
+                    <!-- Social demo (solo UI) -->
+                    <button class="btn btn-light w-100 mb-2 hover-glow" type="button" (click)="log()">
+					<img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" width="18" class="me-2">
+					Continuar con Google
+				</button>
+                    <button class="btn btn-light w-100 hover-glow" type="button">
+					<img src="https://www.svgrepo.com/show/521674/github-142.svg" alt="" width="18" class="me-2">
+					Continuar con GitHub
+				</button>
+                </form>
+
+                <!-- Enlace a crear cuenta -->
+                <div class="text-center mt-4">
+                    <p>
+                        ¿No tienes una cuenta?
+                        <a routerLink="/crear-cuenta" class="text-primary text-decoration-none fw-semibold">Regístrate aquí</a>
+                    </p>
+                    <a routerLink="/home" class="text-primary text-decoration-none fw-semibold">Regresar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Cambio Obligatorio de Contraseña -->
+    @if (showChangePasswordModal()) {
+    <div class="modal-backdrop fade show" style="z-index: 1040;"></div>
+    <div class="modal fade show d-block" tabindex="-1" style="z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass shadow-xl">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">🔐 Cambio de Contraseña Obligatorio</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3 fw-bold text-center">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        <span>Por seguridad, <u>no puedes navegar ni usar la aplicación</u> hasta que cambies tu contraseña.</span>
+                    </div>
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Has iniciado sesión con una contraseña temporal.</strong> Debes crear una nueva contraseña permanente para continuar.
+                    </div>
+
+                    @if (changePasswordError()) {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-x-circle me-2"></i>{{ changePasswordError() }}
+                    </div>
+                    } @if (changePasswordSuccess()) {
+                    <div class="alert alert-success" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>{{ changePasswordSuccess() }}
+                    </div>
+                    }
+
+                    <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()" novalidate>
+                        <!-- Nueva Contraseña -->
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="newPassword" placeholder="Nueva contraseña" formControlName="newPassword" [class.is-invalid]="cpf['newPassword'].touched && cpf['newPassword'].invalid">
+                            <label for="newPassword">Nueva contraseña</label>
+                            <div class="invalid-feedback">Mínimo 6 caracteres</div>
+                        </div>
+
+                        <!-- Confirmar Contraseña -->
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirmar contraseña" formControlName="confirmPassword" [class.is-invalid]="cpf['confirmPassword'].touched && cpf['confirmPassword'].invalid">
+                            <label for="confirmPassword">Confirmar contraseña</label>
+                            <div class="invalid-feedback">Las contraseñas deben coincidir</div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" [disabled]="changingPassword() || changePasswordForm.invalid">
+                                @if (changingPassword()) {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Actualizando...
+                                } @else {
+                                    <i class="bi bi-check-lg me-2"></i>
+                                    Actualizar Contraseña
+                                }
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" (click)="closeChangePasswordModal()" [disabled]="changingPassword()">
+                                Cancelar y cerrar sesión
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+</body>

@@ -1,0 +1,198 @@
+<section class="py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div>
+                <p class="text-uppercase text-muted mb-1 small">Administración</p>
+                <h1 class="h3 mb-0">Reportes HR – Postulaciones</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <h2 class="h5 mb-0">Filtros</h2>
+                    <div class="badge bg-secondary text-uppercase">Solo lectura</div>
+                </div>
+
+                <form class="row g-3" [formGroup]="filtrosForm">
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de postulación</label>
+                        <select class="form-select" formControlName="tipo" (change)="onTipoChange()">
+              <option value="proveedores">Proveedores</option>
+              <option value="trabajadores">Trabajadores</option>
+            </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha inicio</label>
+                        <input type="date" class="form-control" formControlName="from">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha fin</label>
+                        <input type="date" class="form-control" formControlName="to">
+                    </div>
+
+                    <div class="col-md-4" *ngIf="mostrandoProveedores">
+                        <label class="form-label">Categoría (opcional)</label>
+                        <select class="form-select" formControlName="categoria">
+              <option value="">Todas</option>
+              <option value="Musica">Música</option>
+              <option value="Catering">Catering</option>
+              <option value="Lugar">Lugar</option>
+              <option value="Decoracion">Decoración</option>
+            </select>
+                    </div>
+
+                    <div class="col-md-4" *ngIf="mostrandoTrabajadores">
+                        <label class="form-label">Tiene CV (opcional)</label>
+                        <select class="form-select" formControlName="tieneCv">
+              <option value="">Todos</option>
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+                    </div>
+
+                    <div class="col-12 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary" (click)="generar()" [disabled]="loading()">
+              <i class="bi bi-table me-2"></i>Generar
+            </button>
+                        <button type="button" class="btn btn-outline-secondary" (click)="exportarPdf()" [disabled]="loading()">
+              <i class="bi bi-filetype-pdf me-2"></i>Exportar PDF
+            </button>
+                        <div class="text-muted small" *ngIf="loading()">Cargando...</div>
+                    </div>
+                </form>
+
+                <div class="alert alert-danger mt-3" *ngIf="error()">
+                    {{ error() }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pb-5">
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h2 class="h5 mb-0">Resultados</h2>
+                    <span class="badge bg-light text-dark">
+            {{ mostrandoProveedores ? (proveedores().length || 0) : (trabajadores().length || 0) }} registros
+          </span>
+                </div>
+
+                <div *ngIf="mostrandoProveedores">
+                    <div class="alert alert-info" *ngIf="!loading() && proveedores().length === 0">
+                        No hay resultados para los filtros seleccionados.
+                    </div>
+
+                    <div class="table-responsive" *ngIf="proveedores().length > 0">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th>Empresa</th>
+                                    <th>Correo</th>
+                                    <th>Descripción</th>
+                                    <th>Portafolio</th>
+                                    <th>Fecha postulación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let p of proveedores(); index as i">
+                                    <td>{{ p.categoria || '-' }}</td>
+                                    <td>{{ p.nombreEmpresa || '-' }}</td>
+                                    <td>{{ p.correo || '-' }}</td>
+                                    <td>
+                                        <div class="small text-muted">{{ p.descripcion || '-' }}</div>
+                                    </td>
+                                    <td>
+                                        <span *ngIf="!p.portafolioLink && !p.portafolioFile" class="text-muted small">
+                                            <i class="bi bi-exclamation-circle me-1"></i>Sin portafolio
+                                        </span>
+                                        <span *ngIf="p.portafolioLink || p.portafolioFile" class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Presente
+                                        </span>
+                                    </td>
+                                    <td>{{ p.fechaPostulacion | date: 'yyyy-MM-dd' }}</td>
+                                    <td>
+                                        <!-- Si tiene solo LINK (sin PDF) -->
+                                        <a *ngIf="p.portafolioLink && !p.portafolioFile" [href]="p.portafolioLink" target="_blank" class="btn btn-sm btn-outline-primary" title="Abrir enlace en nueva pestaña">
+                                            <i class="bi bi-link-45deg me-1"></i>Ver enlace
+                                        </a>
+
+                                        <!-- Si tiene solo PDF (sin LINK) -->
+                                        <button *ngIf="p.portafolioFile && !p.portafolioLink" type="button" class="btn btn-sm btn-outline-primary" (click)="abrirVerPortafolio(p.portafolioFile)" title="Ver y descargar portafolio">
+                                            <i class="bi bi-eye me-1"></i>Ver Portafolio
+                                        </button>
+
+                                        <!-- Si no tiene ni link ni PDF -->
+                                        <span *ngIf="!p.portafolioLink && !p.portafolioFile" class="text-muted small">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div *ngIf="mostrandoTrabajadores">
+                    <div class="alert alert-info" *ngIf="!loading() && trabajadores().length === 0">
+                        No hay resultados para los filtros seleccionados.
+                    </div>
+
+                    <div class="table-responsive" *ngIf="trabajadores().length > 0">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre completo</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Fecha nacimiento</th>
+                                    <th>Fecha postulación</th>
+                                    <th>CV</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let t of trabajadores(); index as i">
+                                    <td>{{ t.cedula || '-' }}</td>
+                                    <td>{{ (t.nombres || '') + ' ' + (t.apellidos || '') }}</td>
+                                    <td>{{ t.correo || '-' }}</td>
+                                    <td>{{ t.telefono || '-' }}</td>
+                                    <td>{{ t.fechaNacimiento ? (t.fechaNacimiento | date: 'yyyy-MM-dd') : '-' }}</td>
+                                    <td>{{ t.fechaPostulacion ? (t.fechaPostulacion | date: 'yyyy-MM-dd') : '-' }}</td>
+                                    <td>
+                                        <span *ngIf="!t.cvUrl" class="text-muted small">
+                                            <i class="bi bi-exclamation-circle me-1"></i>No tiene CV
+                                        </span>
+                                        <span *ngIf="t.cvUrl" class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>Presente
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button *ngIf="t.cvUrl" type="button" class="btn btn-sm btn-outline-primary" (click)="abrirVerCV(t.cvUrl, 'CV-' + t.cedula + '.pdf')" title="Ver y descargar CV">
+                                            <i class="bi bi-eye me-1"></i>Ver CV
+                                        </button>
+                                        <span *ngIf="!t.cvUrl" class="text-muted small">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal PDF Viewer -->
+<app-pdf-viewer-modal [isVisible]="showPdfModal()" [pdfUrl]="pdfModalUrl()" [fileName]="pdfModalFileName()" (close)="cerrarPdfModal()"></app-pdf-viewer-modal>

@@ -1,0 +1,30 @@
+<!-- Modal Backdrop -->
+<div class="pdf-modal-backdrop" *ngIf="isVisible" (click)="onClose()"></div>
+
+<!-- Modal -->
+<div class="pdf-modal" *ngIf="isVisible" (click)="$event.stopPropagation()">
+    <div class="pdf-modal-content">
+        <!-- Header -->
+        <div class="pdf-modal-header">
+            <h5 class="mb-0">
+                <i class="bi bi-file-earmark-pdf me-2"></i>{{ fileName }}
+            </h5>
+            <button type="button" class="btn-close" (click)="onClose()"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="pdf-modal-body">
+            <iframe [src]="safeUrl" type="application/pdf" class="pdf-iframe"></iframe>
+        </div>
+
+        <!-- Footer -->
+        <div class="pdf-modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="onClose()">
+                <i class="bi bi-x-lg me-2"></i>Cerrar
+            </button>
+            <button type="button" class="btn btn-primary" (click)="descargarPdf()">
+                <i class="bi bi-download me-2"></i>Descargar CV
+            </button>
+        </div>
+    </div>
+</div>

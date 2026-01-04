@@ -1,0 +1,275 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Proveedores</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="insertar-proveedor.css">
+</head>
+<br>
+
+<body>
+    <div class="container-xxl py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <div class="shell shadow p-4 rounded bg-white">
+                    <form [formGroup]="formProveedor" (ngSubmit)="onSubmit()" novalidate>
+                        <h2 class="h5 mb-3"><i class="bi bi-person-bounding-box me-2"></i>Datos del Proveedor</h2>
+
+                        <!-- SELECTOR DE POSTULANTES -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Paso 1:</strong> Selecciona un postulante de la lista para cargar sus datos automáticamente
+                                </div>
+                                <label class="form-label">Seleccionar Postulante <span class="text-danger">*</span></label>
+                                <select class="form-select" (change)="seleccionarPostulante($event)">
+                                    <option value="">{{ cargandoPostulantes ? 'Cargando postulantes...' : 'Selecciona un postulante' }}</option>
+                                    <option *ngFor="let postulante of postulantes" [value]="postulante.id_postu_proveedor">
+                                        {{ postulante.nom_empresa_postu_proveedor }} - {{ postulante.categoria_postu_proveedor }} ({{ postulante.correo_postu_proveedor }})
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- DATOS DEL POSTULANTE SELECCIONADO -->
+                        <div *ngIf="postulanteSeleccionado" class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-success">
+                                    <h6 class="mb-2"><i class="bi bi-check-circle me-2"></i>Datos del Postulante Cargados</h6>
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-md-6">
+                                            <strong>Empresa:</strong> {{ postulanteSeleccionado.nom_empresa_postu_proveedor }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Categoría:</strong> {{ postulanteSeleccionado.categoria_postu_proveedor }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Email:</strong> {{ postulanteSeleccionado.correo_postu_proveedor }}
+                                        </div>
+                                        <div class="col-md-6" *ngIf="postulanteSeleccionado.portafolio_postu_proveedor">
+                                            <strong>Portafolio:</strong>
+                                            <a [href]="postulanteSeleccionado.portafolio_postu_proveedor" target="_blank" rel="noopener" class="text-primary">Ver enlace</a>
+                                        </div>
+                                        <div class="col-12">
+                                            <strong>Fecha de Postulación:</strong> {{ postulanteSeleccionado.fecha_postu_proveedor | date:'short' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" *ngIf="postulanteSeleccionado">
+
+                        <!-- DATOS GENERALES REQUERIDOS PARA PROVEEDOR -->
+                        <div class="row g-3 mb-4" *ngIf="postulanteSeleccionado">
+                            <div class="col-12">
+                                <h5><i class="bi bi-clipboard-check me-2"></i>Datos generales</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tipo / Categoría</label>
+                                        <div class="form-control-plaintext fw-semibold">
+                                            {{ postulanteSeleccionado?.categoria_postu_proveedor || '---' }}
+                                        </div>
+                                        <input type="hidden" formControlName="categoria" />
+                                    </div>
+
+                                    <div class="col-12" formGroupName="datosGenerales">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Plan <span class="text-danger">*</span></label>
+                                                <select class="form-select" formControlName="id_plan">
+                                                    <option value="">Selecciona un plan</option>
+                                                    <option *ngFor="let plan of planes" [value]="plan.id_plan">{{ plan.nombre_plan || plan.nombre }}</option>
+                                                </select>
+                                                <div class="text-danger small mt-1" *ngIf="formProveedor.get('datosGenerales.id_plan')?.touched && formProveedor.get('datosGenerales.id_plan')?.invalid">
+                                                    Selecciona un plan.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Precio base (USD) <span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control" formControlName="precio_base" min="0" step="0.01" />
+                                                <div class="text-danger small mt-1" *ngIf="formProveedor.get('datosGenerales.precio_base')?.touched && formProveedor.get('datosGenerales.precio_base')?.invalid">
+                                                    Ingresa un precio válido.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label class="form-label">Descripción <span class="text-danger">*</span></label>
+                                                <textarea rows="3" class="form-control" formControlName="descripcion"></textarea>
+                                                <div class="text-danger small mt-1" *ngIf="formProveedor.get('datosGenerales.descripcion')?.touched && formProveedor.get('datosGenerales.descripcion')?.invalid">
+                                                    La descripción es obligatoria.
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="alert alert-light border mb-0">
+                                                    <div class="fw-semibold mb-1">Estado y verificación</div>
+                                                    <div class="small text-muted">Se envía automáticamente como activo, verificado y aprobado.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CARACTERÍSTICAS ESPECÍFICAS (con inputs) -->
+                        <div class="row g-3 mb-4" *ngIf="postulanteSeleccionado">
+                            <div class="col-12">
+                                <h5><i class="bi bi-list-check me-2"></i>Datos específicos (dinámicos)</h5>
+                                <div *ngIf="cargandoCaracteristicas" class="alert alert-light border d-flex align-items-center gap-2 mb-2">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    <span>Cargando características...</span>
+                                </div>
+
+                                <div *ngIf="!cargandoCaracteristicas && caracteristicasActuales.length > 0" formGroupName="caracteristicas">
+                                    <div class="row g-3">
+                                        <div class="col-md-6" *ngFor="let car of caracteristicasActuales">
+                                            <ng-container *ngIf="carControl(car) as ctrl">
+                                                <label class="form-label">
+                                                    {{ car.nombre_caracteristica || car.nombre || car.caracteristica || 'Característica' }}
+                                                    <span *ngIf="car.obligatorio" class="text-danger">*</span>
+                                                </label>
+                                                <ng-container [ngSwitch]="(car.tipo_valor || 'texto').toLowerCase()">
+                                                    <input *ngSwitchCase="'numero'" type="number" class="form-control" [formControlName]="getCarControlName(car)" [class.is-invalid]="ctrl?.touched && ctrl?.invalid" />
+                                                    <select *ngSwitchCase="'booleano'" class="form-select" [formControlName]="getCarControlName(car)" [class.is-invalid]="ctrl?.touched && ctrl?.invalid">
+                                                        <option value="">Seleccione</option>
+                                                        <option value="true">Sí</option>
+                                                        <option value="false">No</option>
+                                                    </select>
+                                                    <textarea *ngSwitchCase="'json'" rows="3" class="form-control" [formControlName]="getCarControlName(car)" [class.is-invalid]="ctrl?.touched && ctrl?.invalid"></textarea>
+                                                    <input *ngSwitchDefault type="text" class="form-control" [formControlName]="getCarControlName(car)" [class.is-invalid]="ctrl?.touched && ctrl?.invalid" />
+                                                </ng-container>
+                                                <div *ngIf="ctrl?.touched && ctrl?.invalid" class="text-danger small mt-1">Completa este campo.</div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="!cargandoCaracteristicas && caracteristicasActuales.length === 0" class="alert alert-warning mb-0">
+                                    No se encontraron características específicas para esta categoría.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MÓDULO DE IMÁGENES (al final) -->
+                        <div class="row g-3 mb-4" *ngIf="postulanteSeleccionado">
+                            <div class="col-12">
+                                <h5><i class="bi bi-image me-2"></i>Imágenes</h5>
+                                <div class="alert alert-light border">
+                                    <!-- IMAGEN PRINCIPAL -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Imagen principal (obligatoria)</label>
+
+                                        <!-- Toggle entre Archivo y URL -->
+                                        <div class="btn-group btn-group-sm mb-2" role="group">
+                                            <button type="button" class="btn" [class.btn-primary]="modoImagenPrincipal === 'file'" [class.btn-outline-primary]="modoImagenPrincipal !== 'file'" (click)="toggleModoImagenPrincipal('file')">
+                                                <i class="bi bi-upload me-1"></i>Subir archivo
+                                            </button>
+                                            <button type="button" class="btn" [class.btn-primary]="modoImagenPrincipal === 'url'" [class.btn-outline-primary]="modoImagenPrincipal !== 'url'" (click)="toggleModoImagenPrincipal('url')">
+                                                <i class="bi bi-link-45deg me-1"></i>Pegar URL
+                                            </button>
+                                        </div>
+
+                                        <!-- Input de archivo -->
+                                        <div *ngIf="modoImagenPrincipal === 'file'">
+                                            <input type="file" class="form-control" accept="image/*" (change)="onMainImageChange($event)" />
+                                            <small class="text-muted">Requerida para publicar el proveedor.</small>
+                                        </div>
+
+                                        <!-- Input de URL -->
+                                        <div *ngIf="modoImagenPrincipal === 'url'">
+                                            <input type="url" class="form-control" placeholder="https://ejemplo.com/imagen.jpg" [(ngModel)]="imagenPrincipalUrl" [ngModelOptions]="{standalone: true}" (ngModelChange)="onMainImageUrlChange($event)" />
+                                            <small class="text-muted">Pega la URL completa de la imagen.</small>
+                                        </div>
+
+                                        <!-- Vista previa -->
+                                        <div *ngIf="imagenPrincipalPreview" class="mt-2">
+                                            <img [src]="imagenPrincipalPreview" alt="Vista previa" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                        </div>
+                                    </div>
+
+                                    <!-- IMÁGENES ADICIONALES -->
+                                    <div class="mb-2 d-flex align-items-center justify-content-between">
+                                        <span><strong>Imágenes adicionales (opcionales)</strong></span>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="addExtraImageSlot()">
+                                            <i class="bi bi-plus-circle me-1"></i>Agregar imagen
+                                        </button>
+                                    </div>
+                                    <div class="row g-3" *ngIf="extraImageSlots.length > 0">
+                                        <div class="col-md-6" *ngFor="let slot of extraImageSlots">
+                                            <div class="border rounded p-2">
+                                                <!-- Toggle entre Archivo y URL -->
+                                                <div class="btn-group btn-group-sm mb-2 w-100" role="group">
+                                                    <button type="button" class="btn btn-sm" [class.btn-primary]="extraImageModos[slot] === 'file'" [class.btn-outline-primary]="extraImageModos[slot] !== 'file'" (click)="toggleModoExtraImage(slot, 'file')">
+                                                        <i class="bi bi-upload"></i> Archivo
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm" [class.btn-primary]="extraImageModos[slot] === 'url'" [class.btn-outline-primary]="extraImageModos[slot] !== 'url'" (click)="toggleModoExtraImage(slot, 'url')">
+                                                        <i class="bi bi-link-45deg"></i> URL
+                                                    </button>
+                                                </div>
+
+                                                <!-- Input de archivo -->
+                                                <div *ngIf="extraImageModos[slot] === 'file'">
+                                                    <input type="file" class="form-control form-control-sm" accept="image/*" (change)="onExtraImageChange($event, slot)" />
+                                                </div>
+
+                                                <!-- Input de URL -->
+                                                <div *ngIf="extraImageModos[slot] === 'url'">
+                                                    <input type="url" class="form-control form-control-sm" placeholder="https://..." [(ngModel)]="extraImageUrls[slot]" [ngModelOptions]="{standalone: true}" (ngModelChange)="onExtraImageUrlChange(slot, $event)" />
+                                                </div>
+
+                                                <!-- Vista previa -->
+                                                <div *ngIf="extraImagePreviews[slot]" class="mt-2">
+                                                    <img [src]="extraImagePreviews[slot]" alt="Vista previa" class="img-thumbnail w-100" style="max-height: 150px; object-fit: cover;" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="imagenesSeleccionadas().length > 0" class="mt-3">
+                                        <label class="form-label">Selecciona imagen de portada</label>
+                                        <div class="list-group">
+                                            <label class="list-group-item d-flex align-items-center" *ngFor="let img of imagenesSeleccionadas()">
+                                                <input type="radio" class="form-check-input me-2" name="portada" [value]="img.nombre" [checked]="img.nombre === coverImageName" (change)="setPortada(img.nombre)" />
+                                                <span [ngClass]="{'fw-bold': img.nombre === coverImageName}">{{ img.etiqueta }}</span>
+                                                <span class="badge bg-primary ms-auto" *ngIf="img.esPrincipal">Principal</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BOTONES -->
+                        <div class="d-grid d-sm-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-outline-secondary" (click)="onReset()">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar
+                            </button>
+                            <button type="submit" class="btn btn-primary" [disabled]="!isCategoryValid() || !postulanteSeleccionado || enviando">
+                                <i class="bi bi-save2 me-1"></i>{{ enviando ? 'Guardando...' : 'Insertar en Proveedor' }}
+                            </button>
+                        </div>
+                        <div class="text-end mt-2" *ngIf="!postulanteSeleccionado">
+                            <small class="text-warning">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Debes seleccionar un postulante primero
+                            </small>
+                        </div>
+                        <div class="text-end mt-2" *ngIf="postulanteSeleccionado && !isCategoryValid()">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,165 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Paleta Elegante</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="colaboradores.css">
+</head>
+
+
+<body>
+    <!--SECCION 1: DESCRIPCION DE BIENVENIDA A PROVEEDORES-->
+    <div class="px-4 py-5 my-5 text-center">
+        <h1>Directorio de Proveedores</h1>
+
+        <div class="col-lg-6 mx-auto">
+            <p class="content container">
+                Este directorio representa más que una lista de proveedores: es una comunidad de expertos que, como nosotros, creen en la importancia de la calidad, la confianza y la dedicación personalizada.
+            </p>
+        </div>
+    </div>
+    <!--FIN SECCION 1 DESCRIPCION DE BIENVENIDA A PROVEEDORES-->
+
+
+
+    <!--SECCION 2: CARRUSEL DE IMAGENES DE MARCAS MAS VENDIDAS-->
+    <div id="carouselExampleCaptions" class="carousel slide">
+        <div class="carousel-indicators">
+            @for (item of destacados(); track $index) {
+                <button type="button" 
+                        data-bs-target="#carouselExampleCaptions" 
+                        [attr.data-bs-slide-to]="$index" 
+                        [class.active]="$index === 0"
+                        [attr.aria-current]="$index === 0 ? 'true' : null"
+                        [attr.aria-label]="'Slide ' + ($index + 1)"></button>
+            }
+        </div>
+        <div class="carousel-inner">
+            @if (loading()) {
+                <div class="carousel-item active">
+                    <div class="d-flex justify-content-center align-items-center" style="height: 400px; background-color: #f0f0f0;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            } @else {
+                @for (proveedor of destacados(); track $index) {
+                    <div class="carousel-item" [class.active]="$index === 0">
+                        <img [src]="getFotoUrl(proveedor.Foto)" class="d-block w-100" [alt]="proveedor.Nombre" style="height: 400px; object-fit: cover;">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h3>{{ proveedor.Nombre }}</h3>
+                            <p>{{ proveedor.Categoria }}</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    <!--FIN SECCION 2: CARRUSEL DE IMAGENES DE MARCAS MAS VENDIDAS-->
+
+
+
+    <!-- SECCION 3: CARTAS LISTA DE PROVEEDORES -->
+    <div class="px-4 py-5 my-4 text-center">
+        <h2>Nuestros Proveedores</h2>
+        <p>¡Explora, inspirate y descubre a los mejores aliados para tu gran día!</p>
+    </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        <!--aqui se aumentan columnas en md-4-->
+        <!--TARJETA 1-->
+        <div class="col">
+            <div class="card h-100">
+                <img src="proveedorDrinkTeam.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Drink Team</h5>
+                    <p> Diseño de cócteles personalizados que se adaptan a la esencia de cada evento.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">Sercicio de Cocteleria.</small>
+                </div>
+            </div>
+        </div>
+
+        <!--TARJETA 2-->
+        <div class="col">
+            <div class="card h-100">
+                <img src="proveedorVillegas.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Andrea Villegas Pastry Chef</h5>
+                    <p>Expertos en personalización de tortas, dulces y bocaditos.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">Catering de Pastelería y Dulces.</small>
+                </div>
+            </div>
+        </div>
+        <!--TARJETA 3-->
+        <div class="col">
+            <div class="card h-100">
+                <img src="proveedorCateringAltura.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Catering de Altura</h5>
+                    <p>Menús balanceados, variados y adaptados a las necesidades de cada cliente.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">Catering de Comida.</small>
+                </div>
+            </div>
+        </div>
+        <!--TARJETA 4-->
+        <div class="col">
+            <div class="card h-100">
+                <img src="manaba.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Arelys Henao</h5>
+                    <p>Cantante con un estilo auténtico que combina energía, sentimiento y conexión con el público.</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">Musica.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FIN SECCION 3: LISTA DE PROVEEDORES -->
+
+
+
+
+    <!-- SECCION 4: FOOTER -->
+    <div class="container">
+        <!-- Footer Section -->
+        <footer class="py-3 my-4">
+            <!-- PA PONER LOS LINKS DE NAEGACION -->
+            <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+                <li class="nav-item">
+                    <a href="/home" class="nav-link px-2 text-body-secondary">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/catalogo" class="nav-link px-2 text-body-secondary">Catálogo</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/about" class="nav-link px-2 text-body-secondary">Sobre Nosotros</a>
+                </li>
+            </ul>
+
+            <!-- Copyright Text -->
+            <p class="text-center text-body-secondary">© 2025 Company, Inc</p>
+        </footer>
+    </div>
+
+</body>

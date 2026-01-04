@@ -1,0 +1,390 @@
+/* ------------------------- CONTENIDO ------------------------- */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+.hero {
+    padding: 5rem 1rem;
+    background-color: var(--color-bg);
+}
+
+.subtitle {
+    color: var(--color-subtext);
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+p {
+    color: var(--color-text);
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+.short-separator {
+    width: 50%;
+    margin: 10px auto;
+    border: 1px solid #502121;
+    border-style: dashed;
+}
+
+
+/* ------------------------- CAMPOS DE FORMULARIO ------------------------- */
+
+.form-control,
+.form-select {
+    background-color: #fff;
+    border-color: #ccc;
+    color: var(--color-text);
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.25);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+}
+
+
+/* ------------------------- BOTONES ------------------------- */
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    font-family: 'Playfair Display', serif;
+    border-color: var(--bs-primary);
+    color: #fff;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: color-mix(in srgb, var(--bs-primary) 85%, black 15%);
+    border-color: color-mix(in srgb, var(--bs-primary) 85%, black 15%);
+}
+
+.btn-ghost {
+    color: var(--bs-primary);
+    background-color: transparent;
+    font-family: 'Playfair Display', serif;
+    border: 1px solid color-mix(in srgb, var(--bs-primary) 25%, transparent);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    transition: 0.3s ease;
+}
+
+.btn-ghost:hover {
+    background-color: color-mix(in srgb, var(--bs-primary) 10%, white 90%);
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+}
+
+
+/* ------------------------- LABELS Y TEXTOS ------------------------- */
+
+.form-label {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    color: var(--color-heading);
+}
+
+.form-check-label {
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+
+/* ------------------------- CONTENEDOR PRINCIPAL ------------------------- */
+
+.shell {
+    background: #e4e7e4;
+    border: 1px solid #dee2e6;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(114, 98, 108, 0.521);
+}
+
+.custom-select-size {
+    font-size: 1.1rem;
+    padding: 0.6rem 1.8rem;
+    height: auto;
+}
+
+
+/* Spinner */
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+.spinner-border-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-width: 0.1em;
+}
+
+
+/* Badges */
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+.text-bg-success,
+.bg-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.text-bg-secondary,
+.bg-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.bg-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.bg-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.bg-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+
+/* Modal */
+
+.modal.show {
+    display: block;
+}
+
+.modal-dialog {
+    margin-top: 5rem;
+}
+
+.modal-content {
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+.btn-close {
+    background-color: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+
+/* Tablas */
+
+.table-responsive {
+    margin-top: 1rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-bg);
+    border-radius: 8px;
+}
+
+.table-light th,
+.table-light td {
+    background-color: var(--color-card-bg);
+    border: 1px solid #dee2e6;
+    color: var(--color-text);
+}
+
+th {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    padding: 1rem;
+    font-size: 1rem;
+    text-align: left;
+}
+
+td {
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    padding: 1rem;
+    text-align: left;
+    font-size: 1rem;
+}
+
+
+/* Reducir padding específicamente en tabla de permisos para compactarla */
+
+.permisos-table td,
+.permisos-table th {
+    padding: 0.6rem 0.75rem;
+}
+
+
+/* Alinear acciones y reducir espacio (columna de acciones a la izquierda) */
+
+.permisos-table td.actions-col {
+    width: 140px;
+    text-align: left;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--color-card-bg);
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: var(--color-bg);
+}
+
+.table-hover tbody tr:hover {
+    background-color: color-mix(in srgb, var(--bs-primary) 5%, white 95%);
+}
+
+
+/* Ajustes específicos para la tabla de permisos */
+
+.table td.actions-col .dropdown .btn {
+    min-width: 90px;
+}
+
+
+/* Force dropdown menu to align to left of the toggle in actions columns */
+
+.table td.actions-col .dropdown-menu {
+    left: 0 !important;
+    right: auto !important;
+    transform-origin: left top !important;
+}
+
+
+/* Estilos del modal para parecerse a la segunda imagen */
+
+.modal-dialog {
+    margin-top: 4rem;
+    max-width: 480px;
+}
+
+.modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 0.8rem 1rem;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.btn-close {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+.modal-body {
+    padding: 1.25rem 1.25rem;
+}
+
+.modal-footer {
+    padding: 0.9rem 1rem;
+    border-top: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.btn-ghost {
+    background: #fff;
+    border: 1px solid #e6eef8;
+    color: var(--bs-primary);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+}
+
+.btn-primary {
+    border-radius: 8px;
+    padding: 0.45rem 0.95rem;
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.modal-body .form-control,
+.modal-body textarea {
+    border-radius: 8px;
+}
+
+
+/* Estilos para el botón de recarga pequeño */
+
+.refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0.35rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+}
+
+.refresh-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.refresh-btn:focus,
+.refresh-btn:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}

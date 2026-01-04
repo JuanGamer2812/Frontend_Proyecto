@@ -1,0 +1,123 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="adm-usuarios.css">
+</head>
+<br>
+
+<body>
+
+    <div class="container-xxl py-4">
+        <div class="shell card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Gestión de Usuarios</h2>
+                <button class="btn btn-outline-secondary" type="button" (click)="cargarUsuarios()" [disabled]="loading()" title="Recargar usuarios">
+                    @if (loading()) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                    <i class="bi bi-arrow-clockwise"></i>
+                    }
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Mensaje de carga -->
+                @if (loading()) {
+                <div class="alert alert-info">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Cargando usuarios...
+                </div>
+                }
+
+                <!-- Mensaje de error -->
+                @if (error()) {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> {{ error() }}
+                    <button class="btn btn-sm btn-outline-danger ms-2" (click)="cargarUsuarios()">Reintentar</button>
+                </div>
+                } @if (roleError()) {
+                <div class="alert alert-warning d-flex align-items-center justify-content-between">
+                    <span>{{ roleError() }}</span>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="cargarRoles()">Reintentar roles</button>
+                </div>
+                } @if (roleSuccess()) {
+                <div class="alert alert-success py-2">{{ roleSuccess() }}</div>
+                }
+
+                <!-- Sin usuarios -->
+                @if (!loading() && usuarios().length === 0) {
+                <div class="alert alert-warning">
+                    No hay usuarios disponibles.
+                </div>
+                }
+
+                <!-- Tabla de Usuarios -->
+                @if (!loading() && usuarios().length > 0) {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Completo</th>
+                                <th>Género</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Rol actual</th>
+                                <th>Asignar rol</th>
+                                <th>Fecha Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (usuario of usuarios(); track usuario['Id Usuario']) {
+                            <tr>
+                                <td>{{ usuario['Id Usuario'] }}</td>
+                                <td><strong>{{ usuario['Nombre'] }} {{ usuario['Apellido'] }}</strong></td>
+                                <td>{{ usuario['Género'] }}</td>
+                                <td>
+                                    <div class="small text-truncate" style="max-width: 200px;" [title]="usuario['Correo']">
+                                        {{ trunc(usuario['Correo'], 30) }}
+                                    </div>
+                                </td>
+                                <td>{{ usuario['Telefono'] }}</td>
+                                <td>
+                                    <span class="badge" [class.bg-success]="usuario['Estado'] === true" [class.bg-danger]="usuario['Estado'] === false">
+                                        {{ usuario['Estado'] ? 'Activo' : 'Inactivo' }}
+                                    </span>
+                                </td>
+                                <td><span class="badge bg-info">{{ usuario['Rol asignado'] }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <select class="form-select" style="min-width: 150px;" [ngModel]="rolIdActual(usuario)" (ngModelChange)="cambiarRol(usuario['Id Usuario'], $event)" [disabled]="loadingRoles() || savingRole() === usuario['Id Usuario'] || roles().length === 0">
+                                            <option [ngValue]="null">Seleccione</option>
+                                            @for (rol of roles(); track rol.id_rol) {
+                                            <option [ngValue]="rol.id_rol">{{ rol.nombre_rol }}</option>
+                                            }
+                                        </select>
+                                        <span *ngIf="savingRole() === usuario['Id Usuario']" class="spinner-border spinner-border-sm" role="status"></span>
+                                    </div>
+                                </td>
+                                <td>{{ usuario['Fecha Registro'] | date:'dd/MM/yyyy' }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Info de resultados -->
+                <div class="alert alert-info mt-3">
+                    <small>Total de usuarios: <strong>{{ usuarios().length }}</strong></small>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</body>

@@ -1,0 +1,25 @@
+/* Dashboard Admin - Estilos mínimos */
+
+/* Animación para spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transiciones suaves para hover */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.list-group-item-action:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.05);
+}

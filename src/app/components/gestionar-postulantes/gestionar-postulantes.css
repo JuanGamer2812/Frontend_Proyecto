@@ -1,0 +1,307 @@
+.contenedor-postulantes {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.header p {
+    color: #666;
+    font-size: 14px;
+}
+
+
+/* Alertas */
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
+/* Contenedor Principal */
+
+.contenedor-principal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .contenedor-principal {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* SECCIÓN POSTULANTES */
+
+.seccion-postulantes,
+.seccion-formulario {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.seccion-postulantes h2,
+.seccion-formulario h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.cargando,
+.sin-datos,
+.sin-seleccion {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+
+/* LISTA DE POSTULANTES */
+
+.lista-postulantes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.tarjeta-postulante {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.tarjeta-postulante:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
+}
+
+.tarjeta-postulante.seleccionada {
+    border-color: #28a745;
+    background-color: #f0f8f5;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.encabezado-tarjeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.encabezado-tarjeta h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.badge-categoria {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.detalles {
+    margin-bottom: 10px;
+}
+
+.detalles p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.portafolio {
+    color: #666;
+    font-style: italic;
+}
+
+.acciones-tarjeta {
+    display: flex;
+    gap: 8px;
+}
+
+
+/* FORMULARIO */
+
+.formulario-activo {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.resumen-postulante {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+}
+
+.resumen-postulante h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.resumen-postulante p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.botones-formulario {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+
+/* BOTONES */
+
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* Scrollbar personalizado */
+
+.lista-postulantes::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lista-postulantes::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.lista-postulantes::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.lista-postulantes::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

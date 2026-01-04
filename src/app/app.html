@@ -1,0 +1,9 @@
+<!-- Navbar sólo si la ruta NO pide ocultarla -->
+<app-navbar *ngIf="showNavbar$ | async"></app-navbar>
+<!-- Spinner global -->
+<div class="spinner-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+</div>
+
+<!-- Contenido de la aplicación (Solo se muestra cuando isLoading es falso) -->
+<router-outlet *ngIf="!isLoading"></router-outlet>

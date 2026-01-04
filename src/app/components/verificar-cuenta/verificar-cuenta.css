@@ -1,0 +1,8 @@
+body {
+    background: #f4f6f9;
+}
+
+.verify-container {
+    max-width: 640px;
+    margin: 40px auto;
+}

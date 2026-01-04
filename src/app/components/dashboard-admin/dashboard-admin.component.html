@@ -1,0 +1,425 @@
+<!-- Dashboard Admin - Panel de Administración Principal -->
+
+<div class="container-fluid p-4">
+  <!-- Encabezado -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-4 fw-bold text-primary mb-2">
+        <i class="bi bi-speedometer2 me-2"></i>
+        Panel de Administración
+      </h1>
+      <p class="text-muted fs-5">
+        Bienvenido al centro de control de ÉCLAT
+      </p>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+        <span class="visually-hidden">Cargando estadísticas...</span>
+      </div>
+      <p class="text-muted mt-3 fs-5">Cargando estadísticas...</p>
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!isLoading()) {
+    <!-- KPIs Principales -->
+    <div class="row g-3 mb-4">
+      <!-- Usuarios -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <p class="text-muted mb-1 fw-semibold">Usuarios</p>
+                <h2 class="mb-0 fw-bold">{{ stats().usuarios.total }}</h2>
+              </div>
+              <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                <i class="bi bi-people-fill fs-3 text-primary"></i>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-success">
+                <i class="bi bi-arrow-up me-1"></i>
+                {{ stats().usuarios.nuevos_mes }} nuevos
+              </span>
+              <a routerLink="/adm-usuarios" class="text-decoration-none text-primary fw-semibold">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eventos -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <p class="text-muted mb-1 fw-semibold">Eventos</p>
+                <h2 class="mb-0 fw-bold">{{ stats().eventos.total }}</h2>
+              </div>
+              <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                <i class="bi bi-calendar-event-fill fs-3 text-info"></i>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-info">
+                <i class="bi bi-clock me-1"></i>
+                {{ stats().eventos.proximos }} próximos
+              </span>
+              <a routerLink="/evento" class="text-decoration-none text-info fw-semibold">
+                Ver eventos <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingresos -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <p class="text-muted mb-1 fw-semibold">Ingresos Totales</p>
+                <h2 class="mb-0 fw-bold">{{ formatearMoneda(stats().pagos.total_ingresos) }}</h2>
+              </div>
+              <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                <i class="bi bi-cash-stack fs-3 text-success"></i>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-warning text-dark">
+                <i class="bi bi-hourglass-split me-1"></i>
+                {{ formatearMoneda(stats().pagos.pendientes) }} pendientes
+              </span>
+              <a routerLink="/factura" class="text-decoration-none text-success fw-semibold">
+                Ver pagos <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proveedores -->
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <p class="text-muted mb-1 fw-semibold">Proveedores</p>
+                <h2 class="mb-0 fw-bold">{{ stats().proveedores.total }}</h2>
+              </div>
+              <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                <i class="bi bi-shop-window fs-3 text-warning"></i>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-danger">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {{ stats().proveedores.pendientes }} pendientes
+              </span>
+              <a routerLink="/adm-proveedor" class="text-decoration-none text-warning fw-semibold">
+                Aprobar <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos y Estadísticas Detalladas -->
+    <div class="row g-3 mb-4">
+      <!-- Distribución de Eventos -->
+      <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+              Distribución de Eventos
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Progress Bars -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Próximos</span>
+                <span class="fw-bold text-info">{{ stats().eventos.proximos }} ({{ calcularPorcentaje(stats().eventos.proximos, stats().eventos.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-info" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().eventos.proximos, stats().eventos.total)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Completados</span>
+                <span class="fw-bold text-success">{{ stats().eventos.completados }} ({{ calcularPorcentaje(stats().eventos.completados, stats().eventos.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-success" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().eventos.completados, stats().eventos.total)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-0">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Cancelados</span>
+                <span class="fw-bold text-danger">{{ stats().eventos.cancelados }} ({{ calcularPorcentaje(stats().eventos.cancelados, stats().eventos.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-danger" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().eventos.cancelados, stats().eventos.total)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado de Invitaciones -->
+      <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-envelope-check-fill text-primary me-2"></i>
+              Estado de Invitaciones
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Progress Bars -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Confirmadas</span>
+                <span class="fw-bold text-success">{{ stats().invitaciones.confirmadas }} ({{ calcularPorcentaje(stats().invitaciones.confirmadas, stats().invitaciones.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-success" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().invitaciones.confirmadas, stats().invitaciones.total)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Pendientes</span>
+                <span class="fw-bold text-warning">{{ stats().invitaciones.pendientes }} ({{ calcularPorcentaje(stats().invitaciones.pendientes, stats().invitaciones.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-warning" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().invitaciones.pendientes, stats().invitaciones.total)">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-0">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">Rechazadas</span>
+                <span class="fw-bold text-danger">{{ stats().invitaciones.rechazadas }} ({{ calcularPorcentaje(stats().invitaciones.rechazadas, stats().invitaciones.total) }}%)</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div 
+                  class="progress-bar bg-danger" 
+                  role="progressbar" 
+                  [style.width.%]="calcularPorcentaje(stats().invitaciones.rechazadas, stats().invitaciones.total)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos Rápidos y Actividad -->
+    <div class="row g-3 mb-4">
+      <!-- Accesos Rápidos -->
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-lightning-fill me-2"></i>
+              Accesos Rápidos
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              <a routerLink="/adm-proveedor" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-check-circle text-success me-2"></i>
+                  Aprobar Proveedores
+                </span>
+                @if (stats().proveedores.pendientes > 0) {
+                  <span class="badge bg-danger rounded-pill">{{ stats().proveedores.pendientes }}</span>
+                }
+              </a>
+              
+              <a routerLink="/adm-usuarios" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-people text-primary me-2"></i>
+                  Gestionar Usuarios
+                </span>
+              </a>
+              
+              <a routerLink="/roles" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-shield-lock text-warning me-2"></i>
+                  Gestionar Roles
+                </span>
+              </a>
+              
+              <a routerLink="/invitaciones" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-envelope text-info me-2"></i>
+                  Invitaciones
+                </span>
+              </a>
+              
+              <a routerLink="/factura" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-receipt text-success me-2"></i>
+                  Ver Pagos
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actividad Reciente -->
+      <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pt-3 pb-0">
+            <h5 class="fw-bold mb-0">
+              <i class="bi bi-clock-history text-primary me-2"></i>
+              Actividad Reciente
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              @for (actividad of actividadReciente(); track actividad.id) {
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex gap-3 align-items-start flex-grow-1">
+                      <div 
+                        class="rounded-circle p-2 d-flex align-items-center justify-content-center"
+                        [ngClass]="'bg-' + actividad.color + ' bg-opacity-10'">
+                        <i 
+                          [ngClass]="actividad.icono + ' fs-5 text-' + actividad.color">
+                        </i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <p class="mb-1 fw-semibold">{{ actividad.descripcion }}</p>
+                        <p class="mb-0 text-muted small">
+                          <i class="bi bi-person me-1"></i>
+                          {{ actividad.usuario }}
+                        </p>
+                      </div>
+                    </div>
+                    <span class="badge bg-light text-muted">
+                      {{ formatearFechaRelativa(actividad.fecha) }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas Adicionales -->
+    <div class="row g-3">
+      <!-- Usuarios Detalle -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="text-muted mb-3 fw-semibold">Usuarios Activos</h6>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fs-3 fw-bold text-success">{{ stats().usuarios.activos }}</span>
+              <span class="text-muted">de {{ stats().usuarios.total }}</span>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div 
+                class="progress-bar bg-success" 
+                role="progressbar" 
+                [style.width.%]="calcularPorcentaje(stats().usuarios.activos, stats().usuarios.total)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Administradores -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="text-muted mb-3 fw-semibold">Administradores</h6>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fs-3 fw-bold text-primary">{{ stats().usuarios.administradores }}</span>
+              <span class="badge bg-primary">Admin</span>
+            </div>
+            <p class="mb-0 small text-muted">
+              <i class="bi bi-shield-check me-1"></i>
+              Gestión del sistema
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagos Completados -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="text-muted mb-3 fw-semibold">Pagos Completados</h6>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fs-3 fw-bold text-success">{{ stats().pagos.completados }}</span>
+              <i class="bi bi-check-circle-fill text-success fs-4"></i>
+            </div>
+            <p class="mb-0 small text-success">
+              <i class="bi bi-arrow-up me-1"></i>
+              {{ formatearMoneda(stats().pagos.total_ingresos - stats().pagos.pendientes) }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proveedores Aprobados -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="text-muted mb-3 fw-semibold">Proveedores Aprobados</h6>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fs-3 fw-bold text-info">{{ stats().proveedores.aprobados }}</span>
+              <span class="text-muted">de {{ stats().proveedores.total }}</span>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div 
+                class="progress-bar bg-info" 
+                role="progressbar" 
+                [style.width.%]="calcularPorcentaje(stats().proveedores.aprobados, stats().proveedores.total)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

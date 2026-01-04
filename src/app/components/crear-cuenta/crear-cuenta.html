@@ -1,0 +1,149 @@
+<!--IMPORTAR TIPOGRAFIA-->
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="shell card shadow-sm">
+                <div class="card-body p-4 p-lg-5">
+                    <h1 class="h4 mb-4">Crear cuenta</h1>
+
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" formControlName="nombre" placeholder="Tu nombre" [class.is-invalid]="f['nombre'].touched && f['nombre'].invalid" />
+                                <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="invalid-feedback">
+                                    <div *ngIf="f['nombre'].errors?.['required']">Campo obligatorio.</div>
+                                    <div *ngIf="f['nombre'].errors?.['minlength']">Mínimo 3 caracteres.</div>
+                                    <div *ngIf="f['nombre'].errors?.['pattern']">Solo letras y espacios.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellido<span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" formControlName="apellido" placeholder="Tu apellido" [class.is-invalid]="f['apellido'].touched && f['apellido'].invalid" />
+                                <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="invalid-feedback">
+                                    <div *ngIf="f['apellido'].errors?.['required']">Campo obligatorio.</div>
+                                    <div *ngIf="f['apellido'].errors?.['minlength']">Mínimo 3 caracteres.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Género<span class="text-danger">*</span></label>
+                                <select class="form-select" formControlName="genero" [class.is-invalid]="f['genero'].touched && f['genero'].invalid">
+                                    <option value="">Seleccione</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                                <div *ngIf="f['genero'].errors?.['required']" class="invalid-feedback">Campo obligatorio.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" formControlName="fecha_nacimiento" [class.is-invalid]="f['fecha_nacimiento'].touched && f['fecha_nacimiento'].invalid" />
+                                <div *ngIf="f['fecha_nacimiento'].errors?.['fechaInvalida']" class="invalid-feedback">La fecha no puede ser futura.</div>
+                                <div *ngIf="f['fecha_nacimiento'].errors?.['required']" class="invalid-feedback">Campo obligatorio.</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Correo electrónico<span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" formControlName="correo" placeholder="correo@ejemplo.com" [class.is-invalid]="f['correo'].touched && f['correo'].invalid" />
+                                <div *ngIf="f['correo'].touched && f['correo'].invalid" class="invalid-feedback">
+                                    <div *ngIf="f['correo'].errors?.['required']">Campo obligatorio.</div>
+                                    <div *ngIf="f['correo'].errors?.['email']">Formato inválido.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono<span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" formControlName="telefono" placeholder="10 dígitos" [class.is-invalid]="f['telefono'].touched && f['telefono'].invalid" />
+                                <div *ngIf="f['telefono'].touched && f['telefono'].invalid" class="invalid-feedback">
+                                    <div *ngIf="f['telefono'].errors?.['required']">Campo obligatorio.</div>
+                                    <div *ngIf="f['telefono'].errors?.['pattern']">Debe tener 10 números.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Contraseña<span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" formControlName="password" autocomplete="new-password" placeholder="Mín. 8, Aa1!" [class.is-invalid]="f['password'].touched && f['password'].invalid" />
+                                </div>
+                                <div class="pw-meter mt-2">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar {{ passwordStrength().color }}" [style.width.%]="passwordStrength().score * 20"></div>
+                                    </div>
+                                    <small class="text-muted">Fuerza: {{ passwordStrength().label }}</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Confirmar contraseña<span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" formControlName="confirm" autocomplete="new-password" placeholder="Repite la contraseña" [class.is-invalid]="(f['confirm'].touched && f['confirm'].invalid) || form.errors?.['noCoincide']" />
+                                <div *ngIf="f['confirm'].touched && f['confirm'].errors?.['required']" class="invalid-feedback">La confirmación es obligatoria.</div>
+                                <div *ngIf="form.errors?.['noCoincide']" class="invalid-feedback">Las contraseñas no coinciden.</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Foto de perfil (opcional)</label>
+                                <input type="file" class="form-control" accept="image/*" (change)="onFotoSelected($event)" />
+                                <small class="text-muted">Si no cargas una foto, se usará un avatar por defecto.</small>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div *ngIf="fotoPreview" class="d-flex align-items-center gap-3">
+                                    <img [src]="fotoPreview" alt="Previsualización" class="rounded-circle" style="width:72px;height:72px;object-fit:cover;">
+                                    <span class="text-muted small">Así se verá tu foto.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mt-4">
+                            <input id="terminos" class="form-check-input" type="checkbox" formControlName="terminos" />
+                            <label class="form-check-label" for="terminos">
+                                Acepto los <a href="#" class="link-primary">Términos</a> y la <a href="#" class="link-primary">Privacidad</a>.
+                            </label>
+                            <div class="invalid-feedback">Debes aceptar los términos.</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div><strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios.</div>
+                        </div>
+
+                        <div class="d-grid d-sm-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-primary" routerLink="/home">Regresar</button>
+                            <button type="reset" class="btn btn-outline-secondary" [disabled]="submitting()">Limpiar</button>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary" [disabled]="form.invalid || submitting()">
+                                    <span *ngIf="submitting()" class="spinner-border spinner-border-sm me-1"></span>
+                                    <i class="bi bi-shield-check me-1"></i>Registrarse
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-2" *ngIf="form.invalid">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón</small>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">
+                            ¿Ya tienes una cuenta?
+                            <a routerLink="/login" class="link-primary text-decoration-none fw-semibold">Inicia sesión aquí</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

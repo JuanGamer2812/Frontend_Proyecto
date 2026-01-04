@@ -1,0 +1,202 @@
+/* ==================== ESTILO UNIFICADO CON LOGIN ==================== */
+
+
+/* ------------------------- CONTENIDO ------------------------- */
+
+body {
+    background-color: var(--color-bg);
+    font-family: 'Lora', serif;
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-heading);
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+p {
+    color: var(--color-text);
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+
+/* ------------------------- BOTONES ------------------------- */
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    /* Fondo del botón */
+    font-family: 'Playfair Display', serif;
+    /* Fuente para los botones */
+    border-color: var(--bs-primary);
+    /* Color del borde */
+    color: #fff;
+    /* Color del texto */
+    border-radius: 10px;
+    /* Bordes redondeados */
+    transition: all 0.3s ease;
+    /* Transición suave */
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: color-mix(in srgb, var(--bs-primary) 85%, black 15%);
+    /* Efecto hover */
+    border-color: color-mix(in srgb, var(--bs-primary) 85%, black 15%);
+    /* Efecto de foco */
+}
+
+.recovery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15);
+}
+
+
+/* CABECERA */
+
+.recovery-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.icon-circle i {
+    font-size: 2rem;
+    color: #333;
+}
+
+
+/* TEXTOS */
+
+.recovery-header h2 {
+    font-family: 'Playfair Display', serif;
+    color: #0c0c0c;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.recovery-header p {
+    color: #333;
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+
+/* FORMULARIO */
+
+.form-label {
+    color: #181717;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    background: #fafafa;
+    border: 1px solid #d1d1d1;
+    color: #111;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: #fff;
+    border-color: #1A3A6D;
+    box-shadow: 0 0 0 3px rgba(26, 58, 109, 0.15);
+    color: #111;
+    outline: none;
+}
+
+
+/* MENSAJE DE ERROR */
+
+.invalid-feedback {
+    color: #c62828;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+
+/* BOTÓN PRINCIPAL */
+
+.btn-primary {
+    background: linear-gradient(135deg, #4b4848, #4b4848);
+    border: none;
+    color: #fff;
+    padding: 0.875rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 6px 18px rgba(101, 109, 108, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(101, 109, 108, 0.4);
+}
+
+
+/* BOTÓN SECUNDARIO */
+
+.btn-secondary {
+    background: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    color: #333;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #e6e6e6;
+    transform: translateY(-2px);
+}
+
+
+/* ENLACES */
+
+.back-to-login {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.back-to-login a {
+    color: #1A3A6D;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.back-to-login a:hover {
+    color: #00685A;
+    text-decoration: underline;
+}
+
+
+/* RESPONISVO */
+
+@media (max-width: 576px) {
+    .recovery-card {
+        padding: 2rem 1.5rem;
+    }
+    .recovery-header h2 {
+        font-size: 1.5rem;
+    }
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+    }
+}

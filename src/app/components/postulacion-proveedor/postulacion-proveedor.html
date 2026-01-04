@@ -1,0 +1,184 @@
+<!-- IMPORTAR TIPOGRAFÍA -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&display=swap" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="postulacion-proveedor.css">
+</head>
+
+<body>
+    <!-- SECCIÓN: HEADER CON TITULO Y SUBTITULO -->
+    <header class="hero text-center">
+        <h1>Impulsa tu negocio junto a ÉCLAT</h1>
+        <p class="subtitle">En ÉCLAT, creemos en el valor de las alianzas estratégicas. Si ofreces servicios para eventos <br>como catering, decoración, fotografía, música o logística, te invitamos a formar parte de nuestra red de proveedores.</p>
+    </header>
+
+    <hr class="short-separator">
+
+    <!-- SECCIÓN: FORMULARIO PRINCIPAL -->
+    <div class="container-xxl py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <!-- SECCIÓN: SHELL (Contenedor de formulario con sombra y padding) -->
+                <div class="shell shadow-soft p-4 p-lg-5">
+                    <!-- FORMULARIO: Datos del Proveedor -->
+                    <form [formGroup]="formProveedor" (ngSubmit)="onSubmit()" id="formProveedor" class="needs-validation" novalidate>
+
+                        <!-- Campo: Titulo del Formulario -->
+                        <h2 class="h5 mt-3 mb-3"><i class="bi bi-person-bounding-box me-2"></i>Datos del Proveedor</h2>
+
+                        <!-- SECCIÓN: FIELDS (Campos de entrada del formulario) -->
+                        <div class="row g-3">
+
+                            <!-- Campo: Categoría del Proveedor -->
+                            <div class="col-md-6">
+                                <label for="categoria_proveedor" class="form-label">Categoría <span class="text-danger">*</span></label>
+                                <select id="categoria_proveedor" formControlName="categoria" class="form-control" [(ngModel)]="selectedCategory" [class.is-invalid]="f['categoria'].touched && f['categoria'].invalid">
+                                    <option value="" disabled>Selecciona una categoría</option>
+                                    <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+                                </select>
+                                <!-- Error: Categoría Requerida -->
+                                <div class="invalid-feedback" *ngIf="f['categoria'].touched && f['categoria'].errors?.['required']">
+                                    Debes seleccionar una categoría.
+                                </div>
+                            </div>
+
+                            <!-- Campo: Nombre de la Empresa -->
+                            <div class="col-md-6">
+                                <label for="nom_empresa_proveedor" class="form-label">Nombre de la Empresa <span class="text-danger">*</span></label>
+                                <input id="nom_empresa_proveedor" formControlName="nombreEmpresa" type="text" class="form-control" placeholder="Ej. Eventos Musicales S.A." [class.is-invalid]="f['nombreEmpresa'].touched && f['nombreEmpresa'].invalid">
+                                <!-- Error: Nombre de la Empresa Requerido -->
+                                <div class="invalid-feedback" *ngIf="f['nombreEmpresa'].touched && f['nombreEmpresa'].errors?.['required']">
+                                    El nombre de la empresa es obligatorio.
+                                </div>
+                                <!-- Error: Nombre de la Empresa Mínimo de Caracteres -->
+                                <div class="invalid-feedback" *ngIf="f['nombreEmpresa'].touched && f['nombreEmpresa'].errors?.['minlength']">
+                                    Debe tener al menos 3 caracteres.
+                                </div>
+                                <!-- Error: Nombre de la Empresa Exceso de Caracteres -->
+                                <div class="invalid-feedback" *ngIf="f['nombreEmpresa'].touched && f['nombreEmpresa'].errors?.['maxlength']">
+                                    No puede exceder 100 caracteres.
+                                </div>
+                                <!-- Error: Nombre de la Empresa Patrón Incorrecto -->
+                                <div class="invalid-feedback" *ngIf="f['nombreEmpresa'].touched && f['nombreEmpresa'].errors?.['pattern']">
+                                    Solo se permiten letras, números, espacios y símbolos: & . ' , ( ) / -
+                                </div>
+                            </div>
+
+                            <!-- Campo: Correo Electrónico -->
+                            <div class="col-md-6">
+                                <label for="correo_proveedor" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                                <input id="correo_proveedor" formControlName="correo" type="email" class="form-control" placeholder="contacto@empresa.com" [class.is-invalid]="f['correo'].touched && f['correo'].invalid">
+                                <!-- Error: Correo Electrónico Requerido -->
+                                <div class="invalid-feedback" *ngIf="f['correo'].touched && f['correo'].errors?.['required']">
+                                    El correo electrónico es obligatorio.
+                                </div>
+                                <!-- Error: Correo Electrónico Inválido -->
+                                <div class="invalid-feedback" *ngIf="f['correo'].touched && f['correo'].errors?.['pattern']">
+                                    Ingresa un correo electrónico válido (ej. nombre@dominio.com).
+                                </div>
+                            </div>
+
+                            <!-- Campo: Descripción del Portafolio -->
+                            <div class="col-md-6">
+                                <label for="portafolio_proveedor" class="form-label">Descripción del Portafolio <span class="text-danger">*</span></label>
+                                <textarea id="portafolio_proveedor" formControlName="portafolio" class="form-control" rows="3" placeholder="Describe brevemente tu experiencia y servicios..." [class.is-invalid]="f['portafolio'].touched && f['portafolio'].invalid"></textarea>
+                                <!-- Error: Descripción Requerida -->
+                                <div class="invalid-feedback" *ngIf="f['portafolio'].touched && f['portafolio'].errors?.['required']">
+                                    La descripción del portafolio es obligatoria.
+                                </div>
+                                <!-- Error: Descripción Mínimo de Caracteres -->
+                                <div class="invalid-feedback" *ngIf="f['portafolio'].touched && f['portafolio'].errors?.['minlength']">
+                                    Debe tener al menos 20 caracteres.
+                                </div>
+                                <!-- Error: Descripción Máximo de Caracteres -->
+                                <div class="invalid-feedback" *ngIf="f['portafolio'].touched && f['portafolio'].errors?.['maxlength']">
+                                    No puede exceder 500 caracteres.
+                                </div>
+                                <small class="text-muted">Mínimo 20 caracteres</small>
+                            </div>
+
+                            <!-- Campo: Switch para Enlace del Portafolio -->
+                            <div class="col-md-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" formControlName="enableLink" id="enableLink">
+                                    <label class="form-check-label" for="enableLink">
+                                        <i class="bi bi-link me-1"></i> ¿Tienes un enlace al portafolio? <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                <div class="mt-3" *ngIf="f['enableLink'].value">
+                                    <label for="portafolio_link" class="form-label">Enlace del Portafolio</label>
+                                    <input id="portafolio_link" formControlName="portafolioLink" type="url" class="form-control" placeholder="https://www.instagram.com/mi-empresa" [class.is-invalid]="f['portafolioLink'].touched && f['portafolioLink'].invalid">
+                                    <!-- Error: Enlace Requerido -->
+                                    <div class="invalid-feedback" *ngIf="f['portafolioLink'].touched && f['portafolioLink'].errors?.['required']">
+                                        El enlace del portafolio es obligatorio cuando se activa esta opción.
+                                    </div>
+                                    <!-- Error: Enlace Inválido -->
+                                    <div class="invalid-feedback" *ngIf="f['portafolioLink'].touched && f['portafolioLink'].errors?.['pattern']">
+                                        Ingresa una URL válida que comience con http:// o https://
+                                    </div>
+                                    <small class="text-muted">Puede ser Instagram, Facebook, sitio web, etc.</small>
+                                </div>
+                            </div>
+
+                            <!-- Campo: Switch para Subir Archivo de Portafolio -->
+                            <div class="col-md-12">
+                                <div class="form-check form-switch mt-3">
+                                    <input class="form-check-input" type="checkbox" formControlName="enableFile" id="enableFile">
+                                    <label class="form-check-label" for="enableFile">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i> ¿Deseas subir archivo de portafolio? <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                <div class="mt-3" *ngIf="f['enableFile'].value">
+                                    <label for="portafolio_file" class="form-label">Subir Portafolio (PDF/Imagen)</label>
+                                    <input id="portafolio_file" type="file" class="form-control" accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf" (change)="onFileSelected($event)">
+                                    <!-- Error: Archivo Inválido -->
+                                    <div class="invalid-feedback">
+                                        Selecciona un archivo válido (JPG, PNG, WEBP o PDF, máx. 5MB).
+                                    </div>
+                                    <small class="text-muted">Formatos: JPG, PNG, WEBP, PDF - Tamaño máximo: 5MB</small>
+                                    <div *ngIf="selectedFile" class="alert alert-info mt-2 py-2">
+                                        <i class="bi bi-file-earmark-check me-1"></i> Archivo seleccionado: <strong>{{ selectedFile.name }}</strong> ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+                                    </div>
+                                </div>
+                                <!-- Error: Ninguno de los dos activados -->
+                                <div class="alert alert-danger mt-3" *ngIf="formProveedor.errors?.['noPortfolio'] && (f['enableLink'].touched || f['enableFile'].touched)">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Debes proporcionar al menos un portafolio: un enlace <strong>O</strong> un archivo.
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Mensaje Informativo -->
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Importante:</strong> Todos los campos marcados con <span class="text-danger">*</span> son obligatorios. Los campos opcionales (enlace/archivo de portafolio) te ayudarán a tener un perfil más completo.
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-grid d-sm-flex justify-content-end gap-2 mt-4">
+                            <button type="reset" class="btn btn-ghost" (click)="onFormReset()">Limpiar</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="formProveedor.invalid">
+                                <i class="bi bi-save2 me-1"></i>Guardar Proveedor
+                            </button>
+                        </div>
+                        <div class="text-end mt-2" *ngIf="formProveedor.invalid">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Completa todos los campos obligatorios para habilitar el botón
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
