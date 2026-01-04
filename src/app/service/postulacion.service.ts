@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
 
 export interface PostulacionProveedorResponse {
   message: string;
@@ -15,7 +16,8 @@ export interface PostulacionTrabajadorResponse {
 @Injectable({ providedIn: 'root' })
 export class PostulacionService {
   private http = inject(HttpClient);
-  private baseUrl = '/api/postulaciones';
+  private apiConfig = inject(ApiConfigService);
+  private baseUrl = this.apiConfig.getUrl('/api/postulaciones');
 
   /**
    * POST /api/postulaciones/proveedores

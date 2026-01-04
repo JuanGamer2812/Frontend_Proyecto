@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, of, map, catchError } from 'rxjs';
 import { Router } from '@angular/router';
+import { ApiConfigService } from './api-config.service';
 
 export type UserRole = 'admin' | 'user' | 'proveedor' | 'trabajador';
 
@@ -58,8 +59,9 @@ export interface UpdateProfileResponse {
 export class AuthJwtService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private apiConfig = inject(ApiConfigService);
   
-  private baseUrl = '/api/auth';
+  private baseUrl = this.apiConfig.getUrl('/api/auth');
   
   private authStateSubject = new BehaviorSubject<AuthUser | null>(this.getCurrentUser());
   authState$ = this.authStateSubject.asObservable();

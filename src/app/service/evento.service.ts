@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
 
 export interface Evento {
   id_evento: number;
@@ -14,9 +15,14 @@ export interface Evento {
   providedIn: 'root'
 })
 export class EventoService {
-  private apiUrl = '/api/reservas';
+  private apiUrl: string;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfig: ApiConfigService
+  ) {
+    this.apiUrl = this.apiConfig.getUrl('/api/reservas');
+  }
 
   getEventosByUsuario(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/usuario/${userId}`);

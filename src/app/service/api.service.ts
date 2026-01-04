@@ -1,11 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
+  private http = inject(HttpClient);
+  private apiConfig = inject(ApiConfigService);
+  private baseUrl = this.apiConfig.getUrl('/api');
 
   // Permisos
   getPermisos(): Observable<any[]> {
@@ -36,10 +40,6 @@ export class ApiService {
   deleteRolPermiso(idRol: number, idPermiso: number): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/rol_permiso/${idRol}/${idPermiso}`);
   }
-  private http = inject(HttpClient);
-  // Temporary: call backend directly to bypass dev-server proxy while troubleshooting.
-  // Revert to '/api' after verifying proxy or starting dev server with proxy config.
-  private baseUrl = 'http://127.0.0.1:5000/api';
 
   // Proveedores - CRUD Completo
   getProveedores(): Observable<any[]> {

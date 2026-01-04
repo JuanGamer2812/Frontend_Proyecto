@@ -2,16 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { ApiConfigService } from './api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
-  private baseUrl = '/api/payments';
+  private baseUrl: string;
   private stripe: Stripe | null = null;
   private stripePublishableKey = 'pk_test_51xxxxx'; // ⚠️ CAMBIAR por tu clave pública
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private apiConfig: ApiConfigService
+  ) {
+    this.baseUrl = this.apiConfig.getUrl('/api/payments');
     this.initializeStripe();
   }
 

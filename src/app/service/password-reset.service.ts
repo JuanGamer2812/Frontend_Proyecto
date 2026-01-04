@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PasswordResetService {
-  private baseUrl = '/api/auth';
+  private baseUrl: string;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfig: ApiConfigService
+  ) {
+    this.baseUrl = this.apiConfig.getUrl('/api/auth');
+  }
 
   /** Solicita una contraseña temporal por email */
   requestTemporaryPassword(email: string): Observable<any> {

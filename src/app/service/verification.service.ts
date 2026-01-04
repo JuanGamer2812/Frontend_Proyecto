@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfigService } from './api-config.service';
 
 export interface SendVerificationResponse {
   message: string;
@@ -15,7 +16,8 @@ export interface VerifyEmailResponse {
 @Injectable({ providedIn: 'root' })
 export class VerificationService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/auth';
+  private apiConfig = inject(ApiConfigService);
+  private readonly baseUrl = this.apiConfig.getUrl('/api/auth');
 
   sendVerificationEmail(): Observable<SendVerificationResponse> {
     return this.http.post<SendVerificationResponse>(`${this.baseUrl}/send-verification`, {});

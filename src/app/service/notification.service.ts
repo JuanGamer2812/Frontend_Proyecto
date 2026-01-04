@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { AuthJwtService } from './auth-jwt.service';
+import { ApiConfigService } from './api-config.service';
 
 export interface Notificacion {
   id_notificacion: number;
@@ -33,7 +34,7 @@ export interface ContadorNotificaciones {
   providedIn: 'root'
 })
 export class NotificationService {
-  private apiUrl = '/api/notificaciones';
+  private apiUrl: string;
   private socket: Socket | null = null;
   private connected = signal(false);
 
@@ -51,8 +52,10 @@ export class NotificationService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthJwtService
+    private authService: AuthJwtService,
+    private apiConfig: ApiConfigService
   ) {
+    this.apiUrl = this.apiConfig.getUrl('/api/notificaciones');
     // Auto-conectar cuando el usuario está autenticado
     if (this.authService.isAuthenticated()) {
       this.connect();
@@ -75,7 +78,8 @@ export class NotificationService {
       return;
     }
 
-    this.socket = io('/', {
+    const socketUrl = this.apiConfig.getBaseUrl() || '/';
+    this.socket = io(socketUrl, {
       path: '/socket.io',
       auth: { token },
       transports: ['websocket', 'polling']
