@@ -23,13 +23,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Adjuntar Authorization excepto en endpoints públicos de auth (login/register/refresh)
   const isPublicAuthEndpoint = /\/api\/auth\/(login|register|refresh)(\/|$)/.test(req.url);
-  // Consider local backend hosts as internal so the interceptor attaches the token
+  // Consider local backend hosts AND Railway backend as internal so the interceptor attaches the token
   const isExternalUrl = !(
     req.url.startsWith('/api') ||
     req.url.startsWith('http://localhost') ||
     req.url.startsWith('https://localhost') ||
     req.url.startsWith('http://127.0.0.1') ||
-    req.url.startsWith('https://127.0.0.1')
+    req.url.startsWith('https://127.0.0.1') ||
+    req.url.includes('backendproyecto-production') ||
+    req.url.includes('.up.railway.app')
   );
 
   // Clonar la petición y agregar el token si existe
