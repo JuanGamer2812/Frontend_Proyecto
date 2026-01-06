@@ -9,6 +9,7 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { PostulacionService } from '../../service/postulacion.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-postulacion-trabajador',
@@ -129,13 +130,13 @@ export class PostulacionTrabajador {
     this.postulacionService.postularTrabajador(postulacion).subscribe({
       next: () => {
         this.enviando = false;
-        alert('¡Trabajador registrado exitosamente!');
+        Swal.fire({ icon: 'success', title: 'Postulación registrada', text: '¡Trabajador registrado exitosamente!' });
         this.form.reset();
       },
       error: (err) => {
         this.enviando = false;
         const mensaje = err.error?.error || 'No se pudo registrar la postulación. Intenta nuevamente.';
-        alert(mensaje);
+        Swal.fire({ icon: 'error', title: 'No se pudo registrar', text: mensaje });
       }
     });
   }

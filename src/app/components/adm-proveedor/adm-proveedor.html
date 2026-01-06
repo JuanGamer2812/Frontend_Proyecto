@@ -104,7 +104,7 @@
                     <table class="table table-striped align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
+                                <th>#</th>
                                 <th>Nombre</th>
                                 <th>Precio Base</th>
                                 <th>Estado</th>
@@ -115,9 +115,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (p of listado(); track getId(p)) {
+                            @for (p of listado(); track getId(p); let i = $index) {
                             <tr>
-                                <td>{{ p.id_proveedor }}</td>
+                                <td>{{ i + 1 }}</td>
                                 <td><strong>{{ p.nombre }}</strong></td>
                                 <td>{{ formatCurrency(p.precio_base) }}</td>
                                 <td>

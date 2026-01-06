@@ -10,6 +10,7 @@ import {
 } from '@angular/forms';
 import { AuthJwtService } from '../../service/auth-jwt.service';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-crear-cuenta',
@@ -180,14 +181,14 @@ export class CrearCuenta {
         response = await firstValueFrom(this.authService.register(payload));
       }
 
-      alert('¡Registro realizado exitosamente!');
+      await Swal.fire({ icon: 'success', title: 'Registro realizado', text: 'Tu cuenta fue creada correctamente.' });
       this.form.reset();
       this.fotoPreview = null;
       this.router.navigate(['/home']);
     } catch (error: any) {
       console.error('Error en registro:', error);
       const serverMsg = error?.error?.message || error?.message || (typeof error === 'string' ? error : JSON.stringify(error));
-      alert(serverMsg || 'Error al crear la cuenta');
+      await Swal.fire({ icon: 'error', title: 'No se pudo crear la cuenta', text: serverMsg || 'Intenta nuevamente en unos segundos.' });
     } finally {
       this.submitting.set(false);
     }

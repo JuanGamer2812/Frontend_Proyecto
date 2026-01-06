@@ -6,6 +6,7 @@ import { AuthJwtService } from '../../service/auth-jwt.service';
 import { JsonPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import Swal from 'sweetalert2';
 
 type Categoria = string;
 type Vista = 'proveedores' | 'postulaciones';
@@ -202,7 +203,17 @@ export class AdmProveedor implements OnInit {
         });
 
         console.log('Proveedores mapeados:', mapeados);
-        this.proveedores.set(mapeados);
+
+        // Ordenar alfabéticamente por nombre y luego por ID para numeración estable
+        const ordenados = [...mapeados].sort((a, b) => {
+          const nombreA = (a.nombre || '').toString().toLowerCase();
+          const nombreB = (b.nombre || '').toString().toLowerCase();
+          if (nombreA < nombreB) return -1;
+          if (nombreA > nombreB) return 1;
+          return (this.getId(a) || 0) - (this.getId(b) || 0);
+        });
+
+        this.proveedores.set(ordenados);
         this.loadingProveedores.set(false);
       },
       error: (err) => {
@@ -220,7 +231,14 @@ export class AdmProveedor implements OnInit {
 
     this.apiService.getTrabajaNosotrosProveedor().subscribe({
       next: (data) => {
-        this.postulaciones.set(data);
+        const ordenadas = [...(data || [])].sort((a, b) => {
+          const nombreA = (a.nom_empresa_postu_proveedor || '').toString().toLowerCase();
+          const nombreB = (b.nom_empresa_postu_proveedor || '').toString().toLowerCase();
+          if (nombreA < nombreB) return -1;
+          if (nombreA > nombreB) return 1;
+          return (a.id_postu_proveedor ?? 0) - (b.id_postu_proveedor ?? 0);
+        });
+        this.postulaciones.set(ordenadas);
         this.loadingPostulaciones.set(false);
       },
       error: (err) => {
@@ -231,13 +249,20 @@ export class AdmProveedor implements OnInit {
     });
   }
 
-  aprobarPostulacion(post: PostulacionProveedor): void {
+  async aprobarPostulacion(post: PostulacionProveedor): Promise<void> {
     const idPost = post.id_postu_proveedor;
     if (!idPost) return;
 
-    if (!confirm(`¿Aprobar postulante "${post.nom_empresa_postu_proveedor}" y convertirlo en proveedor?`)) {
-      return;
-    }
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Aprobar postulante',
+      text: `¿Aprobar postulante "${post.nom_empresa_postu_proveedor}" y convertirlo en proveedor?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     const proc = this.procesando();
     proc[idPost] = true;
@@ -271,7 +296,7 @@ export class AdmProveedor implements OnInit {
       const p = this.procesando();
       delete p[idPost];
       this.procesando.set({ ...p });
-      alert('No hay un plan válido para convertir. Reintenta cuando se carguen los planes.');
+      Swal.fire({ icon: 'warning', title: 'Plan no disponible', text: 'No hay un plan válido para convertir. Reintenta cuando se carguen los planes.' });
       return;
     }
 
@@ -307,7 +332,7 @@ export class AdmProveedor implements OnInit {
           const p = this.procesando();
           delete p[idPost];
           this.procesando.set({ ...p });
-          alert(mensaje);
+          Swal.fire({ icon: 'success', title: 'Conversión completada', text: mensaje });
         };
 
         const limpiarPostulacion = () => {
@@ -340,18 +365,25 @@ export class AdmProveedor implements OnInit {
         delete p[idPost];
         this.procesando.set({ ...p });
         const msg = err.error?.message || err.error?.error || err.message || 'Error al convertir postulante';
-        alert('Error al convertir postulante: ' + msg + '\nRevisa que el backend reciba precio_base e id_plan.');
+        Swal.fire({ icon: 'error', title: 'No se pudo convertir', text: 'Error al convertir postulante: ' + msg + ' Revisa que el backend reciba precio_base e id_plan.' });
       }
     });
   }
 
-  eliminarPostulacion(post: PostulacionProveedor): void {
+  async eliminarPostulacion(post: PostulacionProveedor): Promise<void> {
     const idPost = post.id_postu_proveedor;
     if (!idPost) return;
 
-    if (!confirm(`¿Eliminar la postulación de "${post.nom_empresa_postu_proveedor}"? Esta acción no se puede deshacer.`)) {
-      return;
-    }
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Eliminar postulación',
+      text: `¿Eliminar la postulación de "${post.nom_empresa_postu_proveedor}"? Esta acción no se puede deshacer.`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     const proc = this.procesando();
     proc[idPost] = true;
@@ -365,14 +397,14 @@ export class AdmProveedor implements OnInit {
         const p = this.procesando();
         delete p[idPost];
         this.procesando.set({ ...p });
-        alert('Postulación eliminada');
+        Swal.fire({ icon: 'success', title: 'Postulación eliminada', text: 'La postulación se eliminó correctamente.' });
       },
       error: (err) => {
         console.error('Error al eliminar postulación:', err);
         const p = this.procesando();
         delete p[idPost];
         this.procesando.set({ ...p });
-        alert('Error al eliminar: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: 'Error al eliminar: ' + (err.error?.message || err.message) });
       }
     });
   }
@@ -491,10 +523,17 @@ export class AdmProveedor implements OnInit {
     this.router.navigate(['/editar-proveedor', id]);
   }
 
-  eliminarProveedor(id: number): void {
-    if (!confirm('¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) {
-      return;
-    }
+  async eliminarProveedor(id: number): Promise<void> {
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Eliminar proveedor',
+      text: '¿Está seguro de eliminar este proveedor? Esta acción no se puede deshacer.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     const procesandoActual = this.procesando();
     procesandoActual[id] = true;
@@ -509,15 +548,14 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        
-        alert('Proveedor eliminado exitosamente');
+        Swal.fire({ icon: 'success', title: 'Proveedor eliminado', text: 'El proveedor fue eliminado exitosamente.' });
       },
       error: (err) => {
         console.error('Error al eliminar proveedor:', err);
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al eliminar el proveedor: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: 'Error al eliminar el proveedor: ' + (err.error?.message || err.message) });
       }
     });
   }
@@ -549,17 +587,24 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al cambiar el estado: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo cambiar el estado', text: err.error?.message || err.message });
       }
     });
   }
 
-  aprobarProveedor(proveedor: Proveedor): void {
+  async aprobarProveedor(proveedor: Proveedor): Promise<void> {
     if (!proveedor.id_proveedor) return;
-    
-    if (!confirm(`¿Aprobar el proveedor "${proveedor.nombre}"?`)) {
-      return;
-    }
+
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Aprobar proveedor',
+      text: `¿Aprobar el proveedor "${proveedor.nombre}"?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     const currentUser = this.authService.getCurrentUser();
     const userId = currentUser?.id || null;
@@ -592,27 +637,33 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        
-        alert('Proveedor aprobado exitosamente');
+        Swal.fire({ icon: 'success', title: 'Proveedor aprobado', text: 'El proveedor fue aprobado exitosamente.' });
       },
       error: (err) => {
         console.error('Error al aprobar proveedor:', err);
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al aprobar el proveedor: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo aprobar', text: 'Error al aprobar el proveedor: ' + (err.error?.message || err.message) });
       }
     });
   }
 
-  rechazarProveedor(proveedor: Proveedor): void {
+  async rechazarProveedor(proveedor: Proveedor): Promise<void> {
     if (!proveedor.id_proveedor) return;
-    
-    // Prompt mejorado para motivo de rechazo
-    const motivo = prompt(`¿Por qué rechazar a "${proveedor.nombre}"?\n\nIngrese el motivo del rechazo:`);
-    if (!motivo || motivo.trim() === '') {
-      return;
-    }
+
+    const { value: motivo } = await Swal.fire({
+      icon: 'warning',
+      title: 'Rechazar proveedor',
+      text: `¿Por qué rechazar a "${proveedor.nombre}"?`,
+      input: 'text',
+      inputPlaceholder: 'Motivo del rechazo',
+      showCancelButton: true,
+      confirmButtonText: 'Rechazar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!motivo || !motivo.trim()) return;
 
     const currentUser = this.authService.getCurrentUser();
     const userId = currentUser?.id || null;
@@ -645,23 +696,32 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        
-        alert('Proveedor rechazado con motivo: ' + motivo.trim());
+        Swal.fire({ icon: 'success', title: 'Proveedor rechazado', text: 'Proveedor rechazado con motivo: ' + motivo.trim() });
       },
       error: (err) => {
         console.error('Error al rechazar proveedor:', err);
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al rechazar el proveedor: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo rechazar', text: 'Error al rechazar el proveedor: ' + (err.error?.message || err.message) });
       }
     });
   }
 
-  suspenderProveedor(proveedor: Proveedor): void {
+  async suspenderProveedor(proveedor: Proveedor): Promise<void> {
     if (!proveedor.id_proveedor) return;
-    
-    const razon = prompt('Ingrese la razón de la suspensión:');
+
+    const { value: razon } = await Swal.fire({
+      icon: 'warning',
+      title: 'Suspender proveedor',
+      text: 'Ingrese la razón de la suspensión:',
+      input: 'text',
+      inputPlaceholder: 'Motivo',
+      showCancelButton: true,
+      confirmButtonText: 'Suspender',
+      cancelButtonText: 'Cancelar'
+    });
+
     if (!razon) return;
 
     const currentUser = this.authService.getCurrentUser();
@@ -694,15 +754,14 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        
-        alert('Proveedor suspendido (no aparecerá en /colaboradores)');
+        Swal.fire({ icon: 'success', title: 'Proveedor suspendido', text: 'El proveedor fue suspendido (no aparecerá en /colaboradores).' });
       },
       error: (err) => {
         console.error('Error al suspender proveedor:', err);
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al cambiar el estado del proveedor: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo suspender', text: 'Error al cambiar el estado del proveedor: ' + (err.error?.message || err.message) });
       }
     });
   }
@@ -727,15 +786,14 @@ export class AdmProveedor implements OnInit {
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        
-        alert('Proveedor desuspendido, aprobado y activado');
+        Swal.fire({ icon: 'success', title: 'Proveedor reactivado', text: 'Proveedor desuspendido, aprobado y activado.' });
       },
       error: (err) => {
         console.error('Error al desuspender proveedor:', err);
         const procesandoActual = this.procesando();
         delete procesandoActual[id];
         this.procesando.set({ ...procesandoActual });
-        alert('Error al desuspender el proveedor: ' + (err.error?.message || err.message));
+        Swal.fire({ icon: 'error', title: 'No se pudo reactivar', text: 'Error al desuspender el proveedor: ' + (err.error?.message || err.message) });
       }
     });
   }

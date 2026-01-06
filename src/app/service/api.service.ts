@@ -366,8 +366,16 @@ export class ApiService {
     return this.http.post<any>(`${this.baseUrl}/proveedor-caracteristicas`, payload);
   }
 
+  updateProveedorCaracteristicas(id_proveedor: number, caracteristicas: any[]): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/proveedor/${id_proveedor}/caracteristicas`, caracteristicas);
+  }
+
   subirImagenesProveedor(formData: FormData): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/proveedor-imagen`, formData);
+  }
+
+  eliminarImagenProveedor(id_imagen: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/proveedor-imagen/${id_imagen}`);
   }
 
   getProveedoresPorPlan(id_plan: number | string): Observable<any[]> {
@@ -375,6 +383,9 @@ export class ApiService {
   }
   getProveedorById(id: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/proveedor/${id}`);
+  }
+  getProveedorCompleto(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/proveedores/${id}/completo`);
   }
   getProveedorCaracteristicasById(id: number): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/proveedor/${id}/caracteristicas`);
@@ -397,6 +408,15 @@ export class ApiService {
   /**
    * Método genérico para POST a cualquier endpoint
    */
+  /**
+   * Verifica disponibilidad de un proveedor en un rango de fechas
+   */
+  verificarDisponibilidadProveedor(id_proveedor: number, fecha_inicio: string, fecha_fin: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/proveedor/${id_proveedor}/disponibilidad`, {
+      params: { fecha_inicio, fecha_fin }
+    });
+  }
+
   postData(endpoint: string, data: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/${endpoint}`, data);
   }

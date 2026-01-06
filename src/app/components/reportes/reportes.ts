@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ReportesService, ReporteProveedor, ReporteTrabajador } from '../../service/reportes.service';
 import { PdfViewerModal } from '../pdf-viewer-modal/pdf-viewer-modal';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-reportes',
@@ -141,7 +142,7 @@ export class ReportesComponent {
 
   abrirVerCV(cvUrl: string | null | undefined, nombreArchivo: string = 'CV.pdf'): void {
     if (!cvUrl) {
-      alert('No hay CV disponible para visualizar');
+      Swal.fire({ icon: 'info', title: 'Sin CV disponible', text: 'No hay CV para visualizar en este registro.' });
       return;
     }
     this.pdfModalUrl.set(cvUrl);
@@ -151,7 +152,7 @@ export class ReportesComponent {
 
   abrirVerPortafolio(portafolioUrl: string | null | undefined, nombreEmpresa: string = 'Portafolio.pdf'): void {
     if (!portafolioUrl) {
-      alert('No hay portafolio disponible para visualizar');
+      Swal.fire({ icon: 'info', title: 'Sin portafolio disponible', text: 'No hay portafolio para visualizar en este registro.' });
       return;
     }
     // Agregar fragmento para forzar visualización en línea

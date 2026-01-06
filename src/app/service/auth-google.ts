@@ -3,6 +3,7 @@ import { AuthJwtService } from './auth-jwt.service';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -202,8 +203,13 @@ export class AuthGoogle {
     };
     
     console.log('[GoogleLogin] PAYLOAD a enviar al backend:', JSON.stringify(payload, null, 2));
+
+    // Construir endpoint respetando apiUrl en producción (evita golpear Nginx estático)
+    const googleLoginUrl = (environment.apiUrl || '').trim()
+      ? `${environment.apiUrl}/api/auth/google-login`
+      : '/api/auth/google-login';
     try {
-      const resp: any = await this.http.post('/api/auth/google-login', payload).toPromise();
+      const resp: any = await this.http.post(googleLoginUrl, payload).toPromise();
       // Aceptar 'token' o 'accessToken' según la respuesta del backend
       const accessToken = resp.accessToken || resp.token;
       const refreshToken = resp.refreshToken || resp.refresh_token;

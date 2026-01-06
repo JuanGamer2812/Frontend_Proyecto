@@ -3,10 +3,10 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 15, 35, 0.28);
-    backdrop-filter: blur(6px);
+    background: rgba(38, 30, 25, 0.55);
+    backdrop-filter: blur(8px);
     z-index: 1040;
-    animation: fadeIn 120ms ease-out;
+    animation: fadeIn 140ms ease-out;
 }
 
 .pdf-modal {
@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 1.25rem;
     pointer-events: none;
 }
 
@@ -24,30 +24,38 @@
     pointer-events: auto;
     display: flex;
     flex-direction: column;
-    width: min(980px, 86vw);
-    height: 78vh;
-    background: #ffffff;
+    width: min(980px, 88vw);
+    height: 80vh;
+    background: #f4f1ed;
     border-radius: 14px;
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 18px 60px rgba(67, 52, 44, 0.3);
+    border: 1px solid rgba(122, 75, 52, 0.18);
     overflow: hidden;
-    animation: slideIn 140ms ease-out;
+    animation: slideIn 160ms ease-out;
 }
 
 .pdf-modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #7a4b34 0%, #c08a55 100%);
+    color: #f8f2ec;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .pdf-modal-header h5 {
     margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.08rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+}
+
+.pdf-modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
 }
 
 .pdf-modal-body {
@@ -57,14 +65,18 @@
     overflow: hidden;
     width: 100%;
     height: 100%;
-    background: #fdfdfd;
+    background: #f9f6f2;
+    padding: 0.75rem 0.9rem 0.9rem;
 }
 
 .pdf-iframe {
     flex: 1;
     width: 100%;
     height: 100%;
-    border: none;
+    border: 1px solid rgba(85, 99, 111, 0.15);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
     display: block;
 }
 
@@ -72,53 +84,51 @@
     .pdf-modal {
         padding: 1rem;
     }
-
     .pdf-modal-content {
         width: min(980px, 96vw);
         height: 82vh;
     }
-
     .pdf-modal-header h5 {
         font-size: 1rem;
-    }
-
-    .pdf-modal-footer {
-        gap: 0.75rem;
-    }
-
-    .pdf-modal-footer .btn {
-        padding: 0.55rem 1rem;
-        font-size: 0.9rem;
+        .pdf-modal-footer {
+            background: #f1ede7;
+            border-top: 1px solid rgba(122, 75, 52, 0.12);
+            padding: 0.85rem 1.2rem;
+            flex-shrink: 0;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
     }
 }
 
 @media (max-width: 768px) {
     .pdf-modal {
-        padding: 0.75rem;
-    }
-
-    .pdf-modal-content {
-        width: 98vw;
+        .pdf-modal-footer .btn {
+            padding: 0.6rem 1.3rem;
+            font-weight: 600;
+            border-radius: 10px;
+            letter-spacing: 0.01em;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
         height: 86vh;
         border-radius: 10px;
     }
-
     .pdf-modal-header {
-        padding: 0.9rem 1rem;
+        .pdf-modal-footer .btn-secondary {
+            background: #f7f2ec;
+            border: 1px solid rgba(85, 99, 111, 0.25);
+            color: #55636f;
+        }
     }
-
-    .pdf-modal-header h5 {
-        font-size: 0.95rem;
-    }
-
     .pdf-modal-footer {
         flex-direction: column-reverse;
         padding: 0.9rem 1rem;
-        gap: 0.75rem;
-    }
-
-    .pdf-modal-footer .btn {
-        width: 100%;
+        .pdf-modal-footer .btn-primary {
+            background: linear-gradient(135deg, #7a4b34 0%, #9b623f 100%);
+            border: none;
+            color: #fff9f3;
+        }
         padding: 0.65rem 1rem;
         font-size: 0.92rem;
     }
@@ -128,37 +138,33 @@
     .pdf-modal-content {
         height: 88vh;
     }
-
     .pdf-modal-header h5 {
         font-size: 0.9rem;
     }
-
     .pdf-modal-header .btn-close {
         padding: 0.25rem;
     }
 }
-  
+
+
 /* Responsive */
+
 @media (max-width: 992px) {
     .pdf-modal {
         width: 96%;
         height: 88vh;
         max-width: 900px;
     }
-
     .pdf-modal-header h5 {
         font-size: 1rem;
     }
-
     .pdf-modal-body {
         padding: 1.25rem;
     }
-
     .pdf-modal-footer {
         padding: 1rem 1.25rem;
         gap: 0.75rem;
     }
-
     .pdf-modal-footer .btn {
         padding: 0.55rem 1rem;
         font-size: 0.9rem;
@@ -171,25 +177,20 @@
         height: 90vh;
         max-width: 100%;
     }
-
     .pdf-modal-header {
         padding: 1rem;
     }
-
     .pdf-modal-header h5 {
         font-size: 0.9rem;
     }
-
     .pdf-modal-body {
         padding: 1rem;
     }
-
     .pdf-modal-footer {
         flex-direction: column-reverse;
         padding: 1rem;
         gap: 0.75rem;
     }
-
     .pdf-modal-footer .btn {
         width: 100%;
         padding: 0.65rem 1rem;
@@ -202,27 +203,21 @@
         height: 92vh;
         border-radius: 8px;
     }
-
     .pdf-modal-header {
         padding: 0.75rem;
     }
-
     .pdf-modal-header h5 {
         font-size: 0.85rem;
     }
-
     .pdf-modal-header .btn-close {
         padding: 0.25rem;
     }
-
     .pdf-modal-body {
         padding: 0.75rem;
     }
-
     .pdf-modal-footer {
         padding: 0.75rem;
     }
-
     .pdf-modal-footer .btn {
         padding: 0.6rem 0.9rem;
         font-size: 0.85rem;

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -80,17 +80,102 @@ export class Reserva implements OnInit {
   private proveedorSubscriptions: Array<Subscription | null> = [];
   private miscSubscriptions: Subscription[] = [];
   private proveedorCache: { [id: number]: any } = {};
+  
+  // Cache de disponibilidad de proveedores para un rango de fechas
+  private proveedoresDisponibles: Set<number> = new Set();
 
   form: FormGroup;
+
+  // ==================== VALIDADOR DE CÉDULA ECUATORIANA ====================
+  private validarCedulaEcuatoriana = (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) {
+      return null;
+    }
+
+    const ci = control.value.toString().trim();
+    let isNumeric = true;
+    let total = 0;
+    let individual = '';
+
+    // Verificar que sea exactamente 10 dígitos
+    if (ci.length !== 10) {
+      return { cedulaInvalida: true };
+    }
+
+    for (let position = 0; position < 10; position++) {
+      individual = ci.substring(position, position + 1);
+
+      if (isNaN(parseInt(individual))) {
+        isNumeric = false;
+        break;
+      } else {
+        if (position < 9) {
+          // Posiciones pares (0, 2, 4, 6, 8)
+          if (position % 2 === 0) {
+            const doubled = parseInt(individual) * 2;
+            if (doubled > 9) {
+              total += 1 + (doubled % 10);
+            } else {
+              total += doubled;
+            }
+          } else {
+            // Posiciones impares (1, 3, 5, 7)
+            total += parseInt(individual);
+          }
+        }
+      }
+    }
+
+    // Calcular el dígito verificador
+    let verificador: number;
+    if (total % 10 !== 0) {
+      verificador = (total - (total % 10) + 10) - total;
+    } else {
+      verificador = 0;
+    }
+
+    // Validaciones finales
+    if (!isNumeric) {
+      return { cedulaInvalida: true };
+    }
+
+    if (parseInt(ci, 10) === 0) {
+      return { cedulaCero: true };
+    }
+
+    if (verificador !== parseInt(individual)) {
+      return { cedulaInvalida: true };
+    }
+
+    return null;
+  };
+
+  // Restringe horarios entre 08:00 y 23:59 para inicio/fin de evento
+  private validarHorarioPermitido = (control: AbstractControl): ValidationErrors | null => {
+    const raw = control?.value;
+    if (!raw) return null;
+    try {
+      const parts = raw.toString().split('T');
+      if (parts.length < 2) return null;
+      const timePart = parts[1];
+      const [hh] = timePart.split(':');
+      const hour = Number(hh);
+      if (!Number.isFinite(hour)) return null;
+      if (hour < 8) {
+        return { horarioNoPermitido: true };
+      }
+    } catch (_) {}
+    return null;
+  };
 
   constructor() {
     this.form = this.fb.group({
       nombre_evento: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      cedula_reservacion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(15)]],
+      cedula_reservacion: ['', [Validators.required, this.validarCedulaEcuatoriana]],
       id_categoria: ['', Validators.required],
       descripcion_evento: ['', Validators.required],
-      fecha_inicio_evento: ['', Validators.required],
-      fecha_fin_evento: ['', Validators.required],
+      fecha_inicio_evento: ['', [Validators.required, this.validarHorarioPermitido]],
+      fecha_fin_evento: ['', [Validators.required, this.validarHorarioPermitido]],
       id_plan: [''],
       hay_playlist_evento: [false],
       playlist_evento: [''],
@@ -106,6 +191,7 @@ export class Reserva implements OnInit {
     const idTipo = grupo.get('id_tipo')?.value || (grupo.get('categoria')?.value ? this.resolveTipoIdFromCategoria(grupo.get('categoria')?.value) : null);
     if (!idTipo) return;
     const idProv = grupo.get('id_proveedor')?.value;
+    const catNorm = this.normalizeCategoria(grupo.get('categoria')?.value);
 
     // Cargamos las características del tipo y (si se indica) los valores del proveedor
     this.apiService.getCaracteristicasByTipo(idTipo).subscribe((list: any[]) => {
@@ -119,10 +205,13 @@ export class Reserva implements OnInit {
         valorUsuario: (c.tipo_valor === 'booleano' || c.tipo === 'booleano') ? false : (c.tipo_valor === 'numero' || c.tipo === 'numero' ? 0 : '')
       }));
 
+      // Mantener características de menú para mostrar PDFs/URLs; el envío al backend se filtra más adelante.
+      const baseFiltered = baseList;
+
       if (!idProv) {
-        this.proveedorCaracteristicasEditable[index] = baseList;
+        this.proveedorCaracteristicasEditable[index] = baseFiltered;
         // almacenar originales
-        this.proveedorCaracteristicasOriginal[index] = baseList.map((b: any) => ({ id_caracteristica: b.id_caracteristica, valor: b.valorUsuario }));
+        this.proveedorCaracteristicasOriginal[index] = baseFiltered.map((b: any) => ({ id_caracteristica: b.id_caracteristica, valor: b.valorUsuario }));
         return;
       }
 
@@ -158,7 +247,7 @@ export class Reserva implements OnInit {
           valsToUse = this.proveedorCache[Number(idProv)].proveedor_caracteristica || this.proveedorCache[Number(idProv)].proveedor_caracteristicas || this.proveedorCache[Number(idProv)].caracteristicas || [];
         }
 
-        const editList = baseList.map(b => {
+        const editList = baseFiltered.map(b => {
           const v = (valsToUse || []).find((x: any) => Number(x.id_caracteristica || x.id) === Number(b.id_caracteristica));
           if (v) {
             if (b.tipo === 'numero') b.valorUsuario = v.valor_numero ?? v.valor ?? b.valorUsuario;
@@ -176,7 +265,7 @@ export class Reserva implements OnInit {
         const cached = idProv ? this.proveedorCache[Number(idProv)] : null;
         if (cached) {
           const provVals = cached.proveedor_caracteristica || cached.proveedor_caracteristicas || cached.caracteristicas || [];
-          const editList = baseList.map(b => {
+          const editList = baseFiltered.map(b => {
             const v = (provVals || []).find((x: any) => Number(x.id_caracteristica || x.id) === Number(b.id_caracteristica));
             if (v) {
               if (b.tipo === 'numero') b.valorUsuario = v.valor_numero ?? v.valor ?? b.valorUsuario;
@@ -190,8 +279,8 @@ export class Reserva implements OnInit {
           this.proveedorCaracteristicasOriginal[index] = editList.map((e: any) => ({ id_caracteristica: e.id_caracteristica, valor: e.valorProveedor != null ? (e.tipo === 'numero' ? Number(e.valorProveedor.valor_numero ?? e.valorProveedor.valor) : (e.tipo === 'booleano' ? !!(e.valorProveedor.valor_booleano ?? e.valorProveedor.valor) : (e.valorProveedor.valor_texto ?? e.valorProveedor.valor ?? '')) ) : e.valorUsuario }));
         } else {
           // fallback: usar la lista base sin valores del proveedor
-          this.proveedorCaracteristicasEditable[index] = baseList;
-          this.proveedorCaracteristicasOriginal[index] = baseList.map((b: any) => ({ id_caracteristica: b.id_caracteristica, valor: b.valorUsuario }));
+          this.proveedorCaracteristicasEditable[index] = baseFiltered;
+          this.proveedorCaracteristicasOriginal[index] = baseFiltered.map((b: any) => ({ id_caracteristica: b.id_caracteristica, valor: b.valorUsuario }));
         }
       });
     }, () => {});
@@ -280,6 +369,19 @@ export class Reserva implements OnInit {
       const sub = playlistCtrl.valueChanges.subscribe(() => this.actualizarSpotifyEmbed());
       this.miscSubscriptions.push(sub);
     }
+    
+    // Watchers para verificar disponibilidad cuando cambien las fechas
+    const fechaInicioCtrl = this.form.get('fecha_inicio_evento');
+    const fechaFinCtrl = this.form.get('fecha_fin_evento');
+    
+    if (fechaInicioCtrl) {
+      const sub = fechaInicioCtrl.valueChanges.subscribe(() => this.actualizarDisponibilidad());
+      this.miscSubscriptions.push(sub);
+    }
+    if (fechaFinCtrl) {
+      const sub = fechaFinCtrl.valueChanges.subscribe(() => this.actualizarDisponibilidad());
+      this.miscSubscriptions.push(sub);
+    }
   }
 
   get proveedoresArray(): FormArray {
@@ -288,6 +390,47 @@ export class Reserva implements OnInit {
 
   get invitadosArray(): FormArray {
     return this.form.get('invitados') as FormArray;
+  }
+
+  isMenuCaracteristica(nombre: string): boolean {
+    if (!nombre) return false;
+    const n = nombre.toLowerCase();
+    return n.includes('menu') || n.includes('menú');
+  }
+
+  isProveedorCatering(index: number): boolean {
+    const cat = this.proveedoresArray.at(index)?.get('categoria')?.value;
+    return this.normalizeCategoria(cat) === 'CATERING';
+  }
+
+  setCaracteristicaEntero(car: any, value: any): void {
+    const n = Number.parseInt(String(value ?? '').trim(), 10);
+    if (Number.isFinite(n)) {
+      car.valorUsuario = n;
+    } else {
+      car.valorUsuario = null;
+    }
+  }
+
+  getMenuPdf(index: number): { url: any; nombre: string } | null {
+    try {
+      const lista = this.proveedorCaracteristicasEditable[index] || [];
+      const found = (lista as any[]).find(c => this.isMenuCaracteristica(c?.nombre || '') && this.esCaracteristicaFileUrl(c) && c.valorProveedor);
+      if (!found) return null;
+      const url = found.valorProveedor?.valor || found.valorProveedor?.valor_texto || found.valorProveedor;
+      if (!url) return null;
+      return { url, nombre: found.nombre || 'Menú' };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  selectNumeroMenuProveedor(index: number, valor: number): void {
+    if (valor < 1 || valor > 3) return;
+    const ctrl = this.proveedoresArray.at(index)?.get('numero_menu');
+    ctrl?.setValue(valor);
+    ctrl?.markAsDirty();
+    ctrl?.markAsTouched();
   }
 
   get planesVisibles(): any[] {
@@ -312,8 +455,20 @@ export class Reserva implements OnInit {
       id_tipo: [ (cat as any).id_tipo || '', Validators.required],
       id_plan: [ this.form.get('id_plan')?.value || '', Validators.required ],
       fecha_inicio_evento: [''],
-      fecha_fin_evento: ['']
+      fecha_fin_evento: [''],
+      numero_menu: [null]
     });
+    // Solo CATERING: obligar número de menú 1-3
+    const catNorm = this.normalizeCategoria(cat.nombre);
+    const numCtrl = grupo.get('numero_menu');
+    if (numCtrl) {
+      if (catNorm === 'CATERING') {
+        numCtrl.setValidators([Validators.required, Validators.min(1), Validators.max(3)]);
+      } else {
+        numCtrl.clearValidators();
+      }
+      numCtrl.updateValueAndValidity({ emitEvent: false });
+    }
     this.proveedoresArray.push(grupo);
 
     // Inicializa arrays para características e imágenes
@@ -376,43 +531,33 @@ export class Reserva implements OnInit {
   onProveedorPlanChange(index: number): void {
     const grp = this.proveedoresArray.at(index);
     if (!grp) return;
+    // Cuando cambias el plan de UN proveedor, solo deselecciona su proveedor
+    // No debes afectar a los otros proveedores
+    grp.get('id_proveedor')?.reset();
+    
     const planId = grp.get('id_plan')?.value;
-    // Actualizar mapas para que el filtrado por plan se aplique inmediatamente
-    try {
-      if (!planId) {
-        // Si se deseleccionó el plan, eliminar cache para este plan (si existiera) y recomputar
-        // No conocemos el plan previo aquí, así que recomputar usando cache existente
-        this.recomputeProveedoresAllFromCache();
-        this.actualizarMapProveedores();
-        return;
-      }
-      const key = String(planId);
-      // Si ya tenemos cache para este plan, usarla
-      if (this.proveedoresPorPlanCache[key] && this.proveedoresPorPlanCache[key].length > 0) {
-        this.recomputeProveedoresAllFromCache();
-        this.actualizarMapProveedores(planId);
-        return;
-      }
-
-      // Consultar al backend los proveedores para este plan y almacenarlos en cache.
-      this.apiService.getProveedoresPorPlan(planId).subscribe((provs: any[]) => {
+    if (!planId) {
+      this.actualizarMapProveedores();
+      return;
+    }
+    
+    // Load providers for this plan and add to cache (don't replace others)
+    const key = String(planId);
+    if (!this.proveedoresPorPlanCache[key]) {
+      this.apiService.getProveedoresPorPlan(planId).subscribe(provs => {
         this.proveedoresPorPlanCache[key] = provs || [];
+        // Recompute union of all cached providers
         this.recomputeProveedoresAllFromCache();
-        this.actualizarMapProveedores(planId);
+        // Update the type maps
+        this.actualizarMapProveedores();
       }, err => {
-        console.error('Error al obtener proveedores por plan (onProveedorPlanChange):', err);
-        // fallback: intentar obtener todos los proveedores aprobados
-        this.apiService.getProveedoresAprobados().subscribe((all: any[]) => {
-          this.proveedoresPorPlanCache[key] = (all || []);
-          this.recomputeProveedoresAllFromCache();
-          this.actualizarMapProveedores();
-        }, () => {
-          // si falla, simplemente recomputar con lo que haya en cache
-          this.recomputeProveedoresAllFromCache();
-          this.actualizarMapProveedores();
-        });
+        console.error('Error loading providers for plan:', err);
       });
-    } catch (e) { /* ignore */ }
+    } else {
+      // Already cached, just recompute and update maps
+      this.recomputeProveedoresAllFromCache();
+      this.actualizarMapProveedores();
+    }
   }
 
   private recomputeProveedoresAllFromCache(): void {
@@ -434,10 +579,8 @@ export class Reserva implements OnInit {
 
   onPlanSeleccionado(): void {
     const planId = this.form.get('id_plan')?.value;
-    // Limpia los proveedores seleccionados si cambia el plan
-    while (this.proveedoresArray.length > 0) {
-      this.eliminarProveedor(0);
-    }
+    // NO borrar los proveedores seleccionados - solo actualizar los disponibles
+    // Los proveedores agregados deben persistir aunque cambien de plan
 
     if (!planId) {
       this.proveedoresAll = [];
@@ -518,7 +661,57 @@ export class Reserva implements OnInit {
         filtered = filteredByPlan.filter(p => String(p['id_tipo']) === String(tipoSeleccionado) || String(p.tipo || p['nombre_tipo'] || '').toLowerCase() === String(tipoSeleccionado).toLowerCase());
       }
     }
+    
+    // Filter by availability: only show providers that are available for the selected dates
+    const fechaInicio = this.form.get('fecha_inicio_evento')?.value;
+    const fechaFin = this.form.get('fecha_fin_evento')?.value;
+    if (fechaInicio && fechaFin && this.proveedoresDisponibles.size > 0) {
+      filtered = filtered.filter(p => this.proveedoresDisponibles.has(Number(p.id_proveedor)));
+    }
+    
     return filtered;
+  }
+
+  private actualizarDisponibilidad(): void {
+    const fechaInicio = this.form.get('fecha_inicio_evento')?.value;
+    const fechaFin = this.form.get('fecha_fin_evento')?.value;
+    
+    if (!fechaInicio || !fechaFin) {
+      this.proveedoresDisponibles.clear();
+      return;
+    }
+    
+    // Clear previous availability cache
+    this.proveedoresDisponibles.clear();
+    
+    // For each provider in proveedoresAll, check availability
+    if (!this.proveedoresAll || this.proveedoresAll.length === 0) {
+      return;
+    }
+    
+    // Load all provider IDs and verify availability in batch
+    const providerIds = this.proveedoresAll.map(p => Number(p.id_proveedor)).filter(id => id);
+    
+    if (providerIds.length === 0) {
+      return;
+    }
+    
+    // Check availability for each provider
+    providerIds.forEach(id => {
+      this.apiService.verificarDisponibilidadProveedor(id, fechaInicio, fechaFin).subscribe({
+        next: (result: any) => {
+          // If result.disponible is true or if the endpoint returns the provider, mark as available
+          if (result && result.disponible !== false) {
+            this.proveedoresDisponibles.add(id);
+          }
+        },
+        error: (err) => {
+          console.error(`Error checking availability for provider ${id}:`, err);
+          // On error, assume available to avoid blocking
+          this.proveedoresDisponibles.add(id);
+        }
+      });
+    });
   }
 
   private actualizarMapProveedores(planId?: number | string | null): void {
@@ -858,8 +1051,6 @@ export class Reserva implements OnInit {
       const Swal = (await import('sweetalert2')).default;
       return Swal.fire({ icon, title, text });
     } catch (e) {
-      // fallback a alert si SweetAlert no está disponible
-      try { alert(title + (text ? '\n\n' + text : '')); } catch (e) {}
       return Promise.resolve(undefined);
     }
   }
@@ -892,6 +1083,30 @@ export class Reserva implements OnInit {
   isInvalid(name: string): boolean {
     const ctrl = this.form.get(name);
     return !!ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched);
+  }
+
+  /**
+   * Obtiene el mensaje de error específico para la cédula ecuatoriana
+   */
+  getCedulaErrorMessage(): string {
+    const control = this.form.get('cedula_reservacion');
+    if (!control || !control.errors) {
+      return '';
+    }
+
+    if (control.errors['required']) {
+      return 'La cédula es obligatoria';
+    }
+
+    if (control.errors['cedulaCero']) {
+      return 'La cédula ingresada no puede ser cero';
+    }
+
+    if (control.errors['cedulaInvalida']) {
+      return 'La cédula ingresada no es válida';
+    }
+
+    return 'Cédula inválida';
   }
 
   actualizarSpotifyEmbed(): void {
@@ -1013,6 +1228,8 @@ export class Reserva implements OnInit {
       };
       if (catNorm === 'CATERING') {
         proveedorObj.precio_persona = Number(precioUnit);
+        const numMenu = Number(g.get('numero_menu')?.value);
+        proveedorObj.numero_menu = Number.isFinite(numMenu) ? numMenu : null;
       }
       return proveedorObj;
     }).filter(p => p.id_proveedor);
@@ -1153,63 +1370,33 @@ export class Reserva implements OnInit {
         // Nota: el backend ya crea la factura al procesar POST /api/reservas.
         // No ejecutar POST /api/facturas desde el frontend (evitar duplicados).
 
-        // Guardar SOLO las características que el usuario realmente modificó
+        // Guardar TODAS las características actuales del proveedor (no solo cambios) para que se inserten en evento_proveedor_caracteristica
         const caracteristicasPayload: any[] = [];
-        console.log('🔍 Iniciando detección de cambios en características...');
+        console.log('🔍 Preparando inserción de características por proveedor...');
         
         this.proveedorCaracteristicasEditable.forEach((lista, idx) => {
           const idProveedor = Number(this.proveedoresArray.at(idx).get('id_proveedor')?.value);
           if (!idProveedor) return;
-          const originals = this.proveedorCaracteristicasOriginal[idx] || [];
-          
-          console.log(`📦 Proveedor ${idProveedor} - Comparando ${lista?.length || 0} características`);
-          
+          console.log(`📦 Proveedor ${idProveedor} - Enviando ${lista?.length || 0} características`);
+
           (lista || []).forEach((c: any) => {
-            const val = c.valorUsuario;
-            
-            // Buscar el valor original para esta característica
-            const origEntry = originals.find((o: any) => Number(o.id_caracteristica) === Number(c.id_caracteristica));
-            const origVal = origEntry ? origEntry.valor : undefined;
-            
-            // Detectar si realmente cambió comparando tipos correctamente
-            let changed = false;
-            
-            if (c.tipo === 'numero' || c.tipo === 'number') {
-              // Para números: comparar numéricamente, considerar null/undefined/'' como mismo valor
-              const valNum = (val === null || val === undefined || val === '') ? null : Number(val);
-              const origNum = (origVal === null || origVal === undefined || origVal === '') ? null : Number(origVal);
-              changed = valNum !== origNum;
-              if (changed) {
-                console.log(`  ✏️ ${c.nombre}: ${origNum} → ${valNum} (número)`);
-              }
-            } else if (c.tipo === 'booleano' || c.tipo === 'boolean') {
-              // Para booleanos: normalizar a true/false
-              const valBool = !!val;
-              const origBool = !!origVal;
-              changed = valBool !== origBool;
-              if (changed) {
-                console.log(`  ✏️ ${c.nombre}: ${origBool} → ${valBool} (booleano)`);
-              }
-            } else {
-              // Para texto/json: comparar strings, considerar vacíos como iguales
-              const valStr = (val === null || val === undefined) ? '' : String(val);
-              const origStr = (origVal === null || origVal === undefined) ? '' : String(origVal);
-              changed = valStr !== origStr;
-              if (changed) {
-                console.log(`  ✏️ ${c.nombre}: "${origStr}" → "${valStr}" (texto)`);
-              }
-            }
-            
-            // SOLO guardar si realmente cambió
-            if (!changed) return;
-            
-            // Construir payload según el tipo
+            // Omitir la característica de menú para CATERING (el menú se gestiona con el selector dedicado)
+            if (this.isProveedorCatering(idx) && this.isMenuCaracteristica(c.nombre || '')) return;
             const item: any = { 
               id_evento: idEvento, 
               id_proveedor: idProveedor, 
               id_caracteristica: Number(c.id_caracteristica) 
             };
-            
+
+            // Usar el valor del usuario; si está vacío, intentar el valor original del proveedor
+            let val = c?.valorUsuario;
+            if (val === undefined || val === null || val === '') {
+              const provVal = c?.valorProveedor;
+              if (provVal && typeof provVal === 'object') {
+                val = provVal.valor_numero ?? provVal.valor_booleano ?? provVal.valor_texto ?? provVal.valor ?? val;
+              }
+            }
+
             if (c.tipo === 'numero' || c.tipo === 'number') {
               item.valor_numero = (val === null || val === undefined || val === '') ? null : Number(val);
             } else if (c.tipo === 'booleano' || c.tipo === 'boolean') {
@@ -1219,19 +1406,19 @@ export class Reserva implements OnInit {
             } else {
               item.valor_texto = (val === null || val === undefined) ? '' : String(val);
             }
-            
+
             caracteristicasPayload.push(item);
           });
         });
 
         if (caracteristicasPayload.length > 0) {
-          console.log('📝 Insertar características MODIFICADAS en evento_proveedor_caracteristica:', caracteristicasPayload);
+          console.log('📝 Insertar características en evento_proveedor_caracteristica:', caracteristicasPayload);
           this.apiService.crearEventoProveedorCaracteristicas(caracteristicasPayload).subscribe({ 
             next: (resC) => { console.log('✅ Características guardadas:', resC); }, 
             error: (errC) => { console.error('❌ Error guardando características', errC); } 
           });
         } else {
-          console.log('ℹ️ No hay características modificadas para guardar');
+          console.log('ℹ️ No hay características para guardar (lista vacía)');
         }
 
         // Invitados ya se enviaron en el payload principal `reservasPayload`.

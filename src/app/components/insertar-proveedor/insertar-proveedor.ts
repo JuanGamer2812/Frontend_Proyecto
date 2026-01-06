@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { ApiService } from '../../service/api.service';
 import { AuthJwtService } from '../../service/auth-jwt.service';
+import { ApiConfigService } from '../../service/api-config.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -65,7 +66,8 @@ export class InsertarProveedor implements OnInit {
   constructor(
     private fb: FormBuilder,
     private apiService: ApiService,
-    private authService: AuthJwtService
+    private authService: AuthJwtService,
+    private apiConfig: ApiConfigService
   ) {
     this.crearFormulario();
   }
@@ -208,7 +210,7 @@ export class InsertarProveedor implements OnInit {
         datosGenerales: {
           precio_base: '',
           id_plan: this.planes?.[0]?.id_plan ?? null,
-          descripcion: this.postulanteSeleccionado.portafolio_postu_proveedor || '',
+          descripcion: '',
           estado: true,
           verificado: true,
         },
@@ -400,6 +402,42 @@ export class InsertarProveedor implements OnInit {
     return (this.formProveedor.get('caracteristicas') as FormGroup)?.get(this.getCarControlName(car));
   }
 
+  abrirPortafolio(url: string): void {
+    const normalized = this.buildPortafolioUrl(url);
+    if (!normalized) {
+      this.mostrarError('Portafolio no disponible');
+      return;
+    }
+    window.open(normalized, '_blank', 'noopener');
+  }
+
+  private buildPortafolioUrl(url: string): string {
+    const path = this.buildPortafolioPath(url);
+    if (!path) return '';
+    if (/^https?:\/\//i.test(path)) return path;
+    const base = this.apiConfig.getBaseUrl() || 'http://127.0.0.1:5000';
+    const finalPath = path.startsWith('/') ? path : `/${path}`;
+    return `${base}${finalPath}`;
+  }
+
+  private normalizarUrl(url: string): string {
+    if (!url) return '';
+    const trimmed = url.toString().trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith('/')) return window.location.origin + trimmed;
+    return 'https://' + trimmed;
+  }
+
+  private buildPortafolioPath(url: string): string {
+    if (!url) return '';
+    const trimmed = url.toString().trim();
+    if (!trimmed) return '';
+    if (trimmed.includes('/') || trimmed.startsWith('http')) return trimmed;
+    // Si es solo nombre de archivo, asumir carpeta temporal de uploads
+    return `/tmp_uploads/${trimmed}`;
+  }
+
   // ============ MANEJO DE FORMULARIO ============
   onSubmit(): void {
     // Permitir guardar aunque el formulario esté vacío: solo exigimos postulante, categoría y al menos una imagen principal
@@ -449,8 +487,11 @@ export class InsertarProveedor implements OnInit {
       planValue = this.planes?.[0]?.id_plan || 1;
     }
 
-    const descripcionFinal = descripcionCaracteristica || this.postulanteSeleccionado.portafolio_postu_proveedor || 'Sin descripción';
+    const descripcionFinal = descripcionCaracteristica || datosGenerales?.get('descripcion')?.value || 'Sin descripción';
     const categoriaProveedor = this.selectedRawCategory || this.postulanteSeleccionado?.categoria_postu_proveedor || '';
+    const portafolioRaw = this.postulanteSeleccionado?.portafolio_file_postu_proveedor || this.postulanteSeleccionado?.portafolio_postu_proveedor || '';
+    const portafolioPath = this.buildPortafolioPath(portafolioRaw);
+    const portafolioFullUrl = portafolioPath ? this.buildPortafolioUrl(portafolioPath) : '';
 
     const caracteristicasPayload = this.construirCaracteristicasParaEnvio();
 
@@ -464,6 +505,8 @@ export class InsertarProveedor implements OnInit {
     formData.append('verificado', 'true');
     formData.append('estado_aprobacion', 'aprobado');
     formData.append('estado', 'true');
+    if (portafolioFullUrl) formData.append('portafolio', portafolioFullUrl);
+    if (portafolioRaw) formData.append('portafolio_file', portafolioRaw);
     if (currentUser?.id) formData.append('aprobado_por', String(currentUser.id));
     
     // Fecha actual en UTC-5 (hora local de Ecuador/Colombia/Perú)

@@ -331,19 +331,19 @@ export class Roles implements OnInit {
             const adminRole = this.esRolAdministrador(idRol);
             const isAdminPerm = idPerm === 4 || idPerm === 8 || idPerm === 9;
             if (!adminRole && isAdminPerm && estado) {
-              alert('Error: no se puede asignar el permiso de administrador a este rol.');
+              Swal.fire({ icon: 'error', title: 'Permiso no permitido', text: 'No se puede asignar el permiso de administrador a este rol.' });
               this.permisoAsignadoSeleccionValue = this.permisoAsignadoOriginalValue;
             } else if (adminRole && idPerm === 4 && !estado) {
-              alert('Error: es un permiso de administrador, no puede desactivarlo.');
+              Swal.fire({ icon: 'error', title: 'Permiso protegido', text: 'Es un permiso de administrador, no puede desactivarlo.' });
               this.permisoAsignadoSeleccionValue = this.permisoAsignadoOriginalValue;
             } else {
               this.apiService.setRolPermiso({ id_rol: idRol, id_permiso: idPerm, estado }).subscribe({
                 next: () => {},
                 error: (e) => {
                   if (e?.status === 400 && e?.error?.message) {
-                    alert('Error: ' + e.error.message);
+                    Swal.fire({ icon: 'error', title: 'Error', text: e.error.message });
                   } else {
-                    alert('Error inesperado al asignar permiso.');
+                    Swal.fire({ icon: 'error', title: 'Error inesperado', text: 'No se pudo asignar el permiso.' });
                   }
                   this.permisoAsignadoSeleccionValue = this.permisoAsignadoOriginalValue;
                   console.error('Error asignando permiso', e);
@@ -359,7 +359,10 @@ export class Roles implements OnInit {
           }
           this.cargarPermisos(); this.cerrarPermisoModal();
         },
-        error: (err: any) => { console.error('Error creando permiso', err); alert(err?.error?.message || 'Error creando permiso'); }
+        error: (err: any) => {
+          console.error('Error creando permiso', err);
+          Swal.fire({ icon: 'error', title: 'Error creando permiso', text: err?.error?.message || 'No se pudo crear el permiso.' });
+        }
       });
     } else {
       idPerm = payload.id_permiso;

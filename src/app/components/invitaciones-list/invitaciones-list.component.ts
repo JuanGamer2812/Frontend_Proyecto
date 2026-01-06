@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { InvitacionService, InvitacionDetalle, EstadisticasInvitaciones } from '../../service/invitacion.service';
+import Swal from 'sweetalert2';
 
 interface Evento {
   id_evento: number;
@@ -238,12 +239,12 @@ export class InvitacionesListComponent implements OnInit {
 
     // Validaciones
     if (!data.nombre.trim() || !data.email.trim()) {
-      alert('Nombre y email son obligatorios');
+      Swal.fire({ icon: 'warning', title: 'Datos faltantes', text: 'Nombre y email son obligatorios.' });
       return;
     }
     // Validación de teléfono (10 dígitos)
-    if (data.telefono && !/^\d{10}$/.test(data.telefono)) {
-      alert('El teléfono debe tener exactamente 10 dígitos');
+      if (data.telefono && !/^\d{10}$/.test(data.telefono)) {
+      Swal.fire({ icon: 'warning', title: 'Teléfono inválido', text: 'El teléfono debe tener exactamente 10 dígitos.' });
       return;
     }
 
@@ -267,7 +268,7 @@ export class InvitacionesListComponent implements OnInit {
         },
         error: (err: any) => {
           console.error('Error al crear invitación:', err);
-          alert('Error al crear invitación');
+          Swal.fire({ icon: 'error', title: 'No se pudo crear', text: 'Ocurrió un error al crear la invitación.' });
           this.isLoading.set(false);
         }
       });
@@ -286,7 +287,7 @@ export class InvitacionesListComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar invitación:', err);
-          alert('Error al actualizar invitación');
+          Swal.fire({ icon: 'error', title: 'No se pudo actualizar', text: 'Ocurrió un error al actualizar la invitación.' });
           this.isLoading.set(false);
         }
       });
@@ -296,8 +297,17 @@ export class InvitacionesListComponent implements OnInit {
   /**
    * Eliminar invitación
    */
-  eliminarInvitacion(id: number): void {
-    if (!confirm('¿Estás seguro de eliminar esta invitación?')) return;
+  async eliminarInvitacion(id: number): Promise<void> {
+    const confirmacion = await Swal.fire({
+      icon: 'question',
+      title: 'Eliminar invitación',
+      text: '¿Estás seguro de eliminar esta invitación?',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     const eventoId = this.eventoSeleccionado();
     if (!eventoId) return;
@@ -311,7 +321,7 @@ export class InvitacionesListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al eliminar invitación:', err);
-        alert('Error al eliminar invitación');
+        Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: 'Ocurrió un error al eliminar la invitación.' });
       }
     });
   }
@@ -323,14 +333,14 @@ export class InvitacionesListComponent implements OnInit {
     this.invitacionService.enviarInvitacion(id).subscribe({
       next: (response) => {
         if (response.success) {
-          alert('Email enviado exitosamente');
+          Swal.fire({ icon: 'success', title: 'Email enviado', text: 'El email fue enviado exitosamente.' });
           const eventoId = this.eventoSeleccionado();
           if (eventoId) this.cargarInvitaciones(eventoId);
         }
       },
       error: (err) => {
         console.error('Error al enviar email:', err);
-        alert('Error al enviar email');
+        Swal.fire({ icon: 'error', title: 'No se pudo enviar', text: 'Ocurrió un error al enviar el email.' });
       }
     });
   }
@@ -340,7 +350,7 @@ export class InvitacionesListComponent implements OnInit {
    */
   copiarCodigo(codigo: string): void {
     this.invitacionService.copiarAlPortapapeles(codigo);
-    alert('Código copiado al portapapeles');
+    Swal.fire({ icon: 'success', title: 'Código copiado', text: 'El código se copió al portapapeles.' });
   }
 
   /**
@@ -348,9 +358,9 @@ export class InvitacionesListComponent implements OnInit {
    */
   copiarLink(codigo: string): void {
     const link = `${window.location.origin}/rsvp/${codigo}`;
-    navigator.clipboard.writeText(link).then(() => {
-      alert('Link copiado al portapapeles');
-    });
+    navigator.clipboard.writeText(link)
+      .then(() => Swal.fire({ icon: 'success', title: 'Link copiado', text: 'El link se copió al portapapeles.' }))
+      .catch(() => Swal.fire({ icon: 'error', title: 'No se pudo copiar', text: 'No se pudo copiar el link al portapapeles.' }));
   }
 
   /**
@@ -390,29 +400,38 @@ export class InvitacionesListComponent implements OnInit {
   enviarEmailsMasivos(): void {
     const seleccionadas = this.invitacionesSeleccionadas();
     if (seleccionadas.length === 0) {
-      alert('Selecciona al menos una invitación');
+      Swal.fire({ icon: 'warning', title: 'Sin invitaciones seleccionadas', text: 'Selecciona al menos una invitación.' });
       return;
     }
 
-    if (!confirm(`¿Enviar emails a ${seleccionadas.length} invitados?`)) return;
+    Swal.fire({
+      icon: 'question',
+      title: 'Enviar emails',
+      text: `¿Enviar emails a ${seleccionadas.length} invitados?`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.isLoading.set(true);
+      this.isLoading.set(true);
 
-    this.invitacionService.enviarInvitacionesMasivas(seleccionadas).subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          alert(`Emails enviados: ${response.data.exitosos}/${response.data.total}`);
-          const eventoId = this.eventoSeleccionado();
-          if (eventoId) this.cargarInvitaciones(eventoId);
-          this.deseleccionarTodas();
+      this.invitacionService.enviarInvitacionesMasivas(seleccionadas).subscribe({
+        next: (response: any) => {
+          if (response.success) {
+            Swal.fire({ icon: 'success', title: 'Emails enviados', text: `Emails enviados: ${response.data.exitosos}/${response.data.total}` });
+            const eventoId = this.eventoSeleccionado();
+            if (eventoId) this.cargarInvitaciones(eventoId);
+            this.deseleccionarTodas();
+          }
+          this.isLoading.set(false);
+        },
+        error: (err: any) => {
+          console.error('Error al enviar emails:', err);
+          Swal.fire({ icon: 'error', title: 'No se pudo enviar', text: 'Error al enviar emails masivos.' });
+          this.isLoading.set(false);
         }
-        this.isLoading.set(false);
-      },
-      error: (err: any) => {
-        console.error('Error al enviar emails:', err);
-        alert('Error al enviar emails masivos');
-        this.isLoading.set(false);
-      }
+      });
     });
   }
 

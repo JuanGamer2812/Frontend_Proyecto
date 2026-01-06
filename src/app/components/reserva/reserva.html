@@ -26,43 +26,62 @@
                                 <div class="col-md-4">
                                     <label class="form-label">Nombre del evento<span class="text-danger">*</span></label>
                                     <input class="form-control" formControlName="nombre_evento" placeholder="Ej. Boda Camila & Diego" [ngClass]="{'is-invalid': isInvalid('nombre_evento')}">
-                                    <div class="invalid-feedback">3–100 caracteres requeridos.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="isInvalid('nombre_evento')">
+                                        <small><i class="bi bi-exclamation-circle"></i> El nombre debe tener entre 3 y 100 caracteres</small>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Cédula del responsable<span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
-                                        <input type="text" class="form-control" formControlName="cedula_reservacion" placeholder="Ej. 1234567890" maxlength="15" [ngClass]="{'is-invalid': isInvalid('cedula_reservacion')}">
+                                        <input type="text" class="form-control" formControlName="cedula_reservacion" placeholder="Ej. 1234567890" maxlength="10" [ngClass]="{'is-invalid': isInvalid('cedula_reservacion')}">
                                     </div>
-                                    <div class="invalid-feedback">Cédula válida requerida (10-15 dígitos).</div>
+                                    <div class="invalid-feedback d-block" *ngIf="isInvalid('cedula_reservacion')">
+                                        <small><i class="bi bi-exclamation-circle"></i> {{ getCedulaErrorMessage() }}</small>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-6 datetime-field">
                                     <label class="form-label">Categoría del evento<span class="text-danger">*</span></label>
                                     <select class="form-select" formControlName="id_categoria" [ngClass]="{'is-invalid': isInvalid('id_categoria')}">
                                         <option value="" disabled selected>Selecciona una categoría</option>
                                         <option *ngFor="let cat of categorias()" [value]="cat.id">{{ cat.nombre }}</option>
                                     </select>
-                                    <div class="invalid-feedback">Selecciona una categoría de evento.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="isInvalid('id_categoria')">
+                                        <small><i class="bi bi-exclamation-circle"></i> Selecciona una categoría de evento</small>
+                                    </div>
                                 </div>
+
 
                                 <div class="col-12">
                                     <label class="form-label">Descripción<span class="text-danger">*</span></label>
                                     <textarea rows="3" class="form-control" formControlName="descripcion_evento" placeholder="Describe tu evento..." [ngClass]="{'is-invalid': isInvalid('descripcion_evento')}"></textarea>
-                                    <div class="invalid-feedback">La descripción es obligatoria.</div>
+                                    <div class="invalid-feedback d-block" *ngIf="isInvalid('descripcion_evento')">
+                                        <small><i class="bi bi-exclamation-circle"></i> La descripción es obligatoria</small>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-6 datetime-field">
                                     <label class="form-label">Fecha y hora de inicio<span class="text-danger">*</span></label>
                                     <input type="datetime-local" class="form-control" formControlName="fecha_inicio_evento" [ngClass]="{'is-invalid': isInvalid('fecha_inicio_evento') || form.errors?.['rangoFechas']}">
-                                    <div class="invalid-feedback">Fecha/hora válida requerida.</div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>El horario permitido es de 08:00 a 23:59</span></small>
+                                    </div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido') && isInvalid('fecha_inicio_evento')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>Ingresa una fecha y hora válida</span></small>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Fecha y hora de fin<span class="text-danger">*</span></label>
                                     <input type="datetime-local" class="form-control" formControlName="fecha_fin_evento" [ngClass]="{'is-invalid': isInvalid('fecha_fin_evento') || form.errors?.['rangoFechas']}">
-                                    <div class="invalid-feedback">Debe ser posterior al inicio.</div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_fin_evento')?.hasError('horarioNoPermitido')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>El horario permitido es de 08:00 a 23:59</span></small>
+                                    </div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_fin_evento')?.hasError('horarioNoPermitido') && isInvalid('fecha_fin_evento')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>Debe ser posterior al inicio</span></small>
+                                    </div>
                                 </div>
 
                                 <!-- Plan global eliminado: ahora se selecciona por proveedor -->
@@ -137,6 +156,28 @@
                                                 </select>
                                                 <div class="invalid-feedback">Debes seleccionar un proveedor.</div>
                                             </div>
+
+                                            <div class="col-md-6" *ngIf="isProveedorCatering(i) && getMenuPdf(i)">
+                                                <label class="form-label d-block">Documento del menú</label>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" (click)="abrirPdfCaracteristica(getMenuPdf(i)?.url, getMenuPdf(i)?.nombre)">
+                                                    <i class="bi bi-eye me-1"></i>Ver menú
+                                                </button>
+                                                <div class="form-text text-muted">Documento proporcionado por el proveedor.</div>
+                                            </div>
+                                            <!-- Número de menú solo para CATERING -->
+                                            <div class="col-md-6" *ngIf="isProveedorCatering(i)">
+                                                <label class="form-label d-block">Número de menú<span class="text-danger">*</span></label>
+                                                <div class="d-flex gap-3 flex-wrap">
+                                                    <div class="form-check" *ngFor="let num of [1,2,3]">
+                                                        <input class="form-check-input" type="checkbox" [id]="'menu-' + i + '-' + num" [checked]="provGrp.get('numero_menu')?.value === num" (change)="selectNumeroMenuProveedor(i, num)">
+                                                        <label class="form-check-label" [for]="'menu-' + i + '-' + num">Menú {{ num }}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-text text-muted">Selecciona solo una opción (1 a 3).</div>
+                                                <div class="invalid-feedback d-block" *ngIf="provGrp.get('numero_menu')?.invalid && provGrp.get('numero_menu')?.touched">
+                                                    <small><i class="bi bi-exclamation-circle"></i> Selecciona un número de menú entre 1 y 3</small>
+                                                </div>
+                                            </div>
                                             <div class="col-md-6" *ngIf="!provGrp.get('id_tipo')?.value">
                                                 <label class="form-label">Tipo<span class="text-danger">*</span></label>
                                                 <select class="form-select" formControlName="id_tipo" (change)="onTipoSeleccionado(i)" [ngClass]="{'is-invalid': provGrp.get('id_tipo')?.invalid && provGrp.get('id_tipo')?.touched}">
@@ -173,53 +214,54 @@
                                                     <strong>Opciones para tu reserva:</strong>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-md-4 mb-2" *ngFor="let car of proveedorCaracteristicasEditable[i]">
-                                                        <label>{{ car.nombre }}</label>
+                                                    <ng-container *ngFor="let car of proveedorCaracteristicasEditable[i]">
+                                                        <div class="col-md-4 mb-2" *ngIf="!(isProveedorCatering(i) && isMenuCaracteristica(car.nombre))">
+                                                            <label>{{ car.nombre }}</label>
 
-                                                        <!-- Si es PDF/URL y tiene valor del proveedor, solo mostrar visor -->
-                                                        <ng-container *ngIf="esCaracteristicaFileUrl(car) && car.valorProveedor; else inputEditable">
-                                                            <div>
-                                                                <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="abrirPdfCaracteristica(car.valorProveedor.valor || car.valorProveedor.valor_texto || car.valorProveedor, car.nombre)">
+                                                            <!-- Si es PDF/URL y tiene valor del proveedor, solo mostrar visor -->
+                                                            <ng-container *ngIf="esCaracteristicaFileUrl(car) && car.valorProveedor; else inputEditable">
+                                                                <div>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary w-100" (click)="abrirPdfCaracteristica(car.valorProveedor.valor || car.valorProveedor.valor_texto || car.valorProveedor, car.nombre)">
                                                                     <i class="bi bi-eye me-1"></i>Ver documento
                                                                 </button>
-                                                            </div>
-                                                        </ng-container>
+                                                                </div>
+                                                            </ng-container>
 
-                                                        <!-- Inputs editables normales -->
-                                                        <ng-template #inputEditable>
-                                                            <input *ngIf="car.tipo === 'texto'" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+                                                            <!-- Inputs editables normales -->
+                                                            <ng-template #inputEditable>
+                                                                <input *ngIf="car.tipo === 'texto'" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
 
-                                                            <input *ngIf="car.tipo === 'numero' || car.tipo === 'number'" type="number" step="any" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+                                                                <input *ngIf="car.tipo === 'numero' || car.tipo === 'number'" type="number" step="1" inputmode="numeric" pattern="\d*" class="form-control" [(ngModel)]="car.valorUsuario" (ngModelChange)="setCaracteristicaEntero(car, $event)" [ngModelOptions]="{standalone: true}"
+                                                                    [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
 
-                                                            <div *ngIf="car.tipo === 'booleano' || car.tipo === 'boolean'" class="form-check">
-                                                                <input class="form-check-input" type="checkbox" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" id="car_bool_{{i}}_{{car.id_caracteristica}}" [disabled]="car.obligatorio">
-                                                                <label class="form-check-label" [for]="'car_bool_' + i + '_' + car.id_caracteristica">Sí</label>
-                                                            </div>
+                                                                <div *ngIf="car.tipo === 'booleano' || car.tipo === 'boolean'" class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" id="car_bool_{{i}}_{{car.id_caracteristica}}" [disabled]="car.obligatorio">
+                                                                    <label class="form-check-label" [for]="'car_bool_' + i + '_' + car.id_caracteristica">Sí</label>
+                                                                </div>
 
-                                                            <select *ngIf="car.tipo === 'opcion'" class="form-select" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
+                                                                <select *ngIf="car.tipo === 'opcion'" class="form-select" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio">
                                                                 <option *ngFor="let op of car.opciones" [value]="op">{{ op }}</option>
                                                             </select>
 
-                                                            <textarea *ngIf="car.tipo === 'json'" class="form-control" rows="3" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio"></textarea>
+                                                                <textarea *ngIf="car.tipo === 'json'" class="form-control" rows="3" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica" [disabled]="car.obligatorio"></textarea>
 
-                                                            <!-- fallback -->
-                                                            <input *ngIf="!['texto','numero','number','booleano','boolean','opcion','json'].includes(car.tipo)" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica"
-                                                                [disabled]="car.obligatorio">
-                                                        </ng-template>
-                                                    </div>
+                                                                <!-- fallback -->
+                                                                <input *ngIf="!['texto','numero','number','booleano','boolean','opcion','json'].includes(car.tipo)" type="text" class="form-control" [(ngModel)]="car.valorUsuario" [ngModelOptions]="{standalone: true}" [name]="'car_' + i + '_' + car.id_caracteristica"
+                                                                    [disabled]="car.obligatorio">
+                                                            </ng-template>
+                                                        </div>
+                                                    </ng-container>
                                                 </div>
                                             </div>
 
                                             <!-- Imágenes del proveedor (se muestra para cualquier tipo) -->
                                             <div class="col-12">
                                                 <div class="mb-2"><strong>Imágenes del proveedor:</strong></div>
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    <ng-container *ngIf="proveedorImagenes[i] && proveedorImagenes[i].length > 0">
-                                                        <img *ngFor="let imgObj of proveedorImagenes[i]" [src]="imgObj.url" [attr.data-img-id]="imgObj.id" class="img-thumbnail" style="max-width: 180px; height:120px; object-fit:cover;">
-                                                    </ng-container>
-                                                    <ng-container *ngIf="!proveedorImagenes[i] || proveedorImagenes[i].length === 0">
-                                                        <div class="d-flex align-items-center justify-content-center border rounded" style="width:180px; height:120px; background:#f8f9fa; color:#6c757d">Sin imágenes</div>
-                                                    </ng-container>
+                                                <div class="proveedor-img-scroller" *ngIf="proveedorImagenes[i] && proveedorImagenes[i].length > 0">
+                                                    <img *ngFor="let imgObj of proveedorImagenes[i]" [src]="imgObj.url" [attr.data-img-id]="imgObj.id" class="proveedor-img">
+                                                </div>
+                                                <div class="proveedor-img-empty" *ngIf="!proveedorImagenes[i] || proveedorImagenes[i].length === 0">
+                                                    <div class="placeholder">Sin imágenes</div>
                                                 </div>
                                             </div>
 

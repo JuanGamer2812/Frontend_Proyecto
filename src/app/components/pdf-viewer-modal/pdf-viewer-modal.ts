@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-pdf-viewer-modal',
@@ -49,7 +50,7 @@ export class PdfViewerModal implements OnInit {
       })
       .catch(error => {
         console.error('Error al descargar PDF:', error);
-        alert('Error al descargar el PDF');
+        Swal.fire({ icon: 'error', title: 'No se pudo descargar', text: 'Ocurrió un problema al descargar el PDF.' });
       });
   }
 }

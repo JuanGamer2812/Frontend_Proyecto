@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { PostulacionService } from '../../service/postulacion.service';
 import { ApiService } from '../../service/api.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-postulacion-proveedor',
@@ -125,7 +126,7 @@ export class PostulacionProveedor implements OnInit {
       },
       error: () => {
         this.cargandoCategorias = false;
-        alert('No se pudieron cargar los tipos de proveedor. Intenta nuevamente.');
+        Swal.fire({ icon: 'error', title: 'No se pudieron cargar categorías', text: 'Intenta nuevamente en unos segundos.' });
       }
     });
   }
@@ -149,7 +150,7 @@ export class PostulacionProveedor implements OnInit {
       
       // Validar tamaño
       if (file.size > this.MAX_FILE_SIZE) {
-        alert(`El archivo es demasiado grande. Tamaño máximo: 5MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        Swal.fire({ icon: 'warning', title: 'Archivo demasiado grande', text: `Tamaño máximo: 5MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB` });
         input.value = '';
         this.selectedFile = null;
         return;
@@ -158,7 +159,7 @@ export class PostulacionProveedor implements OnInit {
       // Validar tipo de archivo
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Tipo de archivo no permitido. Solo se aceptan: JPG, PNG, WEBP, PDF');
+        Swal.fire({ icon: 'warning', title: 'Tipo de archivo no permitido', text: 'Solo se aceptan: JPG, PNG, WEBP o PDF.' });
         input.value = '';
         this.selectedFile = null;
         return;
@@ -175,7 +176,7 @@ export class PostulacionProveedor implements OnInit {
     });
 
     if (this.formProveedor.invalid) {
-      alert('Por favor, completa todos los campos correctamente.');
+      Swal.fire({ icon: 'warning', title: 'Formulario incompleto', text: 'Por favor, completa todos los campos correctamente.' });
       return;
     }
 
@@ -197,7 +198,7 @@ export class PostulacionProveedor implements OnInit {
     this.postulacionService.postularProveedor(postulacion).subscribe({
       next: (response) => {
         this.enviando = false;
-        alert('¡Postulación registrada exitosamente! Nos pondremos en contacto contigo pronto.');
+        Swal.fire({ icon: 'success', title: 'Postulación registrada', text: 'Nos pondremos en contacto contigo pronto.' });
         this.formProveedor.reset();
         this.selectedFile = null;
         this.selectedCategory = '';
@@ -205,7 +206,7 @@ export class PostulacionProveedor implements OnInit {
       error: (err) => {
         this.enviando = false;
         const mensaje = err.error?.error || 'No se pudo registrar la postulación. Intenta nuevamente.';
-        alert(mensaje);
+        Swal.fire({ icon: 'error', title: 'No se pudo registrar', text: mensaje });
       }
     });
   }

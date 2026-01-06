@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvitacionService, InvitacionDetalle } from '../../service/invitacion.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-rsvp',
@@ -86,7 +87,11 @@ export class RsvpComponent implements OnInit {
 
     // Validar número de acompañantes
     if (this.acompanantesConfirmados > invitacion.numero_acompanantes) {
-      alert(`Solo puedes traer hasta ${invitacion.numero_acompanantes} acompañante${invitacion.numero_acompanantes > 1 ? 's' : ''}`);
+      Swal.fire({
+        icon: 'warning',
+        title: 'Límite de acompañantes',
+        text: `Solo puedes traer hasta ${invitacion.numero_acompanantes} acompañante${invitacion.numero_acompanantes > 1 ? 's' : ''}`
+      });
       return;
     }
 

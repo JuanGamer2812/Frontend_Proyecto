@@ -1,12 +1,14 @@
 <div class="container py-3">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h2>Detalles del Proveedor</h2>
-        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">Volver</button>
+        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </button>
     </div>
 
     @if (loading()) {
     <div class="alert alert-info">
-        <span class="spinner-border spinner-border-sm me-2"></span> Cargando proveedor...
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando información del proveedor...
     </div>
     } @if (error()) {
     <div class="alert alert-danger">
@@ -14,70 +16,93 @@
     </div>
     } @if (!loading() && !error() && proveedor()) {
     <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-shop me-2"></i> {{ proveedor().nombre_fantasia || proveedor().nombre || '—' }}
+            </h4>
+        </div>
+
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <h4 class="mb-1">{{ proveedor().nombre || '—' }}</h4>
-                    <div class="mb-2">
-                        <span class="badge bg-info me-2">{{ proveedor().tipo_nombre || proveedor().id_tipo }}</span>
-                        <span class="badge" [ngClass]="getEstadoAprobacionClase(proveedor().estado_aprobacion)">
-								{{ getEstadoAprobacionTexto(proveedor().estado_aprobacion) }}
-							</span>
-                    </div>
-                    <p class="text-muted mb-0">ID: {{ proveedor().id_proveedor }}</p>
-                </div>
+            <!-- Estado y Badges principales -->
+            <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge bg-info">{{ getTipoTexto() }}</span>
+                <span class="badge" [ngClass]="getEstadoAprobacionClase(proveedor().estado_aprobacion)">
+                    {{ getEstadoAprobacionTexto(proveedor().estado_aprobacion) }}
+                </span>
+                <span class="badge" [ngClass]="proveedor().estado ? 'bg-success' : 'bg-secondary'">
+                    {{ proveedor().estado ? 'Activo' : 'Inactivo' }}
+                </span>
+                <small class="text-muted ms-auto">ID: {{ proveedor().id_proveedor || proveedor().id }}</small>
+            </div>
 
+            @if (proveedor().estado_aprobacion === 'rechazado' && proveedor().razon_rechazo) {
+            <div class="alert alert-warning">
+                <strong><i class="bi bi-exclamation-triangle me-1"></i> Motivo de rechazo:</strong>
+                <div class="mt-1">{{ proveedor().razon_rechazo }}</div>
+            </div>
+            }
+
+            <hr />
+
+            <!-- Datos Generales (solo campos dinámicos requeridos) -->
+            <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Datos Generales</h5>
+            <div class="row g-3 mb-4">
                 <div class="col-12 col-md-6">
-                    <div class="d-flex flex-column align-items-start">
-                        <span class="fw-bold">Precio base:</span>
-                        <span>{{ formatCurrency(proveedor().precio_base) }}</span>
+                    <label class="form-label fw-bold">Tipo</label>
+                    <div class="form-control-plaintext">{{ getTipoTexto() }}</div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold">Precio Base</label>
+                    <div class="form-control-plaintext fw-semibold text-success">
+                        {{ formatCurrency(proveedor().precio_base) }}
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold">Plan</label>
+                    <div class="form-control-plaintext">{{ getPlanTexto() }}</div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold">Fecha de Registro</label>
+                    <div class="form-control-plaintext">{{ formatFecha(proveedor().fecha_registro) }}</div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Descripción</label>
+                    <div class="form-control-plaintext bg-light p-3 rounded">
+                        {{ proveedor().descripcion || 'Sin descripción' }}
                     </div>
                 </div>
             </div>
 
             <hr />
 
-            <div class="row g-3">
-                <div class="col-12 col-md-8">
-                    <span class="fw-bold">Descripción</span>
-                    <p class="mb-0">{{ proveedor().descripcion || '—' }}</p>
-                </div>
-                <div class="col-12 col-md-4">
-                    <span class="fw-bold">Estado</span>
-                    <p class="mb-1">{{ proveedor().estado ? 'Activo' : 'Inactivo' }}</p>
-                    @if (proveedor().estado_aprobacion === 'rechazado' && proveedor().razon_rechazo) {
-                    <div class="alert alert-warning p-2">
-                        <strong>Motivo de rechazo:</strong>
-                        <div>{{ proveedor().razon_rechazo }}</div>
+            <!-- Características -->
+            @if (caracteristicas() && caracteristicas().length > 0) {
+            <hr />
+            <h5 class="mb-3"><i class="bi bi-list-check me-2"></i>Características</h5>
+            <div class="row g-3 mb-4">
+                @for (caract of caracteristicas(); track caract.id_caracteristica) {
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-bold">{{ caract.nombre_caracteristica || caract.nombre || 'Característica' }}</label>
+                    <div class="form-control-plaintext bg-light p-2 rounded">
+                        {{ caract.valor || '—' }}
                     </div>
-                    }
                 </div>
+                }
             </div>
+            }
 
+            <!-- Imágenes -->
+            @if (imagenes() && imagenes().length > 0) {
             <hr />
-
+            <h5 class="mb-3"><i class="bi bi-images me-2"></i>Galería de Imágenes</h5>
             <div class="row g-3">
-                <div class="col-12 col-md-6">
-                    <span class="fw-bold">Empresa</span>
-                    <p class="mb-1">{{ proveedor().nombre_empresa || '—' }}</p>
-                    <span class="fw-bold">Correo</span>
-                    <p class="mb-1">{{ proveedor().correo || '—' }}</p>
+                @for (img of imagenes(); track img.id) {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <img [src]="img.url" [alt]="'Imagen ' + img.id" class="card-img-top imagen-galeria-ver" (error)="$event.target.src='https://via.placeholder.com/400x300?text=Imagen+no+disponible'">
+                    </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    <span class="fw-bold">Plan</span>
-                    <p class="mb-1">{{ proveedor().nombre_plan || '—' }}</p>
-                    <span class="fw-bold">Portafolio</span>
-                    <p class="mb-1">{{ proveedor().portafolio || '—' }}</p>
-                </div>
-            </div>
-
-            @if (proveedor().pdf_catalogo) {
-            <hr />
-            <div class="mt-2">
-                <span class="fw-bold">Catálogo PDF</span>
-                <div>
-                    <a class="btn btn-outline-primary btn-sm" [href]="proveedor().pdf_catalogo" target="_blank">Ver catálogo</a>
-                </div>
+                }
             </div>
             }
         </div>

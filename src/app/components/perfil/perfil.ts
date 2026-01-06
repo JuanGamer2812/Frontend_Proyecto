@@ -12,6 +12,7 @@ import { AuthJwtService } from '../../service/auth-jwt.service';
 import { VerificationService } from '../../service/verification.service';
 import { PasswordResetService } from '../../service/password-reset.service';
 import { ApiService } from '../../service/api.service';
+import Swal from 'sweetalert2';
 // RouterLink no se usa en esta plantilla
 
 @Component({
@@ -476,12 +477,12 @@ export class Perfil implements OnInit, OnDestroy {
         if (foto) {
           this.fotoPreview = this.resolveImageUrl(foto);
         }
-        alert('Perfil actualizado correctamente.');
+        Swal.fire({ icon: 'success', title: 'Perfil actualizado', text: 'Tus datos se guardaron correctamente.' });
       },
       error: err => {
         console.error('[Perfil] Error al actualizar:', err);
         const msg = err?.error?.message || err?.message || 'No se pudo actualizar el perfil';
-        alert(msg);
+        Swal.fire({ icon: 'error', title: 'No se pudo actualizar', text: msg });
       }
     });
   }

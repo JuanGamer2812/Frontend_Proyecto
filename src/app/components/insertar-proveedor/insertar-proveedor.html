@@ -53,9 +53,11 @@
                                         <div class="col-md-6">
                                             <strong>Email:</strong> {{ postulanteSeleccionado.correo_postu_proveedor }}
                                         </div>
-                                        <div class="col-md-6" *ngIf="postulanteSeleccionado.portafolio_postu_proveedor">
+                                        <div class="col-md-6" *ngIf="postulanteSeleccionado.portafolio_file_postu_proveedor || postulanteSeleccionado.portafolio_postu_proveedor">
                                             <strong>Portafolio:</strong>
-                                            <a [href]="postulanteSeleccionado.portafolio_postu_proveedor" target="_blank" rel="noopener" class="text-primary">Ver enlace</a>
+                                            <button type="button" class="btn btn-link p-0 align-baseline" (click)="abrirPortafolio(postulanteSeleccionado.portafolio_file_postu_proveedor || postulanteSeleccionado.portafolio_postu_proveedor)">
+                                                Ver portafolio
+                                            </button>
                                         </div>
                                         <div class="col-12">
                                             <strong>Fecha de Postulación:</strong> {{ postulanteSeleccionado.fecha_postu_proveedor | date:'short' }}

@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InvitacionService, Invitacion } from '../../service/invitacion.service';
+import Swal from 'sweetalert2';
 
 interface Evento {
   id_evento: number;
@@ -118,7 +119,7 @@ export class EnvioMasivoComponent implements OnInit {
       
       // Validar extensión
       if (!file.name.endsWith('.csv')) {
-        alert('Por favor selecciona un archivo CSV');
+        Swal.fire({ icon: 'warning', title: 'Archivo inválido', text: 'Por favor selecciona un archivo CSV.' });
         return;
       }
       
@@ -139,7 +140,7 @@ export class EnvioMasivoComponent implements OnInit {
     };
     
     reader.onerror = () => {
-      alert('Error al leer el archivo');
+      Swal.fire({ icon: 'error', title: 'No se pudo leer el archivo', text: 'Ocurrió un error al leer el CSV.' });
     };
     
     reader.readAsText(file);
@@ -234,13 +235,13 @@ export class EnvioMasivoComponent implements OnInit {
   async procesarInvitaciones(): Promise<void> {
     const eventoId = this.eventoSeleccionado();
     if (!eventoId) {
-      alert('Selecciona un evento');
+      await Swal.fire({ icon: 'warning', title: 'Selecciona un evento', text: 'Debes elegir un evento antes de continuar.' });
       return;
     }
     
     const invitados = this.invitadosValidos();
     if (invitados.length === 0) {
-      alert('No hay invitados válidos para procesar');
+      await Swal.fire({ icon: 'warning', title: 'Sin invitados válidos', text: 'No hay invitados válidos para procesar.' });
       return;
     }
     
@@ -291,11 +292,11 @@ export class EnvioMasivoComponent implements OnInit {
         this.progreso.set(100);
         this.paso.set(4);
       } else {
-        alert('Error al crear invitaciones');
+        Swal.fire({ icon: 'error', title: 'No se pudieron crear', text: 'Ocurrió un error al crear las invitaciones.' });
       }
     } catch (error) {
       console.error('Error al procesar invitaciones:', error);
-      alert('Error al procesar invitaciones');
+      Swal.fire({ icon: 'error', title: 'No se pudo procesar', text: 'Ocurrió un error al procesar las invitaciones.' });
     } finally {
       this.isProcessing.set(false);
     }

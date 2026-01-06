@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 export interface DatosPago {
   metodoPago: 'tarjeta' | 'paypal' | 'transferencia' | 'deposito';
@@ -315,13 +316,13 @@ export class Pago implements OnInit, OnChanges {
     // Validar tipo de archivo
     const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     if (!tiposPermitidos.includes(file.type)) {
-      alert('Solo se permiten archivos JPG, PNG o PDF');
+      Swal.fire({ icon: 'warning', title: 'Formato no permitido', text: 'Solo se permiten archivos JPG, PNG o PDF.' });
       return;
     }
     
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('El archivo no debe exceder 5MB');
+      Swal.fire({ icon: 'warning', title: 'Archivo demasiado grande', text: 'El comprobante no debe exceder 5MB.' });
       return;
     }
     
@@ -373,7 +374,7 @@ export class Pago implements OnInit, OnChanges {
   
   procesarPago(): void {
     if (!this.isFormValid()) {
-      alert('Por favor completa todos los campos requeridos');
+      Swal.fire({ icon: 'warning', title: 'Formulario incompleto', text: 'Por favor completa todos los campos requeridos.' });
       return;
     }
     

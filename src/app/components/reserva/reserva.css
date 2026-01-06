@@ -175,3 +175,83 @@ p {
 .btn-outline-secondary.btn-sm {
     border-radius: 8px;
 }
+
+
+/* Alinear ícono de calendario y evitar choque con ícono de error */
+
+.datetime-field {
+    position: relative;
+}
+
+.datetime-field input[type="datetime-local"] {
+    padding-right: 2.8rem;
+}
+
+.datetime-field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.85;
+}
+
+.datetime-field .invalid-feedback {
+    margin-top: 0.35rem;
+}
+
+
+/* Evita superposición del ícono de error de Bootstrap con el ícono de calendario */
+
+.datetime-field .form-control.is-invalid,
+.datetime-field .form-control.is-invalid:focus {
+    background-image: none;
+    padding-right: 2.8rem;
+}
+
+
+/* Galería de imágenes de proveedor responsive */
+
+.proveedor-img-scroller {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.1rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+}
+
+.proveedor-img-scroller::-webkit-scrollbar {
+    height: 8px;
+}
+
+.proveedor-img-scroller::-webkit-scrollbar-thumb {
+    background: rgba(85, 99, 111, 0.4);
+    border-radius: 999px;
+}
+
+.proveedor-img {
+    flex: 0 0 auto;
+    width: clamp(110px, 16vw, 150px);
+    max-width: 150px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    scroll-snap-align: start;
+    background: #fff;
+}
+
+.proveedor-img-empty .placeholder {
+    width: clamp(110px, 16vw, 150px);
+    max-width: 150px;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px dashed rgba(85, 99, 111, 0.4);
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
