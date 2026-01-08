@@ -103,7 +103,8 @@ export class PdfViewerModal implements OnInit, OnChanges {
   private isPdfResource(urlOverride?: string): boolean {
     if (this.contentType && this.contentType.startsWith('application/pdf')) return true;
     const name = String(this.fileName || '').toLowerCase();
-    if (name.endsWith('.pdf')) return true;
+    // Verificar si el nombre termina en .pdf O contiene "pdf" (para casos como "Menu_pdf")
+    if (name.endsWith('.pdf') || name.includes('pdf')) return true;
     const url = String(urlOverride ?? this.pdfUrl ?? '').toLowerCase();
     return url.includes('.pdf');
   }
