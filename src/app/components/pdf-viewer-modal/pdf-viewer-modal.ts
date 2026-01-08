@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, SimpleChanges, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import Swal from 'sweetalert2';
@@ -18,6 +18,7 @@ export class PdfViewerModal implements OnInit, OnChanges {
   @Output() close = new EventEmitter<void>();
 
   private sanitizer = inject(DomSanitizer);
+  private cdr = inject(ChangeDetectorRef);
   safeUrl: SafeResourceUrl = '';
   loading = false;
   isImage = false;
@@ -81,6 +82,9 @@ export class PdfViewerModal implements OnInit, OnChanges {
         })
         .finally(() => {
           this.loading = false;
+          console.log('[pdf-viewer] finally: loading=false, safeUrl truthy:', !!this.safeUrl, 'isImage:', this.isImage);
+          // Forzar detección de cambios después de operación async
+          this.cdr.detectChanges();
         });
       return;
     }
@@ -103,12 +107,22 @@ export class PdfViewerModal implements OnInit, OnChanges {
   }
 
   private isPdfResource(urlOverride?: string): boolean {
-    if (this.contentType && this.contentType.startsWith('application/pdf')) return true;
+    console.log('[pdf-viewer] isPdfResource called with fileName:', this.fileName, 'contentType:', this.contentType);
+    if (this.contentType && this.contentType.startsWith('application/pdf')) {
+      console.log('[pdf-viewer] isPdfResource: true (contentType)');
+      return true;
+    }
     const name = String(this.fileName || '').toLowerCase();
+    console.log('[pdf-viewer] isPdfResource: checking name:', name, 'endsWith .pdf:', name.endsWith('.pdf'), 'includes pdf:', name.includes('pdf'));
     // Verificar si el nombre termina en .pdf O contiene "pdf" (para casos como "Menu_pdf")
-    if (name.endsWith('.pdf') || name.includes('pdf')) return true;
+    if (name.endsWith('.pdf') || name.includes('pdf')) {
+      console.log('[pdf-viewer] isPdfResource: true (fileName contains pdf)');
+      return true;
+    }
     const url = String(urlOverride ?? this.pdfUrl ?? '').toLowerCase();
-    return url.includes('.pdf');
+    const result = url.includes('.pdf');
+    console.log('[pdf-viewer] isPdfResource: checking url for .pdf:', result);
+    return result;
   }
 
   private buildProxyUrl(url: string): string | null {
