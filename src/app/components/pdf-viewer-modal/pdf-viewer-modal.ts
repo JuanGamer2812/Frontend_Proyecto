@@ -41,13 +41,17 @@ export class PdfViewerModal implements OnInit, OnChanges {
   private loadResource(): void {
     this.loading = true;
     this.isImage = !!(this.contentType && this.contentType.startsWith('image/'));
+    console.log('[pdf-viewer] loadResource called, pdfUrl:', this.pdfUrl);
     if (!this.pdfUrl) {
+      console.log('[pdf-viewer] pdfUrl is empty, aborting');
       this.safeUrl = '';
       this.loading = false;
       return;
     }
     const normalizedUrl = this.normalizeUrl(this.pdfUrl);
+    console.log('[pdf-viewer] normalizedUrl:', normalizedUrl);
     const isPdfHint = this.isPdfResource(normalizedUrl);
+    console.log('[pdf-viewer] isPdfHint:', isPdfHint);
     // If the resource is cross-origin (e.g. Cloudinary), fetching it as a blob
     // and using an object URL often avoids CORS/frame and content-type issues.
     const tryUseObjectUrl = true;
@@ -56,7 +60,11 @@ export class PdfViewerModal implements OnInit, OnChanges {
       // Try to fetch the resource and convert to object URL
       const proxyUrl = this.buildProxyUrl(normalizedUrl);
       const candidates = [proxyUrl, normalizedUrl].filter(Boolean) as string[];
+      console.log('[pdf-viewer] Trying to fetch with candidates:', candidates);
       this.fetchAsObjectUrl(candidates, isPdfHint)
+        .then(() => {
+          console.log('[pdf-viewer] fetchAsObjectUrl succeeded, safeUrl set');
+        })
         .catch(err => {
           console.warn('[pdf-viewer] objectUrl fallback failed', err);
           if (!isPdfHint) {
@@ -131,7 +139,9 @@ export class PdfViewerModal implements OnInit, OnChanges {
     let lastError: any = null;
     for (const candidate of candidates) {
       try {
+        console.log('[pdf-viewer] Fetching candidate:', candidate);
         const response = await fetch(candidate);
+        console.log('[pdf-viewer] Response status:', response.status, response.ok);
         if (!response.ok) throw new Error('Response not OK ' + response.status);
         const buffer = await response.arrayBuffer();
         const bytes = new Uint8Array(buffer);

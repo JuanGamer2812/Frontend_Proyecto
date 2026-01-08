@@ -283,6 +283,13 @@ export class EditarProveedor implements OnInit {
                     });
                     this.syncMenuInputsFromCaracteristicas();
 
+                    // Debug: mostrar características de menú
+                    const menuCars = this.caracteristicas.filter(c => this.esMenuCaracteristicaNombre(c.nombre));
+                    console.log('[editar-proveedor] Características de menú encontradas:', menuCars);
+                    menuCars.forEach(c => {
+                      console.log(`[editar-proveedor] Menu car "${c.nombre}": valor="${c.valor}", esFileUrl=${this.esCaracteristicaFileUrlValor(c.valor)}, resolved="${this.resolveAssetUrl(c.valor)}"`);
+                    });
+
                     // Cargar datos generales
                     const estadoAprobacion = provObj.estado_aprobacion || proveedorEnLista.estado_aprobacion || 'aprobado';
                     this.estadoAprobacionOriginal = estadoAprobacion; // Guardar para usar en el update
@@ -936,6 +943,7 @@ export class EditarProveedor implements OnInit {
   
   // Abrir modal de PDF
   abrirPdfModal(url: string, nombre: string = 'documento.pdf'): void {
+    console.log('[editar-proveedor] abrirPdfModal llamado con:', { url, nombre });
     this.pdfUrl = url;
     this.pdfFileName = nombre;
     this.mostrarPdfModal = true;
