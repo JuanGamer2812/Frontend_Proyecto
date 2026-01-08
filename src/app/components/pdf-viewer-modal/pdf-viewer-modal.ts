@@ -64,6 +64,8 @@ export class PdfViewerModal implements OnInit, OnChanges {
       this.fetchAsObjectUrl(candidates, isPdfHint)
         .then(() => {
           console.log('[pdf-viewer] fetchAsObjectUrl succeeded, safeUrl set');
+          console.log('[pdf-viewer] isImage:', this.isImage, 'loading:', this.loading, 'safeUrl truthy:', !!this.safeUrl);
+          console.log('[pdf-viewer] currentObjectUrl:', this.currentObjectUrl);
         })
         .catch(err => {
           console.warn('[pdf-viewer] objectUrl fallback failed', err);
@@ -152,17 +154,23 @@ export class PdfViewerModal implements OnInit, OnChanges {
           bytes[2] === 0x44 &&
           bytes[3] === 0x46 &&
           bytes[4] === 0x2d;
+        console.log('[pdf-viewer] magicPdf check:', magicPdf, 'bytes length:', bytes.length, 'first 5 bytes:', bytes.slice(0, 5));
         const upstreamType = response.headers.get('content-type') || 'application/octet-stream';
+        console.log('[pdf-viewer] upstreamType from response:', upstreamType);
         let normalizedType = upstreamType;
         if (!upstreamType || upstreamType === 'application/octet-stream') {
           if (magicPdf || isPdfHint) {
             normalizedType = 'application/pdf';
           }
         }
+        console.log('[pdf-viewer] normalizedType for blob:', normalizedType);
         const normalizedBlob = new Blob([buffer], { type: normalizedType });
         this.isImage = normalizedType.startsWith('image/');
+        console.log('[pdf-viewer] isImage after blob creation:', this.isImage);
         this.currentObjectUrl = window.URL.createObjectURL(normalizedBlob);
+        console.log('[pdf-viewer] created objectUrl:', this.currentObjectUrl);
         this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.currentObjectUrl);
+        console.log('[pdf-viewer] safeUrl set to sanitized objectUrl');
         return;
       } catch (err) {
         lastError = err;
