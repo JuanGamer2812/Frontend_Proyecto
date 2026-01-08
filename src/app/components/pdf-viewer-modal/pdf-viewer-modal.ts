@@ -129,7 +129,8 @@ export class PdfViewerModal implements OnInit, OnChanges {
     try {
       const u = new URL(url);
       if (u.hostname.endsWith('cloudinary.com')) {
-        return `/api/files/proxy?url=${encodeURIComponent(url)}`;
+        // Usar encodeURI (no encodeURIComponent) para evitar doble encoding de %20 -> %2520
+        return `/api/files/proxy?url=${encodeURI(url)}`;
       }
     } catch {
       // ignore
