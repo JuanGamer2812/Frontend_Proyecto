@@ -2,22 +2,26 @@
     "/api": {
         "target": "http://127.0.0.1:5000",
         "secure": false,
-        "changeOrigin": true
+        "changeOrigin": true,
+        "logLevel": "debug"
     },
     "/socket.io": {
         "target": "http://127.0.0.1:5000",
         "secure": false,
         "ws": true,
-        "changeOrigin": true
+        "changeOrigin": true,
+        "logLevel": "debug"
     },
     "/tmp_uploads": {
         "target": "http://127.0.0.1:5000",
         "secure": false,
-        "changeOrigin": true
+        "changeOrigin": true,
+        "logLevel": "debug"
     },
     "/uploads": {
         "target": "http://127.0.0.1:5000",
         "secure": false,
-        "changeOrigin": true
+        "changeOrigin": true,
+        "logLevel": "debug"
     }
 }

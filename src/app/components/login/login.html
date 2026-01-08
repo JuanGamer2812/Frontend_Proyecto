@@ -24,10 +24,6 @@
                 </div>
 
                 <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-                    <!-- DEBUG VISUAL -->
-                    <div *ngIf="debugMessage" class="alert alert-info small" style="white-space: pre-wrap;">
-                        <b>DEBUG:</b> {{ debugMessage }}
-                    </div>
                     <!-- Email -->
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control form-control-lg" id="email" placeholder="name@example.com" formControlName="email" [class.is-invalid]="f['email'].touched && f['email'].invalid" autocomplete="email" />

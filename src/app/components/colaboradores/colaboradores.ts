@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { ApiService } from '../../service/api.service';
 
 interface ProveedorHome {
@@ -16,7 +16,7 @@ interface Categoria {
 
 @Component({
   selector: 'app-colaboradores',
-  imports: [CommonModule],
+  imports: [CommonModule, TitleCasePipe],
   templateUrl: './colaboradores.html',
   styleUrl: './colaboradores.css'
 })
@@ -31,14 +31,6 @@ export class Colaboradores implements OnInit {
   categoriaSeleccionada = signal<string>('TODOS');
   loading = signal(false);
   error = signal<string>('');
-
-  // Categorías por defecto si el backend falla (usar tipos de proveedor)
-  private categoriasDefault: Categoria[] = [
-    { nombre: 'MUSICA', icono: 'bi-music-note-beamed' },
-    { nombre: 'CATERING', icono: 'bi-egg-fried' },
-    { nombre: 'DECORACION', icono: 'bi-balloon-heart' },
-    { nombre: 'LUGAR', icono: 'bi-geo-alt' }
-  ];
 
   ngOnInit(): void {
     this.cargarTiposProveedor();
@@ -57,8 +49,8 @@ export class Colaboradores implements OnInit {
         this.categorias.set(mapped);
       },
       error: (err: any) => {
-        console.warn('⚠️ Error al cargar tipos de proveedor, usando valores por defecto:', err);
-        this.categorias.set(this.categoriasDefault);
+        console.warn('⚠️ Error al cargar tipos de proveedor:', err);
+        this.categorias.set([]);
       }
     });
   }

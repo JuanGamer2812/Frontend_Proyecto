@@ -14,7 +14,14 @@
 
         <!-- Body -->
         <div class="pdf-modal-body">
-            <iframe [src]="safeUrl" type="application/pdf" class="pdf-iframe"></iframe>
+            <div *ngIf="loading" class="d-flex align-items-center justify-content-center" style="height:100%">
+                <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>
+            </div>
+            <ng-container *ngIf="!loading">
+                <img *ngIf="isImage && safeUrl" [src]="safeUrl" alt="Imagen" style="max-width:100%;height:auto;display:block;margin:0 auto;" />
+                <iframe *ngIf="!isImage && safeUrl" [src]="safeUrl" type="application/pdf" class="pdf-iframe"></iframe>
+                <div *ngIf="!safeUrl && !loading" class="text-center text-muted">No se puede mostrar el archivo en vista previa.</div>
+            </ng-container>
         </div>
 
         <!-- Footer -->

@@ -89,9 +89,14 @@
 
 
 <!-- SECCION 4: TESTIMONIOS (RESEÑAS DESDE API) -->
-<section class="py-5">
+<section class="py-5 bg-light">
     <div class="container">
-        <h2 class="h4 text-center mb-4">Lo que dicen nuestros clientes</h2>
+        <div class="text-center mb-5">
+            <h2 class="section-title">
+                <i class="bi bi-chat-quote-fill me-2"></i> Lo que dicen nuestros clientes
+            </h2>
+            <p class="section-subtitle">Experiencias reales de eventos inolvidables</p>
+        </div>
 
         @if (loading()) {
         <div class="text-center py-5">
@@ -109,37 +114,51 @@
             No hay reseñas disponibles en este momento.
         </div>
         } @else {
-        <div id="testimoniosCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
+        <div id="testimoniosCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+            <div class="carousel-inner py-4">
                 @for (pair of getReseniasPairs(); track $index) {
                 <div class="carousel-item" [class.active]="$index === 0">
-                    <div class="row g-4">
-                        @for (resenia of pair; track (resenia['ID Reseña'] || $index)) {
+                    <div class="row justify-content-center g-4 px-lg-5">
+                        @for (resenia of pair; track resenia.id_resena) {
                         <div class="col-12 col-lg-6">
-                            <article class="t-card">
-                                <!-- Calificación con estrellas -->
-                                <div class="mb-2">
-                                    @for (star of getStars(resenia.Calificacion); track $index) {
-                                    <i class="bi bi-star-fill text-warning"></i> }
+                            <article class="testimonial-card">
+                                <div class="card-header-custom">
+                                    <!-- Avatar e Información del usuario -->
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (resenia.foto_perfil_usuario && resenia.foto_perfil_usuario !== '') {
+                                        <div class="avatar-wrapper">
+                                            <img [src]="resenia.foto_perfil_usuario" class="testimonial-avatar" [alt]="'Foto de ' + getNombreCompleto(resenia)">
+                                        </div>
+                                        } @else {
+                                        <div class="avatar-wrapper">
+                                            <div class="testimonial-avatar-placeholder">
+                                                {{ getInitials(getNombreCompleto(resenia)) }}
+                                            </div>
+                                        </div>
+                                        }
+                                        <div class="flex-grow-1">
+                                            <h5 class="testimonial-name mb-1">{{ getNombreCompleto(resenia) }}</h5>
+                                            <div class="testimonial-rating">
+                                                @for (star of getStars(resenia.calificacion); track $index) {
+                                                <i class="bi bi-star-fill"></i> } @for (star of getEmptyStars(resenia.calificacion); track $index) {
+                                                <i class="bi bi-star"></i> }
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Comentario -->
-                                <p class="t-text">
-                                    "{{ resenia.Comentario }}"
-                                </p>
+                                <div class="card-body-custom">
+                                    <i class="bi bi-quote quote-icon"></i>
+                                    <p class="testimonial-text">
+                                        @if (resenia.comentario && resenia.comentario.trim() !== '') { {{ resenia.comentario }} } @else { Excelente experiencia, muy recomendado. }
+                                    </p>
+                                </div>
 
-                                <!-- Información del usuario -->
-                                <div class="d-flex align-items-center gap-3 mt-3">
-                                    @if (resenia['Foto Usuario'] && resenia['Foto Usuario'] !== '') {
-                                    <img [src]="resenia['Foto Usuario']" class="t-avatar" [alt]="'Foto de ' + resenia['Nombre Usuario']"> } @else {
-                                    <div class="t-avatar-placeholder">
-                                        {{ getInitials(resenia['Nombre Usuario']) }}
-                                    </div>
-                                    }
-                                    <div>
-                                        <h5 class="t-name mb-0">{{ resenia['Nombre Usuario'] }}</h5>
-                                        <small class="text-muted">{{ resenia['Fecha Registro'] | date: 'dd/MM/yyyy' }}</small>
-                                    </div>
+                                <div class="card-footer-custom">
+                                    <small class="testimonial-date">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ resenia.fecha_creacion | date: 'dd/MM/yyyy' }}
+                                    </small>
                                 </div>
                             </article>
                         </div>

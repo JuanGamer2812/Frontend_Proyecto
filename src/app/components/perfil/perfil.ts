@@ -151,6 +151,9 @@ export class Perfil implements OnInit, OnDestroy {
   private prefillFromJwtUser(user: any): void {
     const patch: any = {};
     
+    console.log('🔑 prefillFromJwtUser - usuario completo:', user);
+    
+    // Solo actualizar si el campo no ha sido editado Y si tiene un valor válido del backend
     if (user.nombre && !this.fPerfil['nombre'].dirty) {
       patch.nombre = user.nombre;
     }
@@ -163,26 +166,37 @@ export class Perfil implements OnInit, OnDestroy {
     if (user.telefono && !this.fPerfil['telefono'].dirty) {
       patch.telefono = user.telefono;
     }
-    // Foto desde "foto" o "foto_url"
+    // Foto desde "foto" o "foto_url" - solo actualizar si no hay preview cargado
     const foto = user.foto || user.foto_url;
     if (foto && !this.fotoPreview) {
       this.fotoPreview = this.resolveImageUrl(foto);
     }
 
-    // Género
+    // Género - solo si existe en el backend
     if (user.genero && !this.fPerfil['genero'].dirty) {
       const g = String(user.genero).toUpperCase();
       patch.genero = g === 'MASCULINO' ? 'M' : g === 'FEMENINO' ? 'F' : (g === 'M' || g === 'F') ? g : 'Otros';
     }
 
-    // Fecha de nacimiento (normalizar a YYYY-MM-DD)
+    // Fecha de nacimiento (normalizar a YYYY-MM-DD) - solo si existe
     if (user.fecha_nacimiento && !this.fPerfil['fecha_nacimiento'].dirty) {
+      console.log('📅 Fecha del backend:', user.fecha_nacimiento, 'tipo:', typeof user.fecha_nacimiento);
       const iso = this.normalizeToIsoDate(String(user.fecha_nacimiento));
+      console.log('📅 Fecha normalizada:', iso);
       if (iso) patch.fecha_nacimiento = iso;
     }
     
+    console.log('📝 Patch a aplicar:', patch);
     if (Object.keys(patch).length) {
       this.formPerfil.patchValue(patch, { emitEvent: false });
+      // Forzar actualización del DOM para el input date
+      setTimeout(() => {
+        const fechaInput = document.querySelector('input[formControlName="fecha_nacimiento"]') as HTMLInputElement;
+        if (fechaInput && patch.fecha_nacimiento) {
+          fechaInput.value = patch.fecha_nacimiento;
+          console.log('📅 Valor forzado en el DOM:', fechaInput.value);
+        }
+      }, 0);
     }
   }
 
@@ -299,14 +313,15 @@ export class Perfil implements OnInit, OnDestroy {
   private prefillFromGoogleProfile(profile: any): void {
     const patch: any = {};
 
-    if (!this.fPerfil['nombre'].dirty) {
+    // Solo llenar campos que no han sido editados (dirty) y que estén vacíos
+    if (!this.fPerfil['nombre'].dirty && !this.fPerfil['nombre'].value) {
       const givenName = profile.given_name ?? profile.name?.split(' ')[0];
       if (givenName) {
         patch.nombre = givenName;
       }
     }
 
-    if (!this.fPerfil['apellido'].dirty) {
+    if (!this.fPerfil['apellido'].dirty && !this.fPerfil['apellido'].value) {
       const lastName =
         profile.family_name ??
         (profile.name ? (profile.name as string).split(' ').slice(1).join(' ').trim() : '');
@@ -315,13 +330,13 @@ export class Perfil implements OnInit, OnDestroy {
       }
     }
 
-    if (profile.email && !this.fPerfil['correo'].dirty) {
+    if (profile.email && !this.fPerfil['correo'].dirty && !this.fPerfil['correo'].value) {
       patch.correo = profile.email;
     }
 
     // Prefill telefono si viene en los claims (varias claves posibles)
     const phone = profile.phone_number ?? profile.phone ?? profile.phoneNumber ?? profile['phone'];
-    if (phone && !this.fPerfil['telefono'].dirty) {
+    if (phone && !this.fPerfil['telefono'].dirty && !this.fPerfil['telefono'].value) {
       // Normalizar dejando solo dígitos
       const digits = String(phone).replace(/\D+/g, '');
       if (digits.length >= 10) {
@@ -333,14 +348,14 @@ export class Perfil implements OnInit, OnDestroy {
 
     // Fecha de nacimiento: buscar claves comunes y normalizar a YYYY-MM-DD
     const birth = profile.birthdate ?? profile.birthday ?? profile['birth_date'] ?? profile['dob'];
-    if (birth && !this.fPerfil['fecha_nacimiento'].dirty) {
+    if (birth && !this.fPerfil['fecha_nacimiento'].dirty && !this.fPerfil['fecha_nacimiento'].value) {
       const parsed = this.normalizeToIsoDate(String(birth));
       if (parsed) patch.fecha_nacimiento = parsed;
     }
 
     // Género: mapear valores comunes a tus opciones (M/F/Otros)
     const gender = (profile.gender ?? profile['sex'] ?? '').toString().toLowerCase();
-    if (gender && !this.fPerfil['genero'].dirty) {
+    if (gender && !this.fPerfil['genero'].dirty && !this.fPerfil['genero'].value) {
       if (gender.startsWith('m')) patch.genero = 'M';
       else if (gender.startsWith('f')) patch.genero = 'F';
       else patch.genero = 'Otros';
@@ -372,9 +387,16 @@ export class Perfil implements OnInit, OnDestroy {
   // Intenta normalizar varias representaciones de fecha a YYYY-MM-DD
   private normalizeToIsoDate(value: string): string | null {
     if (!value) return null;
-    // Si ya tiene formato ISO simple
-    const isoMatch = value.match(/^(\d{4}-\d{2}-\d{2})/);
-    if (isoMatch) return isoMatch[1];
+    
+    console.log('📅 normalizeToIsoDate input:', value);
+    
+    // Si ya tiene formato ISO completo (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss)
+    const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+      const resultado = isoMatch[1] + '-' + isoMatch[2] + '-' + isoMatch[3];
+      console.log('📅 Ya es ISO, retornando:', resultado);
+      return resultado;
+    }
 
     // Formato dd/mm/yyyy o mm/dd/yyyy
     const slashMatch = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
@@ -382,7 +404,12 @@ export class Perfil implements OnInit, OnDestroy {
       let d = parseInt(slashMatch[1], 10);
       let m = parseInt(slashMatch[2], 10);
       let y = parseInt(slashMatch[3], 10);
-      if (y < 100) y += 1900;
+      
+      // Corregir años de 2 dígitos (asumimos 1900-2099)
+      if (y < 100) {
+        y += (y > 50) ? 1900 : 2000;
+      }
+      
       // Heurística: si el primer número > 12 lo tratamos como día (dd/mm/yyyy)
       if (d > 12) {
         // d is day, m is month
@@ -392,17 +419,29 @@ export class Perfil implements OnInit, OnDestroy {
         d = m;
         m = tmp;
       }
-      const dt = new Date(Date.UTC(y, m - 1, d));
-      if (!isNaN(dt.getTime())) {
-        return dt.toISOString().slice(0, 10);
-      }
+      
+      // Crear fecha directamente como string para evitar conversiones de zona horaria
+      const year = y;
+      const month = String(m).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      const resultado = `${year}-${month}-${day}`;
+      console.log('📅 Convertido de slash format:', resultado);
+      return resultado;
     }
 
-    // Intenta parsear con Date
+    // Intenta parsear con Date (para timestamps, etc) usando UTC
     const dt = new Date(value);
     if (!isNaN(dt.getTime())) {
-      return dt.toISOString().slice(0, 10);
+      // Usar UTC para evitar problemas de zona horaria
+      const year = dt.getUTCFullYear();
+      const month = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(dt.getUTCDate()).padStart(2, '0');
+      const resultado = `${year}-${month}-${day}`;
+      console.log('📅 Parseado con Date() UTC:', resultado);
+      return resultado;
     }
+    
+    console.warn('⚠️ No se pudo parsear la fecha:', value);
     return null;
   }
 
@@ -477,6 +516,8 @@ export class Perfil implements OnInit, OnDestroy {
         if (foto) {
           this.fotoPreview = this.resolveImageUrl(foto);
         }
+        // Marcar formulario como pristine para que futuras recargas no sobrescriban
+        this.formPerfil.markAsPristine();
         Swal.fire({ icon: 'success', title: 'Perfil actualizado', text: 'Tus datos se guardaron correctamente.' });
       },
       error: err => {

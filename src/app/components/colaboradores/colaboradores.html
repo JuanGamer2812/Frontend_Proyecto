@@ -75,8 +75,8 @@
         <p>¡Explora, inspirate y descubre a los mejores aliados para tu gran día!</p>
 
         <!-- Filtro de Categorías Dinámico -->
-        <div class="d-flex justify-content-center mt-4">
-            <div class="btn-group" role="group">
+        <div class="d-flex justify-content-center mt-4 category-filter">
+            <div class="btn-group category-filter__group" role="group">
                 <button type="button" class="btn btn-outline-primary" [class.active]="categoriaSeleccionada() === 'TODOS'" (click)="filtrarPorCategoria('TODOS')">
                     <i class="bi bi-grid-3x3-gap"></i> Todos
                 </button> @for (cat of categorias(); track cat.nombre) {
@@ -84,7 +84,7 @@
                         @if (cat.icono) {
                             <i [class]="'bi ' + cat.icono"></i>
                         }
-                        {{ cat.nombre }}
+                        {{ cat.nombre | titlecase }}
                     </button> }
             </div>
         </div>

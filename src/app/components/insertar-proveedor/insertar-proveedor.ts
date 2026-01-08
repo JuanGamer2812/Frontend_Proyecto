@@ -11,12 +11,13 @@ import { forkJoin, of } from 'rxjs';
 import { ApiService } from '../../service/api.service';
 import { AuthJwtService } from '../../service/auth-jwt.service';
 import { ApiConfigService } from '../../service/api-config.service';
+import { PdfViewerModal } from '../pdf-viewer-modal/pdf-viewer-modal';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-insertar-proveedor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PdfViewerModal],
   templateUrl: './insertar-proveedor.html',
   styleUrls: ['./insertar-proveedor.css'],
 })
@@ -50,6 +51,11 @@ export class InsertarProveedor implements OnInit {
   extraImageModos: Record<number, 'file' | 'url'> = {};
   
   coverImageName: string | null = null;
+  
+  // Modal de PDF
+  mostrarPdfModal = false;
+  pdfUrl = '';
+  pdfFileName = 'portafolio.pdf';
   
   // Estados
   cargandoCategorias = true;
@@ -302,7 +308,7 @@ export class InsertarProveedor implements OnInit {
     if (file) {
       this.caracteristicasFiles[carId] = file;
       const control = this.formProveedor.get('caracteristicas')?.get(carId);
-      if (control) control.setValue(file.name);
+      if (control) control.setValue(file);
     }
   }
 
@@ -369,6 +375,11 @@ export class InsertarProveedor implements OnInit {
     return raw.charAt(0).toUpperCase() + raw.slice(1);
   }
 
+  private normalizeCaracteristicaId(controlName: string): string {
+    const raw = (controlName || '').toString().trim();
+    return raw.startsWith('car_') ? raw.slice(4) : raw;
+  }
+
   private obtenerIdTipo(rawCategoria: string, grupoCategoria: string): number {
     const rawLower = this.normalizeText(rawCategoria);
     const grupoLower = this.normalizeText(grupoCategoria);
@@ -403,13 +414,38 @@ export class InsertarProveedor implements OnInit {
   }
 
   abrirPortafolio(url: string): void {
-    const normalized = this.buildPortafolioUrl(url);
+    if (!url) {
+      this.mostrarError('Portafolio no disponible');
+      return;
+    }
+
+    const resolved = this.resolvePortafolioUrl(url);
+    const trimmed = resolved.toString().trim();
+    console.log('[abrirPortafolio] URL solicitada:', trimmed);
+    
+    // Si es una URL completa HTTPS, abrirla en el modal
+    if (/^https?:\/\//i.test(trimmed)) {
+      console.log('[abrirPortafolio] URL detectada como HTTPS, abriendo en modal...');
+      
+      if (trimmed.includes('cloudinary.com')) {
+        console.log('[abrirPortafolio] ✅ URL de Cloudinary confirmada:', trimmed);
+      }
+      
+      this.abrirPdfModal(trimmed, 'Portafolio');
+      return;
+    }
+    
+    // Si es un enlace relativo o nombre de archivo, construir la URL del backend
+    console.log('[abrirPortafolio] URL parece ser relativa, construyendo URL del backend...');
+    const normalized = this.buildPortafolioUrl(trimmed);
     if (!normalized) {
       this.mostrarError('Portafolio no disponible');
       return;
     }
-    window.open(normalized, '_blank', 'noopener');
+    this.abrirPdfModal(normalized, 'Portafolio');
   }
+
+  // Manejar selección de archivo de portafolio (PDF)
 
   private buildPortafolioUrl(url: string): string {
     const path = this.buildPortafolioPath(url);
@@ -436,6 +472,24 @@ export class InsertarProveedor implements OnInit {
     if (trimmed.includes('/') || trimmed.startsWith('http')) return trimmed;
     // Si es solo nombre de archivo, asumir carpeta temporal de uploads
     return `/tmp_uploads/${trimmed}`;
+  }
+
+  private resolvePortafolioUrl(raw: any): string {
+    if (!raw) return '';
+    if (typeof raw === 'object') {
+      return raw.url || raw.secure_url || '';
+    }
+    const text = String(raw).trim();
+    if (!text) return '';
+    if (text.startsWith('{') && text.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(text);
+        return parsed?.url || parsed?.secure_url || '';
+      } catch {
+        return text;
+      }
+    }
+    return text;
   }
 
   // ============ MANEJO DE FORMULARIO ============
@@ -535,22 +589,41 @@ export class InsertarProveedor implements OnInit {
     // Manejo de imágenes: archivos + URLs
     const archivos: File[] = [];
     const urls: string[] = [];
+    const nombresImagenes: string[] = []; // Para rastrear el orden y nombres
+    let indicePrincipal = 0; // Por defecto la primera
     
     // Imagen principal
     if (this.imagenPrincipalFile) {
       archivos.push(this.imagenPrincipalFile);
+      nombresImagenes.push(this.imagenPrincipalFile.name);
     } else if (this.imagenPrincipalUrl) {
       urls.push(this.imagenPrincipalUrl);
+      nombresImagenes.push('url-principal');
     }
     
-    // Imágenes extras
+    // Imágenes extras (archivos)
     Object.entries(this.extraImages).forEach(([slotId, file]) => {
-      if (file) archivos.push(file);
+      if (file) {
+        archivos.push(file);
+        nombresImagenes.push(file.name);
+      }
     });
     
+    // Imágenes extras (URLs)
     Object.entries(this.extraImageUrls).forEach(([slotId, url]) => {
-      if (url && url.trim()) urls.push(url.trim());
+      if (url && url.trim()) {
+        urls.push(url.trim());
+        nombresImagenes.push(`url-extra-${slotId}`);
+      }
     });
+
+    // Calcular el índice de la imagen principal seleccionada
+    if (this.coverImageName) {
+      const indice = nombresImagenes.indexOf(this.coverImageName);
+      if (indice !== -1) {
+        indicePrincipal = indice;
+      }
+    }
 
     // Agregar archivos al FormData
     if (archivos.length > 0) {
@@ -561,10 +634,20 @@ export class InsertarProveedor implements OnInit {
     if (urls.length > 0) {
       formData.append('imagenes_urls', JSON.stringify(urls));
     }
+    
+    // Agregar el índice de la imagen principal
+    formData.append('imagen_principal_index', indicePrincipal.toString());
+    
+    console.log('📤 Nombre de portada seleccionada:', this.coverImageName);
+    console.log('📤 Nombres de todas las imágenes:', nombresImagenes);
+    console.log('📤 Índice de imagen principal:', indicePrincipal);
+    console.log('📤 Total de archivos:', archivos.length, '| URLs:', urls.length);
 
     // Agregar archivos de características dinámicas
     Object.entries(this.caracteristicasFiles).forEach(([carId, file]) => {
-      if (file) formData.append(`caracteristica_file_${carId}`, file);
+      if (!file) return;
+      const normalizedId = this.normalizeCaracteristicaId(carId);
+      formData.append(`caracteristica_${normalizedId}`, file, file.name);
     });
     
     // Agregar URLs de características dinámicas al JSON de características
@@ -702,7 +785,7 @@ export class InsertarProveedor implements OnInit {
     if (input?.files && input.files.length > 0) {
       const file = input.files[0];
       this.imagenPrincipalFile = file;
-      this.formProveedor.get('imagen_principal')?.setValue(file.name);
+      this.formProveedor.get('imagen_principal')?.setValue(file);
       this.formProveedor.get('imagen_principal')?.markAsTouched();
       
       // Generar vista previa
@@ -721,6 +804,7 @@ export class InsertarProveedor implements OnInit {
     this.imagenPrincipalUrl = url.trim();
     if (this.imagenPrincipalUrl) {
       this.imagenPrincipalPreview = this.imagenPrincipalUrl;
+      // store the URL string for validation/display; do not assign to the native file input
       this.formProveedor.get('imagen_principal')?.setValue(this.imagenPrincipalUrl);
       this.formProveedor.get('imagen_principal')?.markAsTouched();
       if (!this.coverImageName) {
@@ -786,22 +870,30 @@ export class InsertarProveedor implements OnInit {
     
     // Imagen principal (archivo o URL)
     if (this.imagenPrincipalFile) {
-      lista.push({ nombre: this.imagenPrincipalFile.name, etiqueta: `Principal: ${this.imagenPrincipalFile.name}`, esPrincipal: true });
+      const nombre = this.imagenPrincipalFile.name;
+      const esPrincipal = !this.coverImageName || this.coverImageName === nombre;
+      lista.push({ nombre, etiqueta: `Principal: ${nombre}`, esPrincipal });
     } else if (this.imagenPrincipalUrl) {
       const urlCorta = this.imagenPrincipalUrl.length > 40 ? this.imagenPrincipalUrl.substring(0, 40) + '...' : this.imagenPrincipalUrl;
-      lista.push({ nombre: 'url-principal', etiqueta: `Principal: ${urlCorta}`, esPrincipal: true });
+      const nombre = 'url-principal';
+      const esPrincipal = !this.coverImageName || this.coverImageName === nombre;
+      lista.push({ nombre, etiqueta: `Principal: ${urlCorta}`, esPrincipal });
     }
 
     // Imágenes extras (archivos)
     Object.values(this.extraImages).forEach((file, idx) => {
-      lista.push({ nombre: file.name, etiqueta: `Extra ${idx + 1}: ${file.name}`, esPrincipal: false });
+      const nombre = file.name;
+      const esPrincipal = this.coverImageName === nombre;
+      lista.push({ nombre, etiqueta: `Extra ${idx + 1}: ${nombre}`, esPrincipal });
     });
     
     // Imágenes extras (URLs)
     Object.entries(this.extraImageUrls).forEach(([slotId, url], idx) => {
       if (url && url.trim()) {
         const urlCorta = url.length > 40 ? url.substring(0, 40) + '...' : url;
-        lista.push({ nombre: `url-extra-${slotId}`, etiqueta: `Extra URL ${idx + 1}: ${urlCorta}`, esPrincipal: false });
+        const nombre = `url-extra-${slotId}`;
+        const esPrincipal = this.coverImageName === nombre;
+        lista.push({ nombre, etiqueta: `Extra URL ${idx + 1}: ${urlCorta}`, esPrincipal });
       }
     });
 
@@ -824,7 +916,7 @@ export class InsertarProveedor implements OnInit {
       // Actualizar el control del formulario
       const group = this.formProveedor.get(groupName) as FormGroup;
       if (group) {
-        group.get(controlName)?.setValue(file.name);
+        group.get(controlName)?.setValue(file);
         group.get(controlName)?.markAsTouched();
       }
 
@@ -927,5 +1019,19 @@ export class InsertarProveedor implements OnInit {
     setTimeout(() => {
       this.mensajeError = '';
     }, 5000);
+  }
+  
+  // Abrir modal de PDF
+  abrirPdfModal(url: string, nombre: string = 'portafolio.pdf'): void {
+    this.pdfUrl = url;
+    this.pdfFileName = nombre;
+    this.mostrarPdfModal = true;
+  }
+  
+  // Cerrar modal de PDF
+  cerrarPdfModal(): void {
+    this.mostrarPdfModal = false;
+    this.pdfUrl = '';
+    this.pdfFileName = 'portafolio.pdf';
   }
 }

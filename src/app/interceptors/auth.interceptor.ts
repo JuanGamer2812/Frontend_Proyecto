@@ -24,6 +24,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Adjuntar Authorization excepto en endpoints públicos de auth (login/register/refresh)
   const isPublicAuthEndpoint = /\/api\/auth\/(login|register|refresh)(\/|$)/.test(req.url);
   // Consider local backend hosts AND Railway backend as internal so the interceptor attaches the token
+  // EXCLUDE: Cloudinary and other external CDNs should never receive Authorization headers
+  const isCloudinaryUrl = req.url.includes('res.cloudinary.com') || req.url.includes('cloudinary.com');
   const isExternalUrl = !(
     req.url.startsWith('/api') ||
     req.url.startsWith('http://localhost') ||
@@ -35,7 +37,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   );
 
   // Clonar la petición y agregar el token si existe
-  if (token && !isPublicAuthEndpoint && !isExternalUrl) {
+  // NEVER add Authorization to Cloudinary URLs (CDN should not require auth)
+  if (token && !isPublicAuthEndpoint && !isExternalUrl && !isCloudinaryUrl) {
     req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
@@ -45,6 +48,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     try {
       console.log('[authInterceptor] Authorization header enviado:', req.headers.get('Authorization'));
     } catch(e){}
+  }
+
+  // Log cuando se evita agregar Authorization a Cloudinary
+  if (isCloudinaryUrl) {
+    console.log('[authInterceptor] ⚠️ Cloudinary URL detectada, NO se agrega Authorization header:', req.url);
   }
 
   // Manejar la respuesta con renovación de token y sin forzar redirect para invitados

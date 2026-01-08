@@ -366,8 +366,11 @@ export class ApiService {
     return this.http.post<any>(`${this.baseUrl}/proveedor-caracteristicas`, payload);
   }
 
-  updateProveedorCaracteristicas(id_proveedor: number, caracteristicas: any[]): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/proveedor/${id_proveedor}/caracteristicas`, caracteristicas);
+  updateProveedorCaracteristicas(caracteristicas: any[]): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/proveedor-caracteristicas`, caracteristicas);
+  }
+  updateProveedorCaracteristicasMultipart(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/proveedor-caracteristicas`, formData);
   }
 
   subirImagenesProveedor(formData: FormData): Observable<any> {

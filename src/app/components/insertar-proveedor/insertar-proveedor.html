@@ -298,3 +298,6 @@
         </div>
     </div>
 </body>
+
+<!-- Modal para visualizar PDFs -->
+<app-pdf-viewer-modal [isVisible]="mostrarPdfModal" [pdfUrl]="pdfUrl" [fileName]="pdfFileName" (close)="cerrarPdfModal()"></app-pdf-viewer-modal>

@@ -64,23 +64,29 @@
 
                                 <div class="col-md-6 datetime-field">
                                     <label class="form-label">Fecha y hora de inicio<span class="text-danger">*</span></label>
-                                    <input type="datetime-local" class="form-control" formControlName="fecha_inicio_evento" [ngClass]="{'is-invalid': isInvalid('fecha_inicio_evento') || form.errors?.['rangoFechas']}">
-                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido')">
+                                    <input type="datetime-local" class="form-control" formControlName="fecha_inicio_evento" [min]="fechaMinimaReserva" (change)="onFechaInicioChange()" [ngClass]="{'is-invalid': isInvalid('fecha_inicio_evento') || form.errors?.['rangoFechas']}">
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_inicio_evento')?.hasError('anticipacionMinima')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>La reserva debe hacerse con mínimo 5 días de anticipación</span></small>
+                                    </div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido') && !form.get('fecha_inicio_evento')?.hasError('anticipacionMinima')">
                                         <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>El horario permitido es de 08:00 a 23:59</span></small>
                                     </div>
-                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido') && isInvalid('fecha_inicio_evento')">
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_inicio_evento')?.hasError('horarioNoPermitido') && !form.get('fecha_inicio_evento')?.hasError('anticipacionMinima') && isInvalid('fecha_inicio_evento')">
                                         <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>Ingresa una fecha y hora válida</span></small>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Fecha y hora de fin<span class="text-danger">*</span></label>
-                                    <input type="datetime-local" class="form-control" formControlName="fecha_fin_evento" [ngClass]="{'is-invalid': isInvalid('fecha_fin_evento') || form.errors?.['rangoFechas']}">
-                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_fin_evento')?.hasError('horarioNoPermitido')">
+                                    <input type="datetime-local" class="form-control" formControlName="fecha_fin_evento" (change)="onFechaFinChange()" [ngClass]="{'is-invalid': isInvalid('fecha_fin_evento') || form.errors?.['rangoFechas']}">
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.errors?.['rangoFechas']">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>La fecha de fin debe ser posterior a la fecha de inicio</span></small>
+                                    </div>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="form.get('fecha_fin_evento')?.hasError('horarioNoPermitido') && !form.errors?.['rangoFechas']">
                                         <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>El horario permitido es de 08:00 a 23:59</span></small>
                                     </div>
-                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_fin_evento')?.hasError('horarioNoPermitido') && isInvalid('fecha_fin_evento')">
-                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>Debe ser posterior al inicio</span></small>
+                                    <div class="invalid-feedback d-block mt-1" *ngIf="!form.get('fecha_fin_evento')?.hasError('horarioNoPermitido') && !form.errors?.['rangoFechas'] && isInvalid('fecha_fin_evento')">
+                                        <small class="d-flex align-items-center gap-1"><i class="bi bi-exclamation-circle"></i><span>Ingresa una fecha y hora válida</span></small>
                                     </div>
                                 </div>
 
@@ -113,8 +119,8 @@
                             <div class="mb-3">
                                 <p class="text-muted mb-2">Selecciona la categoría de proveedor que deseas agregar:</p>
                                 <div class="d-flex flex-wrap gap-2">
-                                    <button *ngFor="let tipo of tiposProveedor" type="button" class="btn btn-outline-primary btn-sm" (click)="agregarProveedor(tipo)" [disabled]="isAgregarDisabled(tipo)" [class.disabled]="isAgregarDisabled(tipo)" [attr.aria-disabled]="isAgregarDisabled(tipo)">
-                                        <i class="bi bi-plus-circle"></i> {{ tipo.nombre }}
+                                    <button *ngFor="let tipo of tiposProveedor" type="button" class="btn btn-outline-primary btn-sm btn-categoria-filtro" (click)="agregarProveedor(tipo)" [disabled]="isAgregarDisabled(tipo)" [class.disabled]="isAgregarDisabled(tipo)" [attr.aria-disabled]="isAgregarDisabled(tipo)">
+                                        <i class="bi bi-plus-circle"></i> {{ tipo.nombre | titlecase }}
                                     </button>
                                 </div>
                             </div>
@@ -127,12 +133,16 @@
                                     <div class="card-body">
                                         <div class="row g-3">
                                             <div class="col-12">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <h6 class="mb-0">
-                                                        <i class="bi bi-tag me-2"></i> {{ provGrp.get('categoria')?.value }}
-                                                    </h6>
-                                                    <div *ngIf="proveedorDescripcion[i]" class="text-muted small">{{ proveedorDescripcion[i] }}</div>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminarProveedor(i)">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1 fw-bold" style="color: var(--bs-primary); letter-spacing: 0.5px;">
+                                                            <i class="bi bi-tag me-2"></i>{{ provGrp.get('categoria')?.value | titlecase }}
+                                                        </h6>
+                                                        <div *ngIf="proveedorDescripcion[i]" class="proveedor-nombre">
+                                                            {{ proveedorDescripcion[i] }}
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger ms-3" (click)="eliminarProveedor(i)">
                                                         <i class="bi bi-trash"></i> Quitar
                                                     </button>
                                                 </div>
@@ -151,7 +161,7 @@
                                                 <select class="form-select" formControlName="id_proveedor" [disabled]="!provGrp.get('id_plan')?.value" [ngClass]="{'is-invalid': provGrp.get('id_proveedor')?.invalid && provGrp.get('id_proveedor')?.touched}">
                                                        <option value="" disabled selected>Selecciona un proveedor</option>
                                                        <option *ngFor="let prov of getProveedoresPorCategoriaYPlan(provGrp.get('categoria')?.value, i)" [value]="prov.id_proveedor">
-                                                           {{ prov.nombre }} - ${{ prov.precio_base | number:'1.2-2' }}
+                                                           {{ prov.nombre }} - ${{ formatNumber(prov.precio_base) }}
                                                        </option>
                                                 </select>
                                                 <div class="invalid-feedback">Debes seleccionar un proveedor.</div>
@@ -338,7 +348,7 @@
                                                     <input type="tel" class="form-control form-control-sm" formControlName="telefono" placeholder="0999999999">
                                                 </td>
                                                 <td>
-                                                    <input type="number" class="form-control form-control-sm text-center" formControlName="acompanantes" min="0" max="10" title="Número de acompañantes adicionales">
+                                                    <input type="number" class="form-control form-control-sm text-center" formControlName="acompanantes" min="0" max="10" (change)="onAcompanantesChange(i)" title="Número de acompañantes adicionales">
                                                 </td>
                                                 <td>
                                                     <input type="text" class="form-control form-control-sm" formControlName="notas" placeholder="Dieta especial, alergias, etc.">
@@ -367,7 +377,7 @@
                                     <ul class="list-unstyled mb-0">
                                         <li class="mb-2 d-flex justify-content-between">
                                             <span class="text-muted">Base por proveedor (25 x {{ proveedoresArray.length }}):</span>
-                                            <strong>${{ 25 * proveedoresArray.length | number:'1.2-2' }}</strong>
+                                            <strong>${{ formatNumber(25 * proveedoresArray.length) }}</strong>
                                         </li>
                                         <li class="mt-2 pt-2 border-top d-flex justify-content-between">
                                             <span class="text-muted">Proveedores seleccionados:</span>
@@ -375,17 +385,17 @@
                                         </li>
                                         <li class="mt-3 pt-2 border-top d-flex justify-content-between">
                                             <span class="text-muted">Subtotal:</span>
-                                            <strong>${{ subtotal | number:'1.2-2' }}</strong>
+                                            <strong>${{ formatNumber(subtotal) }}</strong>
                                         </li>
                                         <li class="mb-1 d-flex justify-content-between">
                                             <span class="text-muted">IVA (15%):</span>
-                                            <strong class="text-warning">${{ iva | number:'1.2-2' }}</strong>
+                                            <strong class="text-warning">${{ formatNumber(iva) }}</strong>
                                         </li>
                                     </ul>
                                 </div>
                                 <div class="col-md-4 text-md-end d-flex flex-column justify-content-center">
                                     <div class="h3 text-primary mb-0">
-                                        Total: ${{ totalEstimado | number:'1.2-2' }}
+                                        Total: ${{ formatNumber(totalEstimado) }}
                                     </div>
                                     <small class="text-muted">Incluye IVA (15%)</small>
                                 </div>

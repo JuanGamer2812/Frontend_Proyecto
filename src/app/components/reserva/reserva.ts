@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../service/api.service';
@@ -36,7 +36,7 @@ interface Categoria {
   imports: [CommonModule,         // Para *ngIf, *ngFor, ngClass, pipes, etc.
     FormsModule,          // Para ngModel
     ReactiveFormsModule,  // Para reactive forms
-    DecimalPipe,          // Para el pipe number
+    TitleCasePipe,        // Para titlecase
     Pago,
     PdfViewerModal],
   templateUrl: './reserva.html',
@@ -83,6 +83,9 @@ export class Reserva implements OnInit {
   
   // Cache de disponibilidad de proveedores para un rango de fechas
   private proveedoresDisponibles: Set<number> = new Set();
+
+  // Fecha mínima permitida para reservas (5 días desde hoy)
+  fechaMinimaReserva: string = '';
 
   form: FormGroup;
 
@@ -168,20 +171,72 @@ export class Reserva implements OnInit {
     return null;
   };
 
+  // Validador: La fecha del evento debe ser mínimo 5 días en el futuro
+  private validarAnticipacionMinima = (control: AbstractControl): ValidationErrors | null => {
+    const raw = control?.value;
+    if (!raw) return null;
+    
+    try {
+      const fechaEvento = new Date(raw);
+      const hoy = new Date();
+      
+      // Resetear las horas para comparar solo fechas
+      hoy.setHours(0, 0, 0, 0);
+      fechaEvento.setHours(0, 0, 0, 0);
+      
+      // Calcular la diferencia en días
+      const diffTime = fechaEvento.getTime() - hoy.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Validar que sea al menos 5 días en el futuro
+      if (diffDays < 5) {
+        return { anticipacionMinima: { diasRestantes: diffDays, diasRequeridos: 5 } };
+      }
+    } catch (_) {
+      // Si hay error al parsear la fecha, no validar
+      return null;
+    }
+    
+    return null;
+  };
+
+  // Validador de formulario: Fecha fin debe ser posterior a fecha inicio
+  private validarRangoFechas = (formGroup: AbstractControl): ValidationErrors | null => {
+    const inicio = formGroup.get('fecha_inicio_evento')?.value;
+    const fin = formGroup.get('fecha_fin_evento')?.value;
+
+    if (!inicio || !fin) {
+      return null;
+    }
+
+    try {
+      const fechaInicio = new Date(inicio);
+      const fechaFin = new Date(fin);
+
+      if (fechaFin <= fechaInicio) {
+        return { rangoFechas: { mensaje: 'La fecha de fin debe ser posterior a la fecha de inicio' } };
+      }
+    } catch (_) {
+      return null;
+    }
+
+    return null;
+  };
+
   constructor() {
     this.form = this.fb.group({
       nombre_evento: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       cedula_reservacion: ['', [Validators.required, this.validarCedulaEcuatoriana]],
       id_categoria: ['', Validators.required],
       descripcion_evento: ['', Validators.required],
-      fecha_inicio_evento: ['', [Validators.required, this.validarHorarioPermitido]],
+      fecha_inicio_evento: ['', [Validators.required, this.validarHorarioPermitido, this.validarAnticipacionMinima]],
       fecha_fin_evento: ['', [Validators.required, this.validarHorarioPermitido]],
       id_plan: [''],
       hay_playlist_evento: [false],
       playlist_evento: [''],
       proveedoresSeleccionados: this.fb.array([]),
       invitados: this.fb.array([])
-    });
+    }, { validators: this.validarRangoFechas });
     
   }
 
@@ -304,7 +359,8 @@ export class Reserva implements OnInit {
   pdfModalFileName = signal('');
 
   abrirPdfCaracteristica(url: string, nombre: string = 'Documento'): void {
-    this.pdfModalUrl.set(url);
+    const resolved = this.resolveAssetUrl(url);
+    this.pdfModalUrl.set(resolved);
     this.pdfModalFileName.set(nombre);
     this.showPdfModal.set(true);
   }
@@ -316,6 +372,11 @@ export class Reserva implements OnInit {
   }
 
   ngOnInit(): void {
+    // Calcular fecha mínima permitida (5 días desde hoy)
+    const hoy = new Date();
+    hoy.setDate(hoy.getDate() + 5);
+    this.fechaMinimaReserva = hoy.toISOString().slice(0, 16); // Formato: YYYY-MM-DDTHH:MM
+
     this.cargarCategorias();
     this.apiService.getPlanes().subscribe(planes => this.planes = planes);
     this.apiService.getTiposProveedor().subscribe(tipos => this.tiposProveedor = tipos);
@@ -392,6 +453,29 @@ export class Reserva implements OnInit {
     return this.form.get('invitados') as FormArray;
   }
 
+  private parseAssetMeta(raw: any): { url?: string } | null {
+    if (!raw) return null;
+    if (typeof raw === 'object') {
+      const url = raw.url || raw.secure_url || null;
+      return url ? { url } : null;
+    }
+    const s = String(raw).trim();
+    if (!s || !s.startsWith('{') || !s.endsWith('}')) return null;
+    try {
+      const parsed = JSON.parse(s);
+      const url = parsed?.url || parsed?.secure_url || null;
+      return url ? { url } : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private resolveAssetUrl(raw: any): string {
+    const meta = this.parseAssetMeta(raw);
+    if (meta?.url) return meta.url;
+    return raw ? String(raw) : '';
+  }
+
   isMenuCaracteristica(nombre: string): boolean {
     if (!nombre) return false;
     const n = nombre.toLowerCase();
@@ -417,7 +501,8 @@ export class Reserva implements OnInit {
       const lista = this.proveedorCaracteristicasEditable[index] || [];
       const found = (lista as any[]).find(c => this.isMenuCaracteristica(c?.nombre || '') && this.esCaracteristicaFileUrl(c) && c.valorProveedor);
       if (!found) return null;
-      const url = found.valorProveedor?.valor || found.valorProveedor?.valor_texto || found.valorProveedor;
+      const raw = found.valorProveedor?.valor_texto ?? found.valorProveedor?.valor ?? found.valorProveedor?.valor_json ?? found.valorProveedor;
+      const url = this.resolveAssetUrl(raw);
       if (!url) return null;
       return { url, nombre: found.nombre || 'Menú' };
     } catch (e) {
@@ -441,6 +526,28 @@ export class Reserva implements OnInit {
       if (nombre.includes('personalizado')) return false;
       return true;
     });
+  }
+
+  formatNumber(value: any): string {
+    if (value === null || value === undefined || value === '') return '0';
+    const raw = String(value).trim();
+    // Preserve explicit decimals from backend strings.
+    const intLike = /^-?\d+$/.test(raw);
+    const decimalLike = /^-?\d+[.,]\d+$/.test(raw);
+    if (intLike) return raw;
+    if (decimalLike) {
+      const parts = raw.replace(',', '.').split('.');
+      if (parts.length === 2 && /^[0]+$/.test(parts[1])) {
+        return parts[0];
+      }
+      return raw;
+    }
+
+    const n = Number(value);
+    if (!Number.isFinite(n)) return raw;
+    if (Number.isInteger(n)) return n.toString();
+    // Avoid float noise; keep decimals only when present.
+    return n.toFixed(2).replace(/\.?0+$/, '');
   }
 
   agregarProveedor(cat: Categoria): void {
@@ -661,6 +768,22 @@ export class Reserva implements OnInit {
         filtered = filteredByPlan.filter(p => String(p['id_tipo']) === String(tipoSeleccionado) || String(p.tipo || p['nombre_tipo'] || '').toLowerCase() === String(tipoSeleccionado).toLowerCase());
       }
     }
+    
+    // NUEVO: Filtrar proveedores ya seleccionados en otros índices
+    // Obtener lista de IDs de proveedores ya seleccionados
+    const proveedoresSeleccionados = new Set<string>();
+    this.proveedoresArray.controls.forEach((control, idx) => {
+      // Excluir el índice actual (para permitir cambiar el proveedor del mismo dropdown)
+      if (idx !== index) {
+        const idProv = control.get('id_proveedor')?.value;
+        if (idProv) {
+          proveedoresSeleccionados.add(String(idProv));
+        }
+      }
+    });
+    
+    // Filtrar los proveedores disponibles excluyendo los ya seleccionados
+    filtered = filtered.filter(p => !proveedoresSeleccionados.has(String(p.id_proveedor)));
     
     // Filter by availability: only show providers that are available for the selected dates
     const fechaInicio = this.form.get('fecha_inicio_evento')?.value;
@@ -888,7 +1011,68 @@ export class Reserva implements OnInit {
     this.proveedorEsLugar[index] = false;
   }
 
-  agregarInvitado(): void {
+  /**
+   * Valida que el número de invitados no exceda los platos incluidos de ningún proveedor CATERING
+   * @param totalInvitados - Número total de invitados a validar
+   * @returns Mensaje de error si hay exceso, null si todo está bien
+   */
+  private async validarLimitePlatos(totalInvitados: number): Promise<string | null> {
+    if (!this.proveedoresArray || this.proveedoresArray.length === 0) {
+      return null;
+    }
+    
+    for (let i = 0; i < this.proveedoresArray.length; i++) {
+      const g = this.proveedoresArray.at(i);
+      if (!g) continue;
+      const idProvRaw = g.get('id_proveedor')?.value;
+      const idProv = idProvRaw ? Number(idProvRaw) : undefined;
+      if (!idProv) continue;
+      
+      const provObj = (this.proveedoresAll || []).find(p => Number(p.id_proveedor) === Number(idProv));
+      const categoriaRaw = String(g.get('categoria')?.value || provObj?.categoria || provObj?.['nombre_categoria'] || provObj?.tipo || '').trim();
+      const catNorm = this.normalizeCategoria(categoriaRaw);
+      
+      if (catNorm === 'CATERING') {
+        const platosIncluidos = this.getPlatosIncluidosForIndex(i);
+        if (platosIncluidos != null && totalInvitados > platosIncluidos) {
+          const nombreProv = provObj?.nombre || provObj?.['nombre_proveedor'] || `Proveedor en posición ${i+1}`;
+          return `El proveedor "${nombreProv}" tiene ${platosIncluidos} platos incluidos. No puedes tener más de ${platosIncluidos} invitados.`;
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  async agregarInvitado(): Promise<void> {
+    // Validar que haya al menos un proveedor seleccionado
+    if (!this.proveedoresArray || this.proveedoresArray.length === 0) {
+      await this.showSweetAlert('warning', 'Sin proveedores', 'Debes seleccionar al menos un proveedor antes de agregar invitados.');
+      return;
+    }
+    
+    // Verificar que al menos un proveedor esté seleccionado (no solo agregado)
+    const hayProveedorSeleccionado = this.proveedoresArray.controls.some(g => {
+      const idProv = g.get('id_proveedor')?.value;
+      return idProv && idProv !== '';
+    });
+    
+    if (!hayProveedorSeleccionado) {
+      await this.showSweetAlert('warning', 'Sin proveedores', 'Debes seleccionar al menos un proveedor antes de agregar invitados.');
+      return;
+    }
+    
+    // Calcular cuántas personas habrá después de agregar este invitado
+    const totalActual = this.totalPersonasInvitadas;
+    const totalDespues = totalActual + 1; // +1 por el nuevo invitado sin acompañantes aún
+    
+    // Validar contra platos incluidos de proveedores CATERING
+    const errorValidacion = await this.validarLimitePlatos(totalDespues);
+    if (errorValidacion) {
+      await this.showSweetAlert('warning', 'Límite de platos alcanzado', errorValidacion);
+      return; // No agregar el invitado
+    }
+    
     this.invitadosArray.push(this.fb.group({
       nombre: ['', Validators.required],
       email: [''],
@@ -900,6 +1084,25 @@ export class Reserva implements OnInit {
 
   eliminarInvitado(index: number): void {
     this.invitadosArray.removeAt(index);
+  }
+
+  /**
+   * Se ejecuta cuando cambia el número de acompañantes de un invitado
+   */
+  async onAcompanantesChange(invitadoIndex: number): Promise<void> {
+    // Calcular el nuevo total con los acompañantes actualizados
+    const totalDespues = this.totalPersonasInvitadas;
+    
+    // Validar contra platos incluidos
+    const errorValidacion = await this.validarLimitePlatos(totalDespues);
+    if (errorValidacion) {
+      // Revertir el cambio de acompañantes
+      const invitadoGrp = this.invitadosArray.at(invitadoIndex);
+      if (invitadoGrp) {
+        invitadoGrp.get('acompanantes')?.setValue(0);
+      }
+      await this.showSweetAlert('warning', 'Límite de platos alcanzado', errorValidacion);
+    }
   }
 
   get totalPersonasInvitadas(): number {
@@ -1086,6 +1289,32 @@ export class Reserva implements OnInit {
   }
 
   /**
+   * Se ejecuta cuando cambia la fecha de inicio para validar inmediatamente
+   */
+  onFechaInicioChange(): void {
+    const fechaCtrl = this.form.get('fecha_inicio_evento');
+    if (fechaCtrl) {
+      fechaCtrl.markAsTouched();
+      fechaCtrl.updateValueAndValidity();
+    }
+    // También revalidar el formulario para verificar el rango de fechas
+    this.form.updateValueAndValidity();
+  }
+
+  /**
+   * Se ejecuta cuando cambia la fecha de fin para validar inmediatamente
+   */
+  onFechaFinChange(): void {
+    const fechaCtrl = this.form.get('fecha_fin_evento');
+    if (fechaCtrl) {
+      fechaCtrl.markAsTouched();
+      fechaCtrl.updateValueAndValidity();
+    }
+    // Revalidar el formulario para verificar el rango de fechas
+    this.form.updateValueAndValidity();
+  }
+
+  /**
    * Obtiene el mensaje de error específico para la cédula ecuatoriana
    */
   getCedulaErrorMessage(): string {
@@ -1125,7 +1354,17 @@ export class Reserva implements OnInit {
     }
   }
 
-  abrirModalPago(): void {
+  async abrirModalPago(): Promise<void> {
+    // Validar que el número total de invitados no exceda los "platos incluidos" de ningún proveedor CATERING
+    const totalGuests = Math.max(0, this.totalPersonasInvitadas || 0);
+    
+    const errorValidacion = await this.validarLimitePlatos(totalGuests);
+    if (errorValidacion) {
+      await this.showSweetAlert('warning', 'Límite de platos excedido', errorValidacion);
+      return; // No abrir el modal de pago
+    }
+    
+    // Si todo está bien, mostrar el modal de pago
     this.mostrarPago.set(true);
   }
 
@@ -1504,9 +1743,28 @@ export class Reserva implements OnInit {
   }
 
   // Importar invitados desde archivo Excel
-  onImportarExcel(event: Event): void {
+  async onImportarExcel(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
+
+    // Validar que haya al menos un proveedor seleccionado
+    if (!this.proveedoresArray || this.proveedoresArray.length === 0) {
+      await this.showSweetAlert('warning', 'Sin proveedores', 'Debes seleccionar al menos un proveedor antes de importar invitados.');
+      input.value = ''; // Limpiar el input
+      return;
+    }
+    
+    // Verificar que al menos un proveedor esté seleccionado (no solo agregado)
+    const hayProveedorSeleccionado = this.proveedoresArray.controls.some(g => {
+      const idProv = g.get('id_proveedor')?.value;
+      return idProv && idProv !== '';
+    });
+    
+    if (!hayProveedorSeleccionado) {
+      await this.showSweetAlert('warning', 'Sin proveedores', 'Debes seleccionar al menos un proveedor antes de importar invitados.');
+      input.value = ''; // Limpiar el input
+      return;
+    }
 
     const file = input.files[0];
     const reader = new FileReader();
@@ -1721,14 +1979,7 @@ export class Reserva implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.categorias.set([
-          { nombre: 'MUSICA', icono: 'bi-music-note-beamed' },
-          { nombre: 'CATERING', icono: 'bi-egg-fried' },
-          { nombre: 'DECORACION', icono: 'bi-balloon-heart' },
-          { nombre: 'LUGAR', icono: 'bi-geo-alt' },
-          { nombre: 'FOTOGRAFIA', icono: 'bi-camera' },
-          { nombre: 'VIDEO', icono: 'bi-film' }
-        ]);
+        this.categorias.set([]);
         this.loading.set(false);
       }
     });

@@ -56,6 +56,41 @@ p {
     margin-bottom: 2rem;
 }
 
+/* ------------------------- FILTRO RESPONSIVO ------------------------- */
+
+.category-filter {
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.category-filter__group {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    width: 100%;
+}
+
+.category-filter__group .btn {
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 576px) {
+    .category-filter {
+        padding: 0 0.5rem;
+    }
+    .category-filter__group {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.25rem;
+    }
+    .category-filter__group .btn {
+        flex: 0 0 auto;
+    }
+}
+
 
 /* Carrusel: altura estable y recorte responsivo */
 

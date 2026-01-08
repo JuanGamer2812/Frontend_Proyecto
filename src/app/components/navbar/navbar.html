@@ -53,7 +53,7 @@
                             <div class="d-flex align-items-center">
                                 <img [src]="userImage || 'usrIco.png'" (error)="onImgError()" width="48" height="48" class="rounded-circle me-2" alt="Avatar">
                                 <div>
-                                    <div class="fw-bold">{{ userFirstName || userName }}</div>
+                                    <div class="fw-bold">{{ (userFirstName && userLastName && userLastName.trim() !== '') ? (userFirstName + ' ' + userLastName) : (userFirstName || userName) }}</div>
                                     <div class="text-muted small">{{ userEmail }}</div>
                                     <div *ngIf="isAdmin" class="badge bg-danger mt-1">Admin</div>
                                 </div>

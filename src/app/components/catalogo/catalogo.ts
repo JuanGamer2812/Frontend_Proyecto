@@ -5,12 +5,16 @@ import { ApiService } from '../../service/api.service';
 import { PdfViewerModal } from '../pdf-viewer-modal/pdf-viewer-modal';
 
 interface Resenia {
-  'ID Reseña': number;
-  'Nombre Usuario': string;
-  'Comentario': string;
-  'Calificacion': number;
-  'Fecha Registro': string;
-  'Foto Usuario': string;
+  id_resena: number;
+  id_evento: number;
+  id_usuario: number;
+  calificacion: number;
+  comentario: string;
+  fecha_creacion: string;
+  nombre_evento?: string;
+  nombre_usuario?: string;
+  apellido_usuario?: string;
+  foto_perfil_usuario?: string;
 }
 
 interface Plan {
@@ -84,6 +88,7 @@ export class Catalogo implements OnInit {
   ngOnInit(): void {
     this.cargarTiposDesdeTablaPlanes();
     this.cargarCategoriasDesdeTabla();
+    this.cargarResenias();
   }
 
   cargarTiposDesdeTablaPlanes(): void {
@@ -113,6 +118,35 @@ export class Catalogo implements OnInit {
         console.error('Error al cargar categorías:', err);
       }
     });
+  }
+
+  // Cargar todas las reseñas desde el backend
+  cargarResenias(): void {
+    this.loading.set(true);
+    this.error.set('');
+    
+    // Obtener todas las reseñas de todos los eventos
+    this.apiService.getData('resena-evento/todas').subscribe({
+      next: (resenias: any[]) => {
+        console.log('Reseñas recibidas:', resenias);
+        this.resenias.set(resenias);
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        console.error('Error al cargar reseñas:', err);
+        this.error.set('No se pudieron cargar las reseñas.');
+        this.loading.set(false);
+        // Cargar reseñas de ejemplo si falla
+        this.cargarReseniasDemoPorEvento();
+      }
+    });
+  }
+
+  // Método alternativo: obtener reseñas por evento específico
+  cargarReseniasDemoPorEvento(): void {
+    // Puedes implementar lógica para obtener reseñas de eventos específicos
+    // Por ahora, dejamos el array vacío
+    this.loading.set(false);
   }
 
   // Abrir modal con PDF del plan
@@ -150,6 +184,20 @@ export class Catalogo implements OnInit {
   // Generar array de estrellas para la calificación
   getStars(calificacion: number): number[] {
     return Array(calificacion).fill(0);
+  }
+
+  // Generar array de estrellas vacías
+  getEmptyStars(calificacion: number): number[] {
+    const empty = 5 - calificacion;
+    return Array(empty > 0 ? empty : 0).fill(0);
+  }
+
+  // Obtener nombre completo del usuario
+  getNombreCompleto(resenia: Resenia): string {
+    if (resenia.nombre_usuario && resenia.apellido_usuario) {
+      return `${resenia.nombre_usuario} ${resenia.apellido_usuario}`;
+    }
+    return resenia.nombre_usuario || 'Usuario Anónimo';
   }
 
   // Obtener iniciales del nombre

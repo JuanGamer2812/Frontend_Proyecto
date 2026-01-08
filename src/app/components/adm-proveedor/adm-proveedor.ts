@@ -84,6 +84,7 @@ export class AdmProveedor implements OnInit {
 
   // Proveedores
   categorias: Categoria[] = [];
+  private categoriasBase: Categoria[] = [];
   categoria = signal<Categoria>('');
   planes: any[] = [];
   planDefault: number | null = null;
@@ -119,7 +120,7 @@ export class AdmProveedor implements OnInit {
     const normaliza = (v?: any) => this.normalizarCategoriaNombre(v);
     const buscada = normaliza(cat);
     const categoriaDe = (p: any): string => normaliza(
-      p.tipo_nombre ?? p.categoria ?? p.categoria_proveedor ?? p.categoria_postu_proveedor
+      p.tipo_nombre ?? p['nombre_tipo'] ?? p['tipo'] ?? p.categoria ?? p['categoria_proveedor'] ?? p['categoria_postu_proveedor']
     );
 
     const filtrados = allProveedores.filter((p) => {
@@ -187,7 +188,7 @@ export class AdmProveedor implements OnInit {
           });
 
           const tipoNombre = aMayus(
-            p.tipo_nombre ?? p.categoria ?? p.categoria_proveedor ?? p.categoria_postu_proveedor ?? tipoNombrePorId[p.id_tipo] ?? ''
+            p.tipo_nombre ?? p['nombre_tipo'] ?? p['tipo'] ?? p.categoria ?? p['categoria_proveedor'] ?? p['categoria_postu_proveedor'] ?? tipoNombrePorId[p.id_tipo] ?? ''
           );
           const descripcion = normaliza(p.descripcion ?? p.descripcion_proveedor ?? p.lugar_descripcion ?? p.plan_descripcion ?? '');
           const estadoAprob = aMinus(p.estado_aprobacion ?? (p.verificado === true ? 'aprobado' : 'pendiente')) as EstadoAprobacion;
@@ -214,6 +215,7 @@ export class AdmProveedor implements OnInit {
         });
 
         this.proveedores.set(ordenados);
+        this.actualizarCategoriasDesdeDatos();
         this.loadingProveedores.set(false);
       },
       error: (err) => {
@@ -418,15 +420,18 @@ export class AdmProveedor implements OnInit {
   }
 
   private normalizarCategoriaNombre(cat?: string): string {
-    const raw = (cat || '').toString().toUpperCase().trim();
-    const sinAcentos = raw
-      .replace('Á', 'A')
-      .replace('É', 'E')
-      .replace('Í', 'I')
-      .replace('Ó', 'O')
-      .replace('Ú', 'U')
-      .replace('Ü', 'U')
-      .replace('Ñ', 'N');
+    const raw = (cat || '').toString().trim();
+    if (!raw) return '';
+    const upper = raw.toUpperCase();
+    const normalized = upper.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const sinAcentos = normalized
+      .replace('Ç?', 'A')
+      .replace('Ç%', 'E')
+      .replace('Ç?', 'I')
+      .replace('Ç"', 'O')
+      .replace('Çs', 'U')
+      .replace('Ço', 'U')
+      .replace("Ç'", 'N');
 
     if (sinAcentos.includes('DECORACION')) return 'DECORACION';
     if (sinAcentos.includes('MUSICA')) return 'MUSICA';
@@ -474,22 +479,54 @@ export class AdmProveedor implements OnInit {
           .map((v: any) => v.toString());
 
         if (lista.length) {
-          this.categorias = lista;
-        } else if (this.categorias.length === 0) {
-          this.categorias = ['Musica', 'Catering', 'Lugar', 'Decoracion', 'Fotografia'];
+          this.categoriasBase = lista;
+        } else if (this.categoriasBase.length === 0) {
+          this.categoriasBase = ['Musica', 'Catering', 'Lugar', 'Decoracion', 'Fotografia'];
         }
 
-        if (!this.categoria() && this.categorias.length > 0) {
-          this.categoria.set(this.categorias[0]);
-        }
+        this.actualizarCategoriasDesdeDatos();
       },
       error: () => {
-        if (this.categorias.length === 0) {
-          this.categorias = ['Musica', 'Catering', 'Lugar', 'Decoracion', 'Fotografia'];
-          this.categoria.set(this.categorias[0]);
+        if (this.categoriasBase.length === 0) {
+          this.categoriasBase = ['Musica', 'Catering', 'Lugar', 'Decoracion', 'Fotografia'];
         }
+        this.actualizarCategoriasDesdeDatos();
       }
     });
+  }
+
+  private actualizarCategoriasDesdeDatos(): void {
+    const proveedores = this.proveedores();
+    const merged = this.construirCategorias(proveedores, this.categoriasBase);
+    this.categorias = merged.length ? merged : (this.categoriasBase || []);
+
+    const actual = this.categoria();
+    if (!actual || !this.categorias.some(c => this.normalizarCategoriaNombre(c) === this.normalizarCategoriaNombre(actual))) {
+      if (this.categorias.length > 0) {
+        this.categoria.set(this.categorias[0]);
+      }
+    }
+  }
+
+  private construirCategorias(proveedores: Proveedor[], base: Categoria[]): Categoria[] {
+    const map = new Map<string, string>();
+
+    const add = (raw: any) => {
+      const nombre = (raw ?? '').toString().trim();
+      if (!nombre) return;
+      const key = this.normalizarCategoriaNombre(nombre);
+      if (!key) return;
+      if (!map.has(key)) {
+        map.set(key, nombre);
+      }
+    };
+
+    (base || []).forEach(add);
+    (proveedores || []).forEach((p) =>
+      add(p.tipo_nombre ?? p['nombre_tipo'] ?? p['tipo'] ?? p.categoria ?? p['categoria_proveedor'] ?? p['categoria_postu_proveedor'])
+    );
+
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   }
 
   getId(p: Proveedor): number {

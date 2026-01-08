@@ -44,6 +44,22 @@ h2 {
     margin-bottom: 1rem;
 }
 
+.section-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-bottom: 0.35rem;
+}
+
+.section-subtitle {
+    font-family: 'Lora', serif;
+    color: #555;
+    font-size: 1rem;
+    margin: 0;
+}
+
 
 /* Párrafos */
 
@@ -77,98 +93,293 @@ p {
 }
 
 
-/* PA LAS TARJETAS DE CLIENTES (RESEÑAS) */
+/* ========== TESTIMONIOS / RESEÑAS ========== */
 
-.t-card {
+
+/* Tarjeta de testimonio moderna */
+
+.testimonial-card {
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(26, 35, 126, 0.08);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(26, 35, 126, 0.15);
+    border-color: rgba(26, 35, 126, 0.2);
+}
+
+
+/* Header de la tarjeta */
+
+.card-header-custom {
+    padding: 24px 24px 16px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+    border-bottom: 2px solid #f0f2ff;
+}
+
+
+/* Avatar wrapper con efecto */
+
+.avatar-wrapper {
     position: relative;
-    background: #f5f6f7;
-    border-radius: 10px;
-    padding: 28px;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .08) inset, 0 0 0 4px #fff inset, 0 1px 18px rgba(0, 0, 0, .06);
 }
 
-
-/* Comillas decorativas en esquina derecha */
-
-.t-card::after {
-    content: '\201C';
+.avatar-wrapper::before {
+    content: '';
     position: absolute;
-    right: 22px;
-    bottom: 18px;
-    font-size: 82px;
-    line-height: 1;
-    color: #7c696e;
-    font-family: "Playfair Display", serif;
-    opacity: .9;
+    inset: -4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    opacity: 0.2;
+    z-index: -1;
 }
 
-
-/* Texto del testimonio */
-
-.t-text {
-    margin: 0 0 8px 0;
-    color: #54616c;
-    font-size: 1.05rem;
-    line-height: 1.9;
-}
-
-
-/* Avatar + nombre/cargo */
-
-.t-avatar {
-    width: 56px;
-    height: 56px;
+.testimonial-avatar {
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-
-/* Avatar placeholder (cuando no hay foto) */
-
-.t-avatar-placeholder {
-    width: 56px;
-    height: 56px;
+.testimonial-avatar-placeholder {
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
-    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    font-family: 'Segoe UI', sans-serif;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.t-name {
-    font-family: "Playfair Display", serif;
+.testimonial-name {
+    font-size: 1.15rem;
+    font-weight: 700;
     color: #1A237E;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.testimonial-rating {
+    display: flex;
+    gap: 2px;
+}
+
+.testimonial-rating i {
+    color: #ffc107;
+    font-size: 0.95rem;
+}
+
+.testimonial-rating .bi-star {
+    color: #e0e0e0;
 }
 
 
-/* Indicadores más pequeños y separados */
+/* Cuerpo de la tarjeta */
+
+.card-body-custom {
+    padding: 24px;
+    flex: 1;
+    position: relative;
+}
+
+.quote-icon {
+    position: absolute;
+    top: 10px;
+    left: 16px;
+    font-size: 3rem;
+    color: rgba(26, 35, 126, 0.08);
+    z-index: 0;
+}
+
+.testimonial-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding-left: 28px;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #4a5568;
+    font-style: italic;
+}
+
+
+/* Footer de la tarjeta */
+
+.card-footer-custom {
+    padding: 16px 24px;
+    background: #f8f9ff;
+    border-top: 1px solid #e8eaff;
+}
+
+.testimonial-date {
+    color: #718096;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+
+/* Controles del carousel modernos */
+
+#testimoniosCarousel .carousel-control-prev,
+#testimoniosCarousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    opacity: 0.9;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+}
+
+#testimoniosCarousel .carousel-control-prev {
+    left: -25px;
+}
+
+#testimoniosCarousel .carousel-control-next {
+    right: -25px;
+}
+
+#testimoniosCarousel .carousel-control-prev:hover,
+#testimoniosCarousel .carousel-control-next:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.3);
+}
+
+#testimoniosCarousel .carousel-control-prev-icon,
+#testimoniosCarousel .carousel-control-next-icon {
+    background-color: #1A237E;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+}
+
+
+/* Indicadores modernos */
+
+#testimoniosCarousel .carousel-indicators {
+    margin-bottom: 0;
+    gap: 8px;
+}
 
 #testimoniosCarousel .carousel-indicators [data-bs-target] {
     width: 10px;
     height: 10px;
     border-radius: 50%;
     background-color: #1A237E;
+    border: none;
+    margin: 0 4px;
     opacity: .35;
+    margin: 0 6px;
+    transition: all 0.3s ease;
 }
 
 #testimoniosCarousel .carousel-indicators .active {
     opacity: 1;
+    transform: scale(1.2);
+}
+
+
+/* Animación fade suave */
+
+#testimoniosCarousel.carousel-fade .carousel-item {
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+}
+
+#testimoniosCarousel.carousel-fade .carousel-item.active {
+    opacity: 1;
+}
+
+
+/* Sección de testimonios */
+
+section.py-5.bg-light {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+section.py-5.bg-light::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 200%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(26, 35, 126, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.5;
 }
 
 
 /* Espaciado en móvil */
 
-@media (max-width: 576px) {
-    .t-card {
-        padding: 22px;
+
+/* Espaciado en móvil y tablets */
+
+@media (max-width: 992px) {
+    #testimoniosCarousel .carousel-control-prev,
+    #testimoniosCarousel .carousel-control-next {
+        width: 40px;
+        height: 40px;
     }
-    .t-card::after {
-        font-size: 64px;
-        right: 14px;
-        bottom: 10px;
+    #testimoniosCarousel .carousel-control-prev {
+        left: -15px;
+    }
+    #testimoniosCarousel .carousel-control-next {
+        right: -15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .testimonial-card {
+        border-radius: 16px;
+    }
+    .card-header-custom {
+        padding: 20px 20px 14px;
+    }
+    .card-body-custom {
+        padding: 20px;
+    }
+    .testimonial-avatar,
+    .testimonial-avatar-placeholder {
+        width: 56px;
+        height: 56px;
+    }
+    .testimonial-name {
+        font-size: 1.05rem;
+    }
+    .testimonial-text {
+        font-size: 1rem;
+        padding-left: 20px;
+    }
+    .quote-icon {
+        font-size: 2.5rem;
+        left: 12px;
+    }
+    #testimoniosCarousel .carousel-control-prev,
+    #testimoniosCarousel .carousel-control-next {
+        display: none;
     }
 }

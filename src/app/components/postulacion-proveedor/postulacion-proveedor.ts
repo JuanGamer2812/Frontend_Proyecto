@@ -184,13 +184,19 @@ export class PostulacionProveedor implements OnInit {
 
     const formValue = this.formProveedor.value;
     
+    // Validar que al menos uno de los dos esté habilitado
+    if (!formValue.enableLink && !formValue.enableFile) {
+      Swal.fire({ icon: 'warning', title: 'Portafolio requerido', text: 'Debes proporcionar un enlace o un archivo de portafolio.' });
+      return;
+    }
+
     const postulacion = {
       categoria: formValue.categoria,
       nombreEmpresa: formValue.nombreEmpresa,
       correo: formValue.correo,
-      portafolio: formValue.portafolio,
-      portafolioLink: formValue.enableLink ? formValue.portafolioLink : undefined,
-      archivo: this.selectedFile || undefined
+      portafolio: formValue.portafolio, // Descripción del portafolio
+      portafolioLink: formValue.enableLink ? formValue.portafolioLink : undefined, // Link si está habilitado
+      archivo: (formValue.enableFile && this.selectedFile) ? this.selectedFile : undefined // Archivo PDF/imagen si está habilitado
     };
 
     this.enviando = true;

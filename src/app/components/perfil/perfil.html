@@ -58,7 +58,6 @@
                                     <!-- FORMULARIO DE DATOS DEL PERFIL -->
                                     <form [formGroup]="formPerfil" (ngSubmit)="onSubmitPerfil()" novalidate>
                                         <div class="row mb-3">
-
                                             <!-- Campo: Nombre -->
                                             <div class="col-md-6">
                                                 <label class="form-label">Nombre<span class="text-danger">*</span></label>
@@ -68,6 +67,18 @@
                                                     <div *ngIf="fPerfil['nombre'].errors?.['required']">Campo obligatorio.</div>
                                                     <div *ngIf="fPerfil['nombre'].errors?.['minlength']">Mínimo 3 caracteres.</div>
                                                     <div *ngIf="fPerfil['nombre'].errors?.['pattern']">Solo letras y espacios.</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Campo: Apellido -->
+                                            <div class="col-md-6">
+                                                <label class="form-label">Apellido<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" formControlName="apellido" placeholder="Tu apellido" [class.is-invalid]="fPerfil['apellido'].touched && fPerfil['apellido'].invalid" />
+                                                <!-- Errores de validación del apellido -->
+                                                <div *ngIf="fPerfil['apellido'].touched && fPerfil['apellido'].invalid" class="invalid-feedback">
+                                                    <div *ngIf="fPerfil['apellido'].errors?.['required']">Campo obligatorio.</div>
+                                                    <div *ngIf="fPerfil['apellido'].errors?.['minlength']">Mínimo 3 caracteres.</div>
+                                                    <div *ngIf="fPerfil['apellido'].errors?.['pattern']">Solo letras y espacios.</div>
                                                 </div>
                                             </div>
                                         </div>

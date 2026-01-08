@@ -255,3 +255,22 @@ p {
     color: #6c757d;
     font-size: 0.95rem;
 }
+
+
+/* Nombre del proveedor seleccionado */
+
+.proveedor-nombre {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.4;
+    margin-top: 0.25rem;
+}
+
+
+/* Botones de filtro de categorías - capitalizar primera letra */
+
+.btn-categoria-filtro {
+    text-transform: capitalize;
+}

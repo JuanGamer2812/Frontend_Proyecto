@@ -62,10 +62,9 @@ export class Navbar implements OnInit, OnDestroy {
         this.isLoggedIn = true;
         this.userName = user.nombre;
         this.userEmail = user.email;
-        // Extraer nombre y apellido
-        const nameParts = user.nombre.split(' ');
-        this.userFirstName = nameParts[0];
-        this.userLastName = nameParts.slice(1).join(' ') || null;
+        // Usar apellido si existe
+        this.userFirstName = user.nombre;
+        this.userLastName = user.apellido && user.apellido.trim() !== '' ? user.apellido : null;
         // Imagen del usuario desde JWT (foto o foto_url), con fallback
         this.userImage = this.resolveImageUrl((user as any).foto || (user as any).foto_url || '') || this.buildAvatarFromName(this.userFirstName, this.userLastName, this.userName) || 'usrIco.png';
         this.isAdmin = this.authService.isAdmin();
@@ -82,9 +81,9 @@ export class Navbar implements OnInit, OnDestroy {
       this.isLoggedIn = true;
       this.userName = user.nombre;
       this.userEmail = user.email;
-      const nameParts = user.nombre.split(' ');
-      this.userFirstName = nameParts[0];
-      this.userLastName = nameParts.slice(1).join(' ') || null;
+      // Usar apellido si existe
+      this.userFirstName = user.nombre;
+      this.userLastName = user.apellido && user.apellido.trim() !== '' ? user.apellido : null;
       // Imagen del usuario desde JWT (foto o foto_url), con fallback
       this.userImage = this.resolveImageUrl((user as any).foto || (user as any).foto_url || '') || this.buildAvatarFromName(this.userFirstName, this.userLastName, this.userName) || 'usrIco.png';
       this.isAdmin = this.authService.isAdmin();

@@ -15,6 +15,7 @@
         <strong>Error:</strong> {{ error() }}
     </div>
     } @if (!loading() && !error() && proveedor()) {
+    
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">
@@ -84,7 +85,13 @@
                 <div class="col-12 col-md-6">
                     <label class="form-label fw-bold">{{ caract.nombre_caracteristica || caract.nombre || 'Característica' }}</label>
                     <div class="form-control-plaintext bg-light p-2 rounded">
-                        {{ caract.valor || '—' }}
+                        @if (esCaracteristicaFileUrl(caract)) {
+                            <button type="button" class="btn btn-sm btn-outline-primary" (click)="abrirPdfCaracteristica(caract.valor, caract.nombre_caracteristica || caract.nombre)">
+                                <i class="bi bi-eye me-1"></i>{{ esMenuCaracteristica(caract) ? 'Ver menu' : 'Ver documento' }}
+                            </button>
+                        } @else {
+                            {{ caract.valor || '—' }}
+                        }
                     </div>
                 </div>
                 }
@@ -109,3 +116,5 @@
     </div>
     }
 </div>
+
+<app-pdf-viewer-modal [isVisible]="showPdfModal()" [pdfUrl]="pdfModalUrl()" [fileName]="pdfModalFileName()" (close)="cerrarPdfModal()"></app-pdf-viewer-modal>

@@ -8,12 +8,14 @@ import { ApiConfigService } from './api-config.service';
 })
 export class PasswordResetService {
   private baseUrl: string;
+  private passwordUrl: string;
 
   constructor(
     private http: HttpClient,
     private apiConfig: ApiConfigService
   ) {
     this.baseUrl = this.apiConfig.getUrl('/api/auth');
+    this.passwordUrl = this.apiConfig.getUrl('/api/password');
   }
 
   /** Solicita una contraseña temporal por email */
@@ -31,7 +33,7 @@ export class PasswordResetService {
    * Igual que en ProyectoV3.0 V2: POST directo a /api/password/change
    */
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
-    return this.http.post(`/api/password/change`, { currentPassword, newPassword });
+    return this.http.post(`${this.passwordUrl}/change`, { currentPassword, newPassword });
   }
 
   // Métodos deprecados (mantener por compatibilidad)
@@ -40,10 +42,10 @@ export class PasswordResetService {
   }
 
   validateToken(token: string): Observable<any> {
-    return this.http.post(`/api/password/validate-token`, { token });
+    return this.http.post(`${this.passwordUrl}/validate-token`, { token });
   }
 
   resetPassword(token: string, newPassword: string): Observable<any> {
-    return this.http.post(`/api/password/reset`, { token, newPassword });
+    return this.http.post(`${this.passwordUrl}/reset`, { token, newPassword });
   }
 }
